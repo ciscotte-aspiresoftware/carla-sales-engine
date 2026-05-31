@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef, memo } from "react"
+import { useEffect, useState, useCallback, useRef, memo, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { api } from "@/lib/api"
@@ -237,7 +237,7 @@ function IcpBadge({ score }: { score: number | null }) {
   )
 }
 
-export default function ProspectsPage() {
+function ProspectsPageInner() {
   const searchParams = useSearchParams()
   const { vertical, verticalOption } = useVertical()
   const [data, setData] = useState<ProspectListResponse | null>(null)
@@ -634,5 +634,13 @@ export default function ProspectsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function ProspectsPage() {
+  return (
+    <Suspense>
+      <ProspectsPageInner />
+    </Suspense>
   )
 }
