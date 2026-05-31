@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
+from app.config import settings
 import app.models  # noqa: F401 — ensures all models are registered before create_all
 
 app = FastAPI(
