@@ -570,7 +570,19 @@ async def create_vertical_pack(payload: VerticalPackWrite):
 async def update_vertical_pack(pack_id: str, payload: VerticalPackWrite):
     if payload.pack_id != pack_id:
         raise HTTPException(status_code=400, detail="pack_id in body must match URL parameter")
-    data = payload.model_dump()
+    incoming = payload.model_dump()
+    # For built-in vertical packs, deep-merge with the existing file so that
+    # fields the UI builder doesn't expose (industry_context, terminology, etc.)
+    # are preserved. Without this, editing via the Pack Builder strips those
+    # keys and breaks the discovery agent.
+    if pack_id in BUILTIN_VERTICALS:
+        existing = pack_loader.load_vertical(pack_id) or {}
+        # Merge: existing is the base, incoming overrides only the keys it sends
+        # (excluding declared-but-None fields from the Pydantic model).
+        non_null_incoming = {k: v for k, v in incoming.items() if v is not None}
+        data = {**existing, **non_null_incoming}
+    else:
+        data = incoming
     pack_loader.save_vertical(pack_id, data)
     return data
 

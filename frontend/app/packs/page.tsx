@@ -420,7 +420,14 @@ function PackBuilder({ onSaved, onCancel, editingPack, editingPackId }: PackBuil
     setSaving(true)
     setError("")
     try {
-      const payload = buildPayload()
+      const builderFields = buildPayload()
+      // When editing an existing vertical pack, preserve ALL fields the builder
+      // does not expose (industry_context, discovery_copy, terminology, etc).
+      // Sending only the builder's fields would overwrite and lose those keys,
+      // which breaks the discovery agent (terminology keys are required).
+      const payload = isEditing && editingPack
+        ? { ...editingPack, ...builderFields }
+        : builderFields
       if (isEditing) {
         await api.updateVerticalPack(editingPackId!, payload)
       } else {
