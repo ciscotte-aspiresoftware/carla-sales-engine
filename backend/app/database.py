@@ -3,9 +3,12 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import settings
 
 
+_is_sqlite = "sqlite" in settings.database_url
+_connect_args = {"check_same_thread": False} if _is_sqlite else {"sslmode": "require"}
+
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.database_url else {},
+    connect_args=_connect_args,
 )
 
 # Enable WAL mode for SQLite — better concurrent read performance
