@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useVertical } from "@/lib/vertical-context"
 import Link from "next/link"
@@ -36,7 +36,7 @@ function icpTier(score: number | null) {
   return           { label: `${pct}%`, color: "text-gray-500",  tier: "out" }
 }
 
-export default function NewCampaignPage() {
+function NewCampaignPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   // ?prospects=1,2,3 lets callers (e.g. the discovery wizard's done view)
@@ -736,5 +736,13 @@ export default function NewCampaignPage() {
         </Card>
       )}
     </div>
+  )
+}
+
+export default function NewCampaignPage() {
+  return (
+    <Suspense>
+      <NewCampaignPageInner />
+    </Suspense>
   )
 }
