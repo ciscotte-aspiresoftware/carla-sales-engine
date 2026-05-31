@@ -1,0 +1,99 @@
+[
+  {
+    "id": "bluebird",
+    "name": "Bluebird Auto Rental",
+    "vertical": "Car Rental",
+    "portfolioCompany": "Bluebird Auto Rental Systems",
+    "countries": [
+      "UK"
+    ],
+    "searchTerms": [
+      "car rental",
+      "vehicle hire",
+      "auto rental"
+    ],
+    "cities": [
+      "London",
+      "Cambridge",
+      "Manchester"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": true,
+      "airports": true
+    },
+    "targetDescription": "an independent car rental or vehicle-hire business",
+    "customerTypes": [
+      "consumers",
+      "small businesses"
+    ],
+    "excludeTypes": [
+      "national chains",
+      "peer-to-peer marketplaces",
+      "listing or comparison sites"
+    ],
+    "excludeCompanies": [
+      "Hertz",
+      "Enterprise",
+      "Avis",
+      "Budget",
+      "Sixt",
+      "Turo",
+      "Getaround"
+    ],
+    "extraNotes": "",
+    "classifyPrompt": "Is this an independent car rental or vehicle-hire business serving consumers and small businesses? Skip national chains, peer-to-peer marketplaces, and listing or comparison sites, and specific companies like Hertz, Enterprise, Avis, Budget, Sixt, Turo, and Getaround. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "useCustomPrompt": false
+  },
+  {
+    "id": "thermeon",
+    "name": "Thermeon",
+    "vertical": "Car Rental",
+    "searchTerms": [
+      "car rental",
+      "vehicle hire",
+      "fleet rental"
+    ],
+    "cities": [
+      "London",
+      "Manchester",
+      "Birmingham",
+      "Edinburgh"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": false,
+      "rural": false,
+      "airports": true
+    },
+    "targetDescription": "an established mid-market car rental or vehicle-hire business with a fleet of 10+ vehicles, ideally with multi-location operations",
+    "customerTypes": [
+      "business travelers",
+      "corporate accounts",
+      "leisure travelers"
+    ],
+    "excludeTypes": [
+      "national chains",
+      "peer-to-peer marketplaces",
+      "listing or comparison sites",
+      "single-vehicle / hobbyist operators"
+    ],
+    "excludeCompanies": [
+      "Hertz",
+      "Enterprise",
+      "Avis",
+      "Budget",
+      "Sixt",
+      "Europcar",
+      "Turo",
+      "Getaround"
+    ],
+    "extraNotes": "Prefer operators that have been in business 5+ years and serve corporate/business travel customers, not just leisure self-drive. Multi-branch operations are a plus.",
+    "classifyPrompt": "Is this an established mid-market car rental or vehicle-hire business with a fleet of 10+ vehicles, ideally with multi-location operations serving business travelers, corporate accounts, and leisure travelers? Skip national chains, peer-to-peer marketplaces, listing or comparison sites, and single-vehicle / hobbyist operators, and specific companies like Hertz, Enterprise, Avis, Budget, Sixt, Europcar, Turo, and Getaround. Prefer operators that have been in business 5+ years and serve corporate/business travel customers, not just leisure self-drive. Multi-branch operations are a plus. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "portfolioCompany": "Thermeon",
+    "countries": [
+      "UK"
+    ]
+  }
+]

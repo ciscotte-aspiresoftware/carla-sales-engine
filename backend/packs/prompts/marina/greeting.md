@@ -1,0 +1,1 @@
+Open with the contact's first name only — marina staff are casual. If the contact is a harbour master or owner of a family-run marina, lead with a one-liner referencing their location's seasonality (off-season planning, peak prep, etc.) before any product talk.

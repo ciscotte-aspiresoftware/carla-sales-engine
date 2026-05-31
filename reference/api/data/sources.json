@@ -1,0 +1,5280 @@
+{
+  "scans": [
+    {
+      "id": "7ad3c580-25f4-4ddb-9cd8-a008a455fdbe",
+      "city": "52.41°, -2.60°",
+      "country": "US",
+      "ll": "@52.4081,-2.5959,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778176630094,
+      "totalRaw": 20,
+      "chainsFiltered": 1,
+      "nonTargetFiltered": 10,
+      "results": [
+        {
+          "title": "Wicked Van Hire",
+          "placeId": "ChIJKeNK2zFqcEgRzm5LW2L3PeQ",
+          "dataId": "0x48706a31db4ae329:0xe43df7625b4b6ece",
+          "website": "https://www.wickedvanhire.co.uk/",
+          "domain": "wickedvanhire.co.uk",
+          "phone": "+441584872398",
+          "address": "Yard & Unit,Weeping Cross Ln,Ludlow SY8 1JH,United Kingdom",
+          "rating": 4.8,
+          "reviews": 93,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3665653,
+            "longitude": -2.7110327
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEbjUn_oRA8A57sF5eiHyGzBB9A6U4z2zzZvyCxznHXhpn_-dp4_2q8edXSWK6fhQP3x6Wbb8zkjNj0U-RAQGmvwpdJUf-DetgORDD_kOWY_XD5shJDn5qnci5M08SpkYWYqzfRCQ=w152-h86-k-no"
+        },
+        {
+          "title": "Car Leasing",
+          "placeId": "ChIJH7kGvGd9cEgRwhUz0ecr19g",
+          "dataId": "0x48707d67bc06b91f:0xd8d72be7d13315c2",
+          "website": "http://www.carleasing.co.uk/",
+          "domain": "carleasing.co.uk",
+          "phone": "+441746766144",
+          "address": "Unit B2, Faraday Business Park,Faraday Dr,Bridgnorth WV15 5BA,United Kingdom",
+          "rating": 4.8,
+          "reviews": 4,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Auto broker",
+            "Car leasing service",
+            "Finance broker",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.5301628,
+            "longitude": -2.4008293
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAG9uPOKJ0hGN6D3wj9ikTDaf__7y1EaowjVKeYbelUYXhDSzMvXut5SyA0CLZs_osIH0aBj7dl-xsvz4fEMxw5EtUk0r1n95VNtAQBGUInjd_7v_w6ERFcQ2zyZNj-KCug8T-ks=w232-h86-k-no"
+        },
+        {
+          "title": "New Moves Removals",
+          "placeId": "ChIJO-pPdLs8MyARBMyAXGebXfU",
+          "dataId": "0x20333cbb744fea3b:0xf55d9b675c80cc04",
+          "website": "https://newmovesremovals.co.uk/",
+          "domain": "newmovesremovals.co.uk",
+          "phone": "+447388836945",
+          "address": "Unit 7 The Laundry,Seifton,Ludlow SY8 2DH,United Kingdom",
+          "rating": 5,
+          "reviews": 144,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Mailing service",
+            "Self-storage facility",
+            "Mover"
+          ],
+          "description": "",
+          "hours": "Open · Closes 9 PM",
+          "gps": {
+            "latitude": 52.4447355,
+            "longitude": -2.7581179
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAG7MDdWMBPFgIqaSXaeOSMZDuIJJBVcYTKxcvuIckEOsCoDVvmBAaywLxT07_juaWksY7wirPHgF5-mPfBOtUwPDuwXhxfp00fSnlEJCp1zfQFLVVGd_nTajSqmP1zyRD_nKoox34qtl_-Q=w86-h114-k-no"
+        },
+        {
+          "title": "Apex Private Hire Kidderminster",
+          "placeId": "ChIJwQo_aLSNcEgR_fAThakWrPI",
+          "dataId": "0x48708db4683f0ac1:0xf2ac16a98513f0fd",
+          "website": "",
+          "domain": "",
+          "phone": "+447498719970",
+          "address": "Mill Park,78 Mill St,Kidderminster DY11 6XJ,United Kingdom",
+          "rating": 5,
+          "reviews": 5,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Leasing service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3898096,
+            "longitude": -2.2563687999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAH-zNf1Zgfbm-HbDsAr-kYRhdBLlqIm0nqobnZi_HWY5chavCXJT41nTYFLSc-jkeTWOD4qs8D7MrwTlQkI_53dXTunToXcFqyrhaqJrW71Hqghxjd07L7UzM59lp76oE-lEBhdpyFJm5A=w132-h86-k-no"
+        },
+        {
+          "title": "Northgate Vehicle Hire - Kidderminster",
+          "placeId": "ChIJGeexx5mMcEgReiCar6h1FeQ",
+          "dataId": "0x48708c99c7b1e719:0xe41575a8af9a207a",
+          "website": "https://www.northgatevehiclehire.co.uk/branch-finder/kidderminster?utm_source=google&utm_medium%20=organic&utm_campaign=gmb-listing",
+          "domain": "northgatevehiclehire.co.uk",
+          "phone": "+441562862626",
+          "address": "Foley Dr,Stourport Rd,Kidderminster DY11 7QL,United Kingdom",
+          "rating": 3.7,
+          "reviews": 46,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Van rental agency",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.363056099999994,
+            "longitude": -2.2644064
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAH2rZX_ew1B0vobutNORwFixZLgehPY0Xp3BO_INffxKe3KCL87uZcXAFQ0QBOEx8SkJ04O5lgxJLVex9WsICSvNqFbFfCNLXUDvIYJ2y1Bj9c6jlUigwR8ZXEoYRaQ2PdTNqgXJA=w111-h86-k-no"
+        },
+        {
+          "title": "GBV Rentals Kidderminster",
+          "placeId": "ChIJpVRvlziNcEgRmAcMHwJB6K4",
+          "dataId": "0x48708d38976f54a5:0xaee841021f0c0798",
+          "website": "",
+          "domain": "",
+          "phone": "+441562745888",
+          "address": "Gemini Business Park,Unit 15,Kidderminster DY11 7QL,United Kingdom",
+          "rating": 4.1,
+          "reviews": 7,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.364350099999996,
+            "longitude": -2.2646417999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHjLkFB_vGAhIL6PRbPLh54D-kU3zHf4GP05cdMf3sW5YdmJnxH1sRcLbmwRKTq7iexO9ODVu-ACRyNw4hbH45HOVNeubzhmXuR_Gk9KUjLWIr4Php5sb90jTtaV5Dae0_GEoE=w80-h106-k-no"
+        },
+        {
+          "title": "Blink Reservations",
+          "placeId": "ChIJnc1WTZiMcEgR8UCrK0jqb5c",
+          "dataId": "0x48708c984d56cd9d:0x976fea482bab40f1",
+          "website": "",
+          "domain": "",
+          "phone": "+441562745888",
+          "address": "Unit 15/Foley Business Park/Stourport Rd,Kidderminster,DY11 7QL,United Kingdom",
+          "rating": 5,
+          "reviews": 1,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3634248,
+            "longitude": -2.2646492
+          },
+          "thumbnail": ""
+        },
+        {
+          "title": "Motiv Trailer Manufacturing Ltd / Motiv Hire Ltd",
+          "placeId": "ChIJcbY9JwITcEgRZBuBIPCiAGk",
+          "dataId": "0x48701302273db671:0x6900a2f020811b64",
+          "website": "http://www.motivtrailers.co.uk/",
+          "domain": "motivtrailers.co.uk",
+          "phone": "+441588673345",
+          "address": "Stoneacre,Shrewsbury Rd,Craven Arms SY7 8BX,United Kingdom",
+          "rating": 4.5,
+          "reviews": 88,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Plant and machinery hire",
+            "Trailer repair shop",
+            "Trailer supply store",
+            "Trailer dealer"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.454553999999995,
+            "longitude": -2.8381523
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAE_9XXxFbtlwSsZjmtZM2SqXIZpqL4qH1usLO-NCr1ie2H_zuXrczSk0tIJOIjIZtTJwFN1CC76f2c_Gj6PElLZB8T2Z7w14bye3D1TxsDLFAkz8y711vFdfU4rHKYQTjD7xZ0uoctCuSM_=w114-h86-k-no"
+        },
+        {
+          "title": "Brookhire Vehicle Rentals Kidderminster",
+          "placeId": "ChIJVQzKPQD5cEgRuE1MsE8nQ38",
+          "dataId": "0x4870f9003dca0c55:0x7f43274fb04c4db8",
+          "website": "https://www.brookhire.co.uk/",
+          "domain": "brookhire.co.uk",
+          "phone": "+441562549730",
+          "address": "Worcester Rd,Kidderminster,DY10 1JB,United Kingdom",
+          "rating": 4,
+          "reviews": 4,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Recreational vehicle rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3765255,
+            "longitude": -2.2509080999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGpIE2Rm5skiwvfnrLwhHpPgPnfZ_zUXIBD1NdwMXhutc8djY2UOGHxejyX0iB691OfoISl6k9JPj8yAhA3cEq75gowM1J6eoq4fDSPAj7tyCYEgW-sqdlYBuqKsEzqZ9Os_Fgi=w163-h92-k-no"
+        }
+      ]
+    },
+    {
+      "id": "f3a88ea0-6254-4bbc-9f72-3d55192d26d9",
+      "city": "New York, NY",
+      "country": "US",
+      "ll": "@40.7128,-74.0060,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778105549551,
+      "totalRaw": 20,
+      "chainsFiltered": 17,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "RealCar: Premium & Luxury Car Rental NYC",
+          "placeId": "ChIJlenGzrOnm6IRw7rKuhVA9nA",
+          "dataId": "0xa29ba7b3cec6e995:0x70f64015bacabac3",
+          "website": "https://realcar.nyc/",
+          "domain": "realcar.nyc",
+          "phone": "+12129918002",
+          "address": "448 W 38th St,New York, NY 10018",
+          "rating": 4.9,
+          "reviews": 271,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 8 PM",
+          "gps": {
+            "latitude": 40.7567412,
+            "longitude": -73.9968114
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFNExDDY0np09aunYtCg08ZMp2LySt0r9FFTMyPvgz9yHG-POxfWsRTuASJk6nWGe72VMUNSaSaG43XVyiKNm3PSEJ05--zqMmZNbVfznCWFICULmhemW7PWuAG4mWyNS2LS2ydBw=w158-h86-k-no"
+        },
+        {
+          "title": "Zoom Car Rental",
+          "placeId": "ChIJjwLHzXpbwokRHofopSfP1og",
+          "dataId": "0x89c25b7acdc7028f:0x88d6cf27a5e8871e",
+          "website": "http://zoom.rentlynetwork.com/",
+          "domain": "zoom.rentlynetwork.com",
+          "phone": "+17188312919",
+          "address": "2 Spencer St Garage,Brooklyn, NY 11205",
+          "rating": 4.7,
+          "reviews": 137,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closes soon · 6:30 PM · Opens 10 AM Thu",
+          "gps": {
+            "latitude": 40.6987333,
+            "longitude": -73.9561129
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGlOE0RHSragS_E-XFX6rvL6p3vsBSB78jiTNjujnJt92SBc9hm9cFtIMESrAd_RYDLmUtsEfHLuWkaQJ66GOLzzi0QAayfZOwm3S_RFj_BQ_BSB4T2yhQ5O1fTAregxPwJa14=w86-h111-k-no"
+        },
+        {
+          "title": "Auto Rentals NYC",
+          "placeId": "ChIJ--e-sTlfwokRBT_KiOr3Cco",
+          "dataId": "0x89c25f39b1bee7fb:0xca09f7ea88ca3f05",
+          "website": "https://autorentalnyc.com/",
+          "domain": "autorentalnyc.com",
+          "phone": "+19177409222",
+          "address": "20-37 48th St,Astoria, NY 11105",
+          "rating": 4.8,
+          "reviews": 30,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open 24 hours",
+          "gps": {
+            "latitude": 40.771923099999995,
+            "longitude": -73.8974724
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFTgcWPVu-KqtKC_4Ovz5YY7FA2SyEfTlUxbiZEJpznjw5chVB0EKfS6qw6PLcUAoeiy4LxqXyneRRgHpKMh0vVrCIp7Gil3e4KwvH6lrPL-G6wv1qmfR37AgPMyIwSs8tYxz4VxA=w129-h86-k-no"
+        }
+      ]
+    },
+    {
+      "id": "c12f7e86-7481-4d1c-bf2b-8240b775bd4d",
+      "city": "52.42°, 5.14°",
+      "country": "US",
+      "ll": "@52.4212,5.1397,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778104452965,
+      "totalRaw": 20,
+      "chainsFiltered": 15,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "UFODRIVE",
+          "placeId": "ChIJS0ZBqaoJxkcRccH9HhrDOrM",
+          "dataId": "0x47c609aaa941464b:0xb33ac31a1efdc171",
+          "website": "https://www.ufodrive.com/en/locations/amsterdam-city-center",
+          "domain": "ufodrive.com",
+          "phone": "",
+          "address": "Oosterdoksstraat 154,1011 DJ Amsterdam,Netherlands",
+          "rating": 4.7,
+          "reviews": 83,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3765904,
+            "longitude": 4.9054834
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAH5j8eAM7-v2YCr3j80cnv0eiuGiBNqG5PBPtU0SuQFRoJpr5HlKPp03nW34hMKLLb_hXX0PoM5ZT9M0o3CcmlgGyGv3MRA3o-wbyGyyMLf2U5f_oRfglibbIZhIZgiFHMMk7g=w129-h86-k-no"
+        },
+        {
+          "title": "HuurMij Autoverhuur Amsterdam",
+          "placeId": "ChIJX8okb3rixUcRRyAND4XhH5E",
+          "dataId": "0x47c5e27a6f24ca5f:0x911fe1850f0d2047",
+          "website": "https://www.huurmij.nl/",
+          "domain": "huurmij.nl",
+          "phone": "+31206881015",
+          "address": "Karel Doormanstraat 105e,1055 VD Amsterdam,Netherlands",
+          "rating": 4.7,
+          "reviews": 151,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3796511,
+            "longitude": 4.8613509
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFfwhqGAsHPzhNIKgsKVpF-HdMCypB48d-uaoDKuHihYDfR5S_6CmK8_KqCYsEOaFsg7ddmGJosk4BQKxqVbFZfC-jwol6Zg3zQ3V6toK4HI5tZ3HUCSeQ4rrV8b1GeXrQ8-GMp4AmvkFlt=w124-h86-k-no"
+        },
+        {
+          "title": "DIKS Almere",
+          "placeId": "ChIJ90p5chwXxkcRb02RorC7oGU",
+          "dataId": "0x47c6171c72794af7:0x65a0bbb0a2914d6f",
+          "website": "https://diks.net/vestigingen/almere/?utm_source=google&utm_medium=organic&utm_campaign=gmb_almere",
+          "domain": "diks.net",
+          "phone": "+31367630660",
+          "address": "Markerkant 1504,1314 AW Almere,Netherlands",
+          "rating": 4.4,
+          "reviews": 207,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Self-storage facility"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3809575,
+            "longitude": 5.215264599999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGYkCDtD9bhhSkA6YsVQjBsWsv_2yQZidOuQAH3d54zx5nNwmy4HC6X0Gg6i7ZfoySI1X6WkN9fWujO0QDIm5FmPPUoi_Vz5qRXRSxx6OMMajizdxb7oH7OxZ89PE1RsGthCMi6-g=w129-h86-k-no"
+        },
+        {
+          "title": "Diks Autoverhuur",
+          "placeId": "ChIJcyLZfY4JxkcRqO4ym3xBtqI",
+          "dataId": "0x47c6098e7dd92273:0xa2b6417c9b32eea8",
+          "website": "https://diks.net/vestigingen/amsterdam-zuid/?utm_source=google&utm_medium=organic&utm_campaign=gmb_amsterdam_zuid",
+          "domain": "diks.net",
+          "phone": "+31206623366",
+          "address": "Van Ostadestraat 278, 280,1073 TW Amsterdam,Netherlands",
+          "rating": 4.4,
+          "reviews": 343,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Truck rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.353289,
+            "longitude": 4.8992724999999995
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAF47xgEr_j2Dxbr0q28IMc09EI6Ena3vMiM1WehdjzTn6Wu5sU-lcmzQHReNFqBsL2zUUcqXwiG6yRY10oeUImMcV4tekwDH9aNkgvU-TJq5vWFGBvGBnPzTBI__8O7yROD4zgb=w129-h86-k-no"
+        },
+        {
+          "title": "Master Car Rent B.V.",
+          "placeId": "ChIJ5WNh-cb_i6URx98pI7WCFrk",
+          "dataId": "0xa58bffc6f96163e5:0xb91682b52329dfc7",
+          "website": "https://www.mastercarrent.nl/",
+          "domain": "mastercarrent.nl",
+          "phone": "+31206360513",
+          "address": "Meeuwenlaan 102A,1021 JL Amsterdam,Netherlands",
+          "rating": 4.8,
+          "reviews": 21,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 52.3856992,
+            "longitude": 4.9223416
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFdvS4QD66nwPutrmlG9bxl2Y7Le9bo3V80VeyO5oziWC5B2UQKiXSeL46GBQ1YPVas0qkohu4c9A83RJIXeaKtGJoC7g9HkbKz0s-HkokjZuaZWjaKrpu_88VP0xlQ0UtuiRp7ROznv3WC=w86-h114-k-no"
+        }
+      ]
+    },
+    {
+      "id": "65717ac7-920f-4157-8c70-72a2c8ea5f72",
+      "city": "Manchester, UK",
+      "country": "UK",
+      "ll": "@53.4808,-2.2426,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778104267968,
+      "totalRaw": 20,
+      "chainsFiltered": 14,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "Palm Luxury Rentals",
+          "placeId": "ChIJk3SdQnWxe0gROBkaahppO3o",
+          "dataId": "0x487bb175429d7493:0x7a3b691a6a1a1938",
+          "website": "http://www.palmluxuryrentals.com/",
+          "domain": "palmluxuryrentals.com",
+          "phone": "+447460554398",
+          "address": "Aldow Enterprise Park,Manchester,M12 6EJ,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Chauffeur service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4760314,
+            "longitude": -2.2197936
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHOLSSeS7oHOvOqNv-hyl0VDfwyJaWLwd87dbvwkANgzkKtyXKk6kAxDQw57O3DYQ_8jhfxCH2w4UIrUtAvK5dmS_HeM1qpMgYY_Eg5geDd1vKr6aHGPqAZJe0E-04fHyMyMN1WBp0lws5o=w86-h107-k-no"
+        },
+        {
+          "title": "Rentalcars.com",
+          "placeId": "ChIJq6r6CcKxe0gRjOOTFXyCKGU",
+          "dataId": "0x487bb1c209faaaab:0x6528827c1593e38c",
+          "website": "https://www.rentalcars.com/",
+          "domain": "rentalcars.com",
+          "phone": "+448003685302",
+          "address": "35 Fountain St,Manchester,M2 2AN,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.481135099999996,
+            "longitude": -2.240173
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAE-wNJQhpE9Ye2-eySmklh7p94POLzQOQmY1VYzRjdcahPyfKJKs6KNlDmpaoZe2P4KxzaQ3slvVPYZOOhhd2RhahrFeF91gejqxGNrS3NeW2ecr52WLh2azb8mvuBVAHBmLoNPbg=w114-h86-k-no"
+        },
+        {
+          "title": "Empire Luxury",
+          "placeId": "ChIJ-TNpU-u7e0gRbrVIMVz0axE",
+          "dataId": "0x487bbbeb536933f9:0x116bf45c3148b56e",
+          "website": "http://empirehire.co.uk/",
+          "domain": "empirehire.co.uk",
+          "phone": "+441706962782",
+          "address": "Queensway,Rochdale,OL11 2QQ,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.594304699999995,
+            "longitude": -2.1731224
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGU_tkin46cjEFpTygUvvUYf7UagEH-4F_pAgqQi2UFYrEkNBIh9OAomz2IMAxeTbU840Yzek_FzJK1PMA9m77QGWKeZ5KT-ZaEtwd9kb3oR4XmbwErSV5qXuXaDTRcN_tcNQLxgO_--H0=w128-h86-k-no"
+        },
+        {
+          "title": "Salford Car Hire",
+          "placeId": "ChIJqU92Ic-xe0gRQKsJe-mSHqs",
+          "dataId": "0x487bb1cf21764fa9:0xab1e92e97b09ab40",
+          "website": "http://www.salfordvanhire.com/",
+          "domain": "salfordvanhire.com",
+          "phone": "+441618339311",
+          "address": "82 Great Ducie St,Cheetham Hill,Manchester M3 1LT,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4907885,
+            "longitude": -2.2472148
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGAobmYNc8Decc2bpmFQPJY6uXbw7CE5M83VkPk-EA1UD1O9NrffqQButV2qbFrYmibejMA8SHwOEEGUOQcq_X5dJMwNSAZQH34-aHgDcMlzNI1dBC2wD0WkJ2VWU90nOtXkDNr3g=w128-h86-k-no"
+        },
+        {
+          "title": "Arnold Clark Car & Van Rental, Manchester Airport",
+          "placeId": "ChIJBUreYcSze0gRGpXb4Rn3TwU",
+          "dataId": "0x487bb3c461de4a05:0x54ff719e1db951a",
+          "website": "https://www.arnoldclarkrental.com/airport-car-hire/manchester-airport?utm_source=gmb&utm_medium=organic&utm_term=manchester-airport",
+          "domain": "arnoldclarkrental.com",
+          "phone": "+441618868610",
+          "address": "14, Ringway Trading Estate,Mollington Rd,Wythenshawe,Manchester M22 5LH, United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.369718299999995,
+            "longitude": -2.2497564999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHUIT-JgEoU-ouvPPbYPNLXD75ypYXcatAn0HMuYccOMDw0MYfT2tMA4ANB7VIswUonMKm7wbJpOHXfzce5-5cr3qw0QwW3yy_z2QM5FOsBr8Vwt5THNZHrXqjoLXcWUO3b8PE=w114-h86-k-no"
+        },
+        {
+          "title": "Rentalcars.com",
+          "placeId": "ChIJAQAA0MKxe0gR7R9GKKbSFyo",
+          "dataId": "0x487bb1c2d0000001:0x2a17d2a628461fed",
+          "website": "http://www.rentalcars.com/",
+          "domain": "rentalcars.com",
+          "phone": "",
+          "address": "Sunlight House,Quay St,Manchester M3 3LU,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4788218,
+            "longitude": -2.2503835
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAH6PDr9rz9QclgrYelBOH7jeYxLRSplc89TnGWJn6_BxL6cx9fel4Knp3d8eqH1kf0PLxefKNdtD5QtJnroddTYTMwZGPAKFCexRreFKRigtgEhfmTSgORCALCl4_2DasHj4nOQ=w114-h86-k-no"
+        }
+      ]
+    },
+    {
+      "id": "59e0227f-ac02-4008-a798-d6f03e13f69c",
+      "city": "Manchester, UK",
+      "country": "UK",
+      "ll": "@53.4808,-2.2426,12z",
+      "query": "car rental",
+      "page": 20,
+      "ranAt": 1778103847867,
+      "totalRaw": 20,
+      "chainsFiltered": 0,
+      "nonTargetFiltered": 5,
+      "results": [
+        {
+          "title": "Navcar",
+          "placeId": "ChIJYfMTjDywe0gRXzkN40mAKOo",
+          "dataId": "0x487bb03c8c13f361:0xea288049e30d395f",
+          "website": "http://navcar.co.uk/",
+          "domain": "navcar.co.uk",
+          "phone": "+443303806348",
+          "address": "Riverside Off,Agecroft Rd,Pendlebury,Manchester M27 8SJ, United Kingdom",
+          "rating": 4.5,
+          "reviews": 329,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Auto repair shop",
+            "Car repair and maintenance service",
+            "Tire shop",
+            "Towing service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Open 24 hours",
+          "gps": {
+            "latitude": 53.5142477,
+            "longitude": -2.2955175999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGBcAbfxfscYkJCg-2K2q4l0MkXFT3De3ZcE7Vh8MBbdfm5j55C3e1zbc4XFGvi1a56p4xt9W0AOW5u9DrmJS0HTs4d2FzLUEVlOSakwLVX4EWdSBFgJq0tyxK2ddpj320M2BA=w114-h86-k-no"
+        },
+        {
+          "title": "Fast Track Car Hire (Longsight)",
+          "placeId": "ChIJ-xCtppqze0gRsMCsgCaMJXQ",
+          "dataId": "0x487bb39aa6ad10fb:0x74258c2680acc0b0",
+          "website": "",
+          "domain": "",
+          "phone": "",
+          "address": "Montgomery Rd,Levenshulme,Manchester M13 0PW,United Kingdom",
+          "rating": 4.8,
+          "reviews": 4,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car sharing location"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4515014,
+            "longitude": -2.2009336999999998
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFHnfZyudYdqRMXuiVsHnqOWBOfjwmYBBLkS-Z_1q4f-s5rbdJoCqljkGmPl0nZOFDoBB3ZL50U0DmxIWRgpU8SpuHmQRtoIuculgbN_TWvj5N3Kz9PqXJbn7w73JqbDo2S4P-QhA=w86-h114-k-no"
+        },
+        {
+          "title": "Rikshaw Ltd",
+          "placeId": "ChIJBwg-ytuze0gRfS0uGl3agxY",
+          "dataId": "0x487bb3dbca3e0807:0x1683da5d1a2e2d7d",
+          "website": "http://www.rikshawltd.com/",
+          "domain": "rikshawltd.com",
+          "phone": "+441612480882",
+          "address": "In Carwash,691 Stockport Rd,Levenshulme,Manchester M12 4QN, United Kingdom",
+          "rating": 4.5,
+          "reviews": 47,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4499679,
+            "longitude": -2.1922509999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEO1vrl5ZRKDFzL-tUEztn4x02k9uzx7OXXyU-yPjYlVRdsESDTdX6-3gFn1dqYgSqIn2JmdY0WalSYZFXs1QBP-pThi1bGFZRgybxZeszSLHRbmqRVKbxO1T0LLYxa6z_S43M=w114-h86-k-no"
+        },
+        {
+          "title": "Speedy Hire Solutions",
+          "placeId": "ChIJucKsjE2ze0gRgqDhcoKiZ7Y",
+          "dataId": "0x487bb34d8cacc2b9:0xb667a28272e1a082",
+          "website": "https://speedyhiresolutions.co.uk/",
+          "domain": "speedyhiresolutions.co.uk",
+          "phone": "+447725741297",
+          "address": "117a Withington Rd,Whalley Range,Manchester M16 8EE,United Kingdom",
+          "rating": 4.9,
+          "reviews": 12,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4535456,
+            "longitude": -2.2572655
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHNYOUZXaNFJ3v_0SRAiUpEqZdXUq-tEVj81EmR5Qvg_8C4px_KtlQP_VHi6Q4fB20KnHXhRumKDEWEw2DxhGgVeAqU3ZAGmsWRck_K4KDswdfnmAahkJiQLCR2TvnFSx9TvH0=w239-h86-k-no"
+        },
+        {
+          "title": "Elliotts - Car \\& Van Hire",
+          "placeId": "ChIJ_wa1lMixe0gRKr5JNC2k37w",
+          "dataId": "0x487bb1c894b506ff:0xbcdfa42d3449be2a",
+          "website": "https://www.elliottsvanhire.co.uk/",
+          "domain": "elliottsvanhire.co.uk",
+          "phone": "+441612416800",
+          "address": "28-32 Dutton St,Cheetham Hill,Manchester M3 1LE,United Kingdom",
+          "rating": 3.5,
+          "reviews": 8,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Limousine service",
+            "Taxi service",
+            "Transportation infrastructure",
+            "Travel"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4910833,
+            "longitude": -2.2448482999999997
+          },
+          "thumbnail": ""
+        },
+        {
+          "title": "Thrifty Car and Van Rental Manchester",
+          "placeId": "ChIJ5eeaob-ue0gRSgvmDHQgwu0",
+          "dataId": "0x487baebfa19ae7e5:0xedc220740ce60b4a",
+          "website": "http://www.thrifty.co.uk/car-hire/manchester.htm",
+          "domain": "thrifty.co.uk",
+          "phone": "+441612415860",
+          "address": "2A Rondin Rd,Manchester,M12 6LL,United Kingdom",
+          "rating": 3.5,
+          "reviews": 83,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.474892499999996,
+            "longitude": -2.2107407
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFIwf-tIxDWDvQMGjRYk8gbTlc93dWxkETLKbQbTPAJHSfQJCC_jBZrUVvpitVSRfdAtFv0D3sexq9JKKu3_1-DnHnlBliMK7Vkmm7jWavmGBPbgR_55ZGyWG1KY45XU71XrtXY=w152-h86-k-no"
+        },
+        {
+          "title": "Ignition Rentals",
+          "placeId": "ChIJVTeRBGKve0gRr59xUEocQ8o",
+          "dataId": "0x487baf6204913755:0xca431c4a50719faf",
+          "website": "https://ignitionrentals.co.uk/",
+          "domain": "ignitionrentals.co.uk",
+          "phone": "+443337722582",
+          "address": "Quays,The Quays Blue Tower,Salford M50 2ST,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.473034899999995,
+            "longitude": -2.2996190999999997
+          },
+          "thumbnail": ""
+        },
+        {
+          "title": "MCR Hire",
+          "placeId": "ChIJyd3cInKve0gRIDY_Sx5FMzk",
+          "dataId": "0x487baf7222dcddc9:0x3933451e4b3f3620",
+          "website": "https://www.mcrhire.co.uk/",
+          "domain": "mcrhire.co.uk",
+          "phone": "+441617100230",
+          "address": "249 Ordsall Ln,Salford,M5 3WH,United Kingdom",
+          "rating": 4.5,
+          "reviews": 8,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4717839,
+            "longitude": -2.2710708
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFLfJJscePS3ugn0-GABaHQ_7ogobblJnKhKwod4y7b2GNuCmYgeK5_v6q5kZoOsjtg9J1i-m7gePRomTUN41w3gxR08SL4OhaUwrFX52GQLg9FzjW8vZ_KXAbwJvUG4WdqHf6J=w104-h86-k-no"
+        },
+        {
+          "title": "Master Tracks",
+          "placeId": "ChIJh7RSID2xe0gRO2LSCY0DOIk",
+          "dataId": "0x487bb13d2052b487:0x8938038d09d2623b",
+          "website": "",
+          "domain": "",
+          "phone": "+447881880068",
+          "address": "2 Sandy Bank Rd,Manchester,M8 5EN,United Kingdom",
+          "rating": 5,
+          "reviews": 2,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Taxi service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.5139165,
+            "longitude": -2.2458073
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAERiph608gP5HkyjhemGl2yOGFeRSyfrgoTPuHrMp30nrcA0O3fJ6-AsIownr8-DNY3Z9nJjcFYnKJItFafUECKTIgGC0uuohkKtaDDlA64q1K0tA5mk1hEpm-tCO6mWych4u1r=w153-h86-k-no"
+        },
+        {
+          "title": "IDrive Manchester",
+          "placeId": "ChIJo59c_3ixe0gRth2BQE-csww",
+          "dataId": "0x487bb178ff5c9fa3:0xcb39c4f40811db6",
+          "website": "http://idrive-prestigecars.co.uk/",
+          "domain": "idrive-prestigecars.co.uk",
+          "phone": "+441618061960",
+          "address": "Unit 4,118 Bury New Rd,Manchester M8 8EB,United Kingdom",
+          "rating": 4.2,
+          "reviews": 5,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4959558,
+            "longitude": -2.2518531
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHFEJfAjJO-6Dvrqv5CJR1Ndl6uSGT5sdqVH1a8_BSKP5PErgIc0YEmCfsSXTlINr6SValOKS5unERmuUx5aCRB_eZ_HX_e3_I4EEYt3e--tHsOJhQvcaWuaTLO8JlG1_ODx4FpbE3hodo=w143-h86-k-no"
+        },
+        {
+          "title": "Salford Van Hire",
+          "placeId": "ChIJryYx98uxe0gRowIXTHhcG84",
+          "dataId": "0x487bb1cbf73126af:0xce1b5c784c1702a3",
+          "website": "http://www.salfordvanhire.com/",
+          "domain": "salfordvanhire.com",
+          "phone": "+441618330771",
+          "address": "43 Sherborne St,Cheetham Hill,Manchester M3 1EJ,United Kingdom",
+          "rating": 4.1,
+          "reviews": 514,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4942522,
+            "longitude": -2.2461824
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHGRXD0ubFrD1qQnaRxr71_c2jBRs660lPITca__KY2BmopYUfbhzEhaTQ0D41rrLyaGQOYxnmkql9eayzJNBEGS_dy8PQ0z0tKDhj3ujMbA5WuQuZ5cQ9fa-Ma2Z1WcjChmMyU=w114-h86-k-no"
+        },
+        {
+          "title": "GG Chauffeurs Manchester",
+          "placeId": "ChIJaXHhDNUENqIRHbKwTiz4njo",
+          "dataId": "0xa23604d50ce17169:0x3a9ef82c4eb0b21d",
+          "website": "https://gogreenexecutivetravel.com/",
+          "domain": "gogreenexecutivetravel.com",
+          "phone": "+442034881833",
+          "address": "83A Ducie St,Manchester,M1 2JQ,United Kingdom",
+          "rating": 5,
+          "reviews": 102,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Airport shuttle service",
+            "Chauffeur service",
+            "Limousine service",
+            "Taxi service",
+            "Transportation service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.481069399999996,
+            "longitude": -2.226129
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFe9hPDbMpwM2IfXUVKlzVaBo2Iv-96R6hsUQKBYFk_uNWMV4YEF1UkTYEx_yTjmVZS8okMobC7Y7Itm9ae7l0rPdKHiNoHNpxKEUtdFqJXOYUuScXmxXsmsWDh5GrqU7roxHnd=w113-h86-k-no"
+        },
+        {
+          "title": "Europa car rental",
+          "placeId": "ChIJaY1SfQCxe0gR2NnjaWUhe6w",
+          "dataId": "0x487bb1007d528d69:0xac7b216569e3d9d8",
+          "website": "",
+          "domain": "",
+          "phone": "",
+          "address": "Manchester,M2 4WU,United Kingdom",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.480759299999995,
+            "longitude": -2.2426675
+          },
+          "thumbnail": ""
+        },
+        {
+          "title": "Veritas Hire - PHV Private Hire Taxi Rental",
+          "placeId": "ChIJJ8bdw7yxe0gRMCv0hW2LmCk",
+          "dataId": "0x487bb1bcc3ddc627:0x29988b6d85f42b30",
+          "website": "https://www.joinveritas.co.uk/",
+          "domain": "joinveritas.co.uk",
+          "phone": "+441615330308",
+          "address": "Unit 4,249 Ordsall Ln,Manchester M5 3NB,United Kingdom",
+          "rating": 4,
+          "reviews": 20,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Taxi service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.471959399999996,
+            "longitude": -2.2711493
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFVkiu9C7V9PIkZjee3XGcYclEkuDUBARGFbi0A-OvzyhYFXXLV9engP18Km9LKgaKP72q_jwKUyz0bI9Wm3qthPhnhWR7tfsuywyDNbdd8JqeTgeXHMsgbQkvXlCKwpo0Omb1QoQ=w229-h86-k-no"
+        },
+        {
+          "title": "Manchester Van Hire Ltd",
+          "placeId": "ChIJd3w495exe0gRFt7CkfYRyXQ",
+          "dataId": "0x487bb197f7387c77:0x74c911f691c2de16",
+          "website": "",
+          "domain": "",
+          "phone": "+441612731807",
+          "address": "Thrapston House,Travis St,Manchester,M1 2NG, United Kingdom",
+          "rating": 4.1,
+          "reviews": 19,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Leasing service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.477418099999994,
+            "longitude": -2.2245263
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAH2kEUoX7YwawGox_0VJPaCLtPqm23kUY1diJ-kLc9qWKK7AzrEbBQIDA-exnNIGc5HIWfTbP36mdbqW5btMDmq_LXrDkjgcNw34MCuD1GjTuUtYt8wMtJS3UI2vpQyAWj2Umml=w114-h86-k-no"
+        }
+      ]
+    },
+    {
+      "id": "c2367c24-be03-4c8b-a86c-82beae263ff8",
+      "city": "Manchester, UK",
+      "country": "UK",
+      "ll": "@53.4808,-2.2426,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778103830971,
+      "totalRaw": 20,
+      "chainsFiltered": 14,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "Palm Luxury Rentals",
+          "placeId": "ChIJk3SdQnWxe0gROBkaahppO3o",
+          "dataId": "0x487bb175429d7493:0x7a3b691a6a1a1938",
+          "website": "http://www.palmluxuryrentals.com/",
+          "domain": "palmluxuryrentals.com",
+          "phone": "+447460554398",
+          "address": "Aldow Enterprise Park,Manchester,M12 6EJ,United Kingdom",
+          "rating": 5,
+          "reviews": 58,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Chauffeur service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4760314,
+            "longitude": -2.2197936
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHOLSSeS7oHOvOqNv-hyl0VDfwyJaWLwd87dbvwkANgzkKtyXKk6kAxDQw57O3DYQ_8jhfxCH2w4UIrUtAvK5dmS_HeM1qpMgYY_Eg5geDd1vKr6aHGPqAZJe0E-04fHyMyMN1WBp0lws5o=w86-h107-k-no"
+        },
+        {
+          "title": "Empire Luxury",
+          "placeId": "ChIJ-TNpU-u7e0gRbrVIMVz0axE",
+          "dataId": "0x487bbbeb536933f9:0x116bf45c3148b56e",
+          "website": "http://empirehire.co.uk/",
+          "domain": "empirehire.co.uk",
+          "phone": "+441706962782",
+          "address": "Queensway,Rochdale,OL11 2QQ,United Kingdom",
+          "rating": 4.9,
+          "reviews": 271,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 12:30 AM",
+          "gps": {
+            "latitude": 53.594304699999995,
+            "longitude": -2.1731224
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGU_tkin46cjEFpTygUvvUYf7UagEH-4F_pAgqQi2UFYrEkNBIh9OAomz2IMAxeTbU840Yzek_FzJK1PMA9m77QGWKeZ5KT-ZaEtwd9kb3oR4XmbwErSV5qXuXaDTRcN_tcNQLxgO_--H0=w128-h86-k-no"
+        },
+        {
+          "title": "Rentalcars.com",
+          "placeId": "ChIJq6r6CcKxe0gRjOOTFXyCKGU",
+          "dataId": "0x487bb1c209faaaab:0x6528827c1593e38c",
+          "website": "https://www.rentalcars.com/",
+          "domain": "rentalcars.com",
+          "phone": "+448003685302",
+          "address": "35 Fountain St,Manchester,M2 2AN,United Kingdom",
+          "rating": 3.4,
+          "reviews": 1464,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.481135099999996,
+            "longitude": -2.240173
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAE-wNJQhpE9Ye2-eySmklh7p94POLzQOQmY1VYzRjdcahPyfKJKs6KNlDmpaoZe2P4KxzaQ3slvVPYZOOhhd2RhahrFeF91gejqxGNrS3NeW2ecr52WLh2azb8mvuBVAHBmLoNPbg=w114-h86-k-no"
+        },
+        {
+          "title": "Arnold Clark Car & Van Rental, Manchester Airport",
+          "placeId": "ChIJBUreYcSze0gRGpXb4Rn3TwU",
+          "dataId": "0x487bb3c461de4a05:0x54ff719e1db951a",
+          "website": "https://www.arnoldclarkrental.com/airport-car-hire/manchester-airport?utm_source=gmb&utm_medium=organic&utm_term=manchester-airport",
+          "domain": "arnoldclarkrental.com",
+          "phone": "+441618868610",
+          "address": "14, Ringway Trading Estate,Mollington Rd,Wythenshawe,Manchester M22 5LH, United Kingdom",
+          "rating": 4.9,
+          "reviews": 727,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.369718299999995,
+            "longitude": -2.2497564999999997
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHUIT-JgEoU-ouvPPbYPNLXD75ypYXcatAn0HMuYccOMDw0MYfT2tMA4ANB7VIswUonMKm7wbJpOHXfzce5-5cr3qw0QwW3yy_z2QM5FOsBr8Vwt5THNZHrXqjoLXcWUO3b8PE=w114-h86-k-no"
+        },
+        {
+          "title": "Salford Car Hire",
+          "placeId": "ChIJqU92Ic-xe0gRQKsJe-mSHqs",
+          "dataId": "0x487bb1cf21764fa9:0xab1e92e97b09ab40",
+          "website": "http://www.salfordvanhire.com/",
+          "domain": "salfordvanhire.com",
+          "phone": "+441618339311",
+          "address": "82 Great Ducie St,Cheetham Hill,Manchester M3 1LT,United Kingdom",
+          "rating": 4.2,
+          "reviews": 95,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.4907885,
+            "longitude": -2.2472148
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGAobmYNc8Decc2bpmFQPJY6uXbw7CE5M83VkPk-EA1UD1O9NrffqQButV2qbFrYmibejMA8SHwOEEGUOQcq_X5dJMwNSAZQH34-aHgDcMlzNI1dBC2wD0WkJ2VWU90nOtXkDNr3g=w128-h86-k-no"
+        },
+        {
+          "title": "Direct Car and Van Rentals",
+          "placeId": "ChIJPTJgnvake0gR0us0E7h4GIQ",
+          "dataId": "0x487ba4f69e60323d:0x841878b81334ebd2",
+          "website": "https://directvehiclerentals.co.uk/",
+          "domain": "directvehiclerentals.co.uk",
+          "phone": "+441617617773",
+          "address": "ALSTON HOUSE, Woolfold Industrial Estate,Alston St,Bury BL8 1SF,United Kingdom",
+          "rating": 4.5,
+          "reviews": 35,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car repair and maintenance service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 53.5997279,
+            "longitude": -2.3174181
+          },
+          "thumbnail": ""
+        }
+      ]
+    },
+    {
+      "id": "9bd8c01c-48f8-444f-920e-6411f216099e",
+      "city": "London, UK",
+      "country": "UK",
+      "ll": "@51.5074,-0.1278,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778103528681,
+      "totalRaw": 20,
+      "chainsFiltered": 14,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "UFODRIVE: 24/7 Car Rental - London, Canary Wharf",
+          "placeId": "ChIJa7ov_0oDdkgRjcbjnIZBOSQ",
+          "dataId": "0x4876034aff2fba6b:0x243941869ce3c68d",
+          "website": "https://www.ufodrive.com/locations/london-canary-wharf-car-rental",
+          "domain": "ufodrive.com",
+          "phone": "",
+          "address": "1 Canada Square,Canary Wharf Estate, London,E14 5EW,United Kingdom",
+          "rating": 4.6,
+          "reviews": 20,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 51.504658799999994,
+            "longitude": -0.0163088
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFfWdhRT5LtlBuGTGForyh8sRQpXCoORLqRE_y-gZEK-KmUBr-jCwojOBZGldP0dW-UMrbf1FpLbF0zr32x_GrW2TE1kgGGw8rLp-0qRHRV6DcleK1WeWlVlE4fvVUTshDQUnPpAQ=w128-h86-k-no"
+        },
+        {
+          "title": "Prestige Collection | Europcar Official Partner | Luxury Car Hire London",
+          "placeId": "ChIJeUB8lv8PdkgRVJlur3gSU2M",
+          "dataId": "0x48760fff967c4079:0x63531278af6e9954",
+          "website": "https://www.prestigecollection.co.uk/?utm_source=google&utm_medium=organic&utm_campaign=gbp",
+          "domain": "prestigecollection.co.uk",
+          "phone": "+442077276969",
+          "address": "Poplar Pl,London,W2 4AS,United Kingdom",
+          "rating": 4.4,
+          "reviews": 207,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 51.512214799999995,
+            "longitude": -0.1888675
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHNb69wgzUK8kcRT7NJI2qca6qsgQ3D8IlmRaNkbsCzbI23JP4qiWp8l--eguBfkK8boBxzN6ZvER6dq414vaMOXub-ecXYXIPKdG97eZDuv1ew4IdL9aQ8mlp49PTlXH_9bWGZ=w152-h86-k-no"
+        },
+        {
+          "title": "UFODRIVE: 24/7 Car Rental - London, Westfield",
+          "placeId": "ChIJObnlF2IPdkgRulOJMrHTBd4",
+          "dataId": "0x48760f6217e5b939:0xde05d3b1328953ba",
+          "website": "https://www.ufodrive.com/locations/london-shepherds-bush-car-rental",
+          "domain": "ufodrive.com",
+          "phone": "",
+          "address": "Westfield Shopping Centre,London,W12 7GF,United Kingdom",
+          "rating": 4.4,
+          "reviews": 35,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 51.508829899999995,
+            "longitude": -0.22192989999999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFy3tsnrHsa-GFaH5oH-E1jZtTufAbE19GMIDn4WwB0_pyHTxFdETx4SV7Z7x-hXP9ux9sudpMTXlKPTrORtK8nbkioyMTkvsvuKBw8nc6bkzhBkSBDAqZqfuxa2hOFENFcMq8T=w114-h86-k-no"
+        },
+        {
+          "title": "London Car Rentals",
+          "placeId": "ChIJ7egfOSoSdkgRhTt72R3UMrM",
+          "dataId": "0x4876122a391fe8ed:0xb332d41dd97b3b85",
+          "website": "http://www.lcr.co.uk/",
+          "domain": "lcr.co.uk",
+          "phone": "+442089036000",
+          "address": "300 Harrow Rd,Wembley,HA9 6LL,United Kingdom",
+          "rating": 4.7,
+          "reviews": 144,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Coach and minibus hire",
+            "Refrigerated transport service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 51.5526262,
+            "longitude": -0.284632
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHKGs7N7v7qkP_Ga3tIESUgQoNSHS0dADWhtk570SjSPDxFpdW2ImjFaotTAXi_x2gv92XUAuzlptkSkAwNEUGzKMtDRL_N5D7ZYoWusqMYUPbEXWbTw0EBM__-ZQ5CJ-_OFdRW=w177-h86-k-no"
+        },
+        {
+          "title": "Virtuo Car Hire | London Bridge",
+          "placeId": "ChIJE7WwmKYDdkgRpkOiGWwJGJY",
+          "dataId": "0x487603a698b0b513:0x9618096c19a243a6",
+          "website": "https://bit.ly/32MltnE",
+          "domain": "bit.ly",
+          "phone": "",
+          "address": "Kipling Street NCP Car Park,Bridge,London SE1 3RU,United Kingdom",
+          "rating": 4.2,
+          "reviews": 44,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 51.5021,
+            "longitude": -0.08705
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAE3q-O05xx3dNEutMsLvJxLTuGztTMIcxThMRMKOAHkRjn5HPn4Rl3Uw0l947eW1wMUzIDzNHwc2Vyd9Mm7_fNXjx2EPihT2fLPm-gRSG0ZFq-BQAkGYG7HVfakHTYaYTL69wr_=w129-h86-k-no"
+        },
+        {
+          "title": "Arnold Clark Car & Van Rental, Heathrow Airport",
+          "placeId": "ChIJtwI1krpzdkgRlk0FzpjK5eM",
+          "dataId": "0x487673ba923502b7:0xe3e5ca98ce054d96",
+          "website": "https://www.arnoldclarkrental.com/?utm_source=google&utm_medium=gmb&utm_campaign=organic-traffic",
+          "domain": "arnoldclarkrental.com",
+          "phone": "+442030317638",
+          "address": "79 New Rd,Harlington,Hayes UB3 5BQ,United Kingdom",
+          "rating": 4.9,
+          "reviews": 901,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 51.4821179,
+            "longitude": -0.4398587
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAF9FU47ve4YQ4wle9O8tG5VwZHJ3PaFY6xFUboyPOJVmI6FZySL6MZSrLcSVS6Cu-kGLAItsY34XqKDqj1Pfj6oeApSwLE9dqjFHhuaO4Dup3BS8CYyxmlJM_Mn9gvCZ_svd4Uq=w129-h86-k-no"
+        }
+      ]
+    },
+    {
+      "id": "37576cdd-87bd-4211-827c-40710c2f759b",
+      "city": "45.93°, -74.12°",
+      "country": "US",
+      "ll": "@45.9254,-74.1191,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778102887932,
+      "totalRaw": 20,
+      "chainsFiltered": 2,
+      "nonTargetFiltered": 10,
+      "results": [
+        {
+          "title": "Discount Location d'autos et camions",
+          "placeId": "ChIJa2BfpFIVz0wRh-yv6y8cE6U",
+          "dataId": "0x4ccf1552a45f606b:0xa5131c2febafec87",
+          "website": "http://www.discountquebec.com/succursale/sainte-agathe-des-monts",
+          "domain": "discountquebec.com",
+          "phone": "+18193234481",
+          "address": "665 Rue Principale E,Sainte-Agathe-des-Monts, QC J8C 1L1,Canada",
+          "rating": 4.7,
+          "reviews": 180,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Truck rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 46.0439027,
+            "longitude": -74.2720452
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEdxpX2L-mk5pwZzJWIAlwHXIDii3Tvc_ti1wAb_YjD_QGzLQx2-YD6iWq8HaF7FWO0mLBDxy3NEmXISCYXPuTi2gBxrIMtdKUnheu4Pop_dFl89df8Z5DKoLqAzo6BXWB-CMyU=w86-h86-k-no"
+        },
+        {
+          "title": "Enterprise Location de Camions",
+          "placeId": "ChIJXUttp2otz0wRJbniCX9h33c",
+          "dataId": "0x4ccf2d6aa76d4b5d:0x77df617f09e2b925",
+          "website": "https://www.enterprisetrucks.ca/truckrental/en_CA/locations/ca/e1c7qt-saint-jerome.html?mcid=iyp:24489699",
+          "domain": "enterprisetrucks.ca",
+          "phone": "+14505654370",
+          "address": "2124 Bd du Curé-Labelle,Saint-Jérôme, Quebec J7Y 1S8,Canada",
+          "rating": 3.7,
+          "reviews": 39,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 45.7996692,
+            "longitude": -74.0110947
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAElKLCs9x_4jmNbZgHY5lUwhE8cURAOLmB7PBSvblWMU3N4qPCBrmZ1egDCbzOcVJws3aV3qZpLnU_I6_un2hOdRW9xwYHGwjpxeNjAsgW_BcLYMfhi-NBewAKH8a9546DS4gW8=w148-h86-k-no"
+        },
+        {
+          "title": "Location Leduc",
+          "placeId": "ChIJAwAwLlrTyEwRvCs7EoooZGg",
+          "dataId": "0x4cc8d35a2e300003:0x6864288a123b2bbc",
+          "website": "https://locationleduc.com/",
+          "domain": "locationleduc.com",
+          "phone": "+14505654777",
+          "address": "1680 Bd Saint-Antoine,Saint-Jérôme, QC J7Z 7M2,Canada",
+          "rating": 4,
+          "reviews": 22,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "Closes soon · 6 PM · Opens 7 AM Thu",
+          "gps": {
+            "latitude": 45.7731529,
+            "longitude": -73.9680523
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEkwjR0E3-gfc4GLqEKYsFkZo4ooMcWrkY2fQAj4UXJDtWh5v-4l-HJiIRtIb4zjvnC6lJHkT5yrt1dokkbGwRF0zjiw_OTB0rnJHmOXsKP3oYaf6l8NWT-IzI1g7PEkQdYnEr2Tc5GDPMs=w129-h86-k-no"
+        },
+        {
+          "title": "Location Sauvageau inc.",
+          "placeId": "ChIJMXlk_Fkrz0wRuobODjyGSqo",
+          "dataId": "0x4ccf2b59fc647931:0xaa4a863c0ece86ba",
+          "website": "http://www.sauvageau.qc.ca/",
+          "domain": "sauvageau.qc.ca",
+          "phone": "+14504322882",
+          "address": "2 Rue Saint-Georges,Saint-Jérôme, QC J7J 4Y9,Canada",
+          "rating": 3.6,
+          "reviews": 11,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Truck rental agency",
+            "Trailer rental service",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Closes soon · 6 PM · Opens 7:30 AM Thu",
+          "gps": {
+            "latitude": 45.768405099999995,
+            "longitude": -74.0012526
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGsr0iBCNATeJDQLp39AOJwtnHQkxzQDi7udeh7LUZy8op4BVIGJ130KJa3ESjPdDAQk8qoekIvME0w1vyKcSGTCN67DCfMSZqmwDmuxqQtxNTLB_5WSQrvEsHeYvCuR1GzqWJ0=w152-h86-k-no"
+        },
+        {
+          "title": "Ski auto julie",
+          "placeId": "ChIJERTibgA9z0wRS5CYQXSwpL8",
+          "dataId": "0x4ccf3d006ee21411:0xbfa4b0744198904b",
+          "website": "",
+          "domain": "",
+          "phone": "",
+          "address": "1555 Chem. de Chambéry,Saint-Adolphe-d'Howard, QC J0T 2B0,Canada",
+          "rating": null,
+          "reviews": null,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 45.9404243,
+            "longitude": -74.31520979999999
+          },
+          "thumbnail": ""
+        },
+        {
+          "title": "U-Haul Neighborhood Dealer",
+          "placeId": "ChIJ9_htb9DTyEwRvBT6pVyVK4s",
+          "dataId": "0x4cc8d3d06f6df8f7:0x8b2b955ca5fa14bc",
+          "website": "https://fr.uhaul.com/Locations/Truck-Rentals-near-Saint-Jerome-QC-J7Z7M2/059480/?utm_source=gmb&utm_medium=primary&utm_campaign=uhaulsmlm&utm_content=059480",
+          "domain": "fr.uhaul.com",
+          "phone": "+14503276149",
+          "address": "1770 Bd Saint-Antoine,Saint-Jérôme, Quebec J7Z 7M2,Canada",
+          "rating": 3.2,
+          "reviews": 23,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Trailer rental service",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 7 PM",
+          "gps": {
+            "latitude": 45.7741124,
+            "longitude": -73.9677805
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAESc-jZr1gNdmHjw66ARxCSqC5qGi2hrAc_qjs9dTBBbpODPI9WK5feag1fReSrB4dGmeB8E7DvpJEkn5HheY7Tbg9_pZT2xtC-1SmvXwX-HwpHtqfk7E4cPWeZtvXknywdvaSStmkv2JMZ=w86-h114-k-no"
+        },
+        {
+          "title": "U-Haul Neighborhood Dealer",
+          "placeId": "ChIJId2xJfPLyEwRHbk58R0LxLE",
+          "dataId": "0x4cc8cbf325b1dd21:0xb1c40b1df139b91d",
+          "website": "https://fr.uhaul.com/Locations/Truck-Rentals-near-Saint-Calixte-QC-J0K1Z0/058374/?utm_source=gmb&utm_medium=primary&utm_campaign=uhaulsmlm&utm_content=058374",
+          "domain": "fr.uhaul.com",
+          "phone": "+15794040103",
+          "address": "125 Chem. du Lac Bob,Saint-Calixte, Quebec J0K 1Z0,Canada",
+          "rating": 5,
+          "reviews": 4,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Trailer rental service",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 8 PM",
+          "gps": {
+            "latitude": 45.926786299999996,
+            "longitude": -73.8302149
+          },
+          "thumbnail": ""
+        },
+        {
+          "title": "U-Haul Neighborhood Dealer",
+          "placeId": "ChIJPZ3b2HMtz0wRxVXlGegWN3E",
+          "dataId": "0x4ccf2d73d8db9d3d:0x713716e819e555c5",
+          "website": "https://fr.uhaul.com/Locations/Truck-Rentals-near-Saint-Jerome-QC-J7Z7G8/058180/?utm_source=gmb&utm_medium=primary&utm_campaign=uhaulsmlm&utm_content=058180",
+          "domain": "fr.uhaul.com",
+          "phone": "+14504321470",
+          "address": "830 Rue Saint-Georges,Saint-Jérôme, Quebec J7Z 7G8,Canada",
+          "rating": 2.7,
+          "reviews": 7,
+          "primaryType": "Van rental agency",
+          "allTypes": [
+            "Van rental agency",
+            "Trailer rental service",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 45.789947999999995,
+            "longitude": -74.005163
+          },
+          "thumbnail": ""
+        }
+      ]
+    },
+    {
+      "id": "5d624210-0e0b-44b7-862b-6acee7fdfb54",
+      "city": "New York, NY",
+      "country": "US",
+      "ll": "@40.7128,-74.0060,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778090019361,
+      "totalRaw": 20,
+      "chainsFiltered": 16,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "RealCar: Premium & Luxury Car Rental NYC",
+          "placeId": "ChIJlenGzrOnm6IRw7rKuhVA9nA",
+          "dataId": "0xa29ba7b3cec6e995:0x70f64015bacabac3",
+          "website": "https://realcar.nyc/",
+          "domain": "realcar.nyc",
+          "phone": "+12129918002",
+          "address": "448 W 38th St,New York, NY 10018",
+          "rating": 4.9,
+          "reviews": 270,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 8 PM",
+          "gps": {
+            "latitude": 40.7567412,
+            "longitude": -73.9968114
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFNExDDY0np09aunYtCg08ZMp2LySt0r9FFTMyPvgz9yHG-POxfWsRTuASJk6nWGe72VMUNSaSaG43XVyiKNm3PSEJ05--zqMmZNbVfznCWFICULmhemW7PWuAG4mWyNS2LS2ydBw=w158-h86-k-no"
+        },
+        {
+          "title": "Zoom Car Rental",
+          "placeId": "ChIJjwLHzXpbwokRHofopSfP1og",
+          "dataId": "0x89c25b7acdc7028f:0x88d6cf27a5e8871e",
+          "website": "http://zoom.rentlynetwork.com/",
+          "domain": "zoom.rentlynetwork.com",
+          "phone": "+17188312919",
+          "address": "2 Spencer St Garage,Brooklyn, NY 11205",
+          "rating": 4.7,
+          "reviews": 137,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 6:30 PM",
+          "gps": {
+            "latitude": 40.6987333,
+            "longitude": -73.9561129
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGlOE0RHSragS_E-XFX6rvL6p3vsBSB78jiTNjujnJt92SBc9hm9cFtIMESrAd_RYDLmUtsEfHLuWkaQJ66GOLzzi0QAayfZOwm3S_RFj_BQ_BSB4T2yhQ5O1fTAregxPwJa14=w86-h111-k-no"
+        },
+        {
+          "title": "Divano Rent-A-Car (Car Rental)",
+          "placeId": "ChIJYWeiAgFXwokR1ci7a_nXxCo",
+          "dataId": "0x89c2570102a26761:0x2ac4d7f96bbbc8d5",
+          "website": "http://divanorentacar.com/",
+          "domain": "divanorentacar.com",
+          "phone": "+18772286396",
+          "address": "4219 Bergen Turnpike Unit 3,North Bergen, NJ 07047",
+          "rating": 4.5,
+          "reviews": 354,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 6 PM",
+          "gps": {
+            "latitude": 40.7816869,
+            "longitude": -74.0330756
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHn_xxMx6EORyCH3NgOdoyoMcJgNldtPPwtDeX-vgrqzRx__tvBHnSlOPc8b5zfnHYHVFYbhYsbo3fCzHLfttoBsc9WXofYlp5Uu2nEWGNh9FHfbiCewcc3mpdxus-jfaA0rVVVWw=w114-h86-k-no"
+        },
+        {
+          "title": "United Rent A Car",
+          "placeId": "ChIJOxA_fjpFwokRkZ3ou4pBtiM",
+          "dataId": "0x89c2453a7e3f103b:0x23b6418abbe89d91",
+          "website": "",
+          "domain": "",
+          "phone": "+17188711600",
+          "address": "6224 17th Ave,Brooklyn, NY 11204",
+          "rating": 4.6,
+          "reviews": 153,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Open · Closes 5 PM",
+          "gps": {
+            "latitude": 40.6219544,
+            "longitude": -73.99133599999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGKhBhjeXuqQK5YifsOQwO6ZX___GR-qo5XM0yBIFgtIeveKyE5F2ZNIBamDY-CeLtboxZUSvv-1mmZfEOg26h8YI8NsLTjSdmV8A7nrsAq5TL64pmY6nEzQ35l66vgm1KRyF94FQ=w114-h86-k-no"
+        }
+      ]
+    },
+    {
+      "id": "cdca2019-ef45-4705-8697-a27687a136ba",
+      "city": "Montreal, QC",
+      "country": "CA",
+      "ll": "@45.5017,-73.5673,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778040674223,
+      "totalRaw": 20,
+      "chainsFiltered": 14,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "Budget Truck Rental",
+          "placeId": "ChIJP1i-ltAZyUwRScIZVisTDMA",
+          "dataId": "0x4cc919d096be583f:0xc00c132b5619c249",
+          "website": "https://www.budgettruck.ca/en/locations/ca/pq/montreal/j2t?utm_source=google&utm_medium=gbp&utm_campaign=budget_gbp",
+          "domain": "budgettruck.ca",
+          "phone": "+15143872847",
+          "address": "5210 Rue Jean-Talon O,Montreal, Quebec H4P 1X3,Canada",
+          "rating": 4.6,
+          "reviews": 510,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 8 AM",
+          "gps": {
+            "latitude": 45.495360299999994,
+            "longitude": -73.6514091
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEO13NJC4p4U6a4Bt4qMwJizuydwekPI_s4MFwr7zKg_R_xUZlPuSlUmdyqNe9r-2n8_hP2mJSo5pgdTN9aQ7MWdFx3cVzBTQbV1nJBmI5YYHntkzg_XSK-sSotbTrf-6JLYTlH=w114-h86-k-no"
+        },
+        {
+          "title": "National Car Rental",
+          "placeId": "ChIJB0x0ons9yUwRlylR12Hz0Ig",
+          "dataId": "0x4cc93d7ba2744c07:0x88d0f361d7512997",
+          "website": "https://www.nationalcar.ca/en/car-rental-locations/ca/qc/montreal-trudeau-airport-c7n1.html?mcid=yext:245709",
+          "domain": "nationalcar.ca",
+          "phone": "+18336193658",
+          "address": "590 Bd Albert de Niverville,Dorval, Quebec H4Y 1J3,Canada",
+          "rating": 4.5,
+          "reviews": 838,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closes soon · 1 AM · Reopens 7 AM",
+          "gps": {
+            "latitude": 45.4523648,
+            "longitude": -73.7538077
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGwDtOV1QNvrtK4ru3c4hvCV81ldeXfdhKgoNk_TczrMOVI8iKDkbIMYUxz-JswW3av8VFg46oOo--TvbW01d6r2_NM8cfEvd0L-PGXh1aA_3bqKGq2tqIOVMN6Gtgk6M6EALUt43X7SYw=w86-h86-k-no"
+        },
+        {
+          "title": "Loue Lauto",
+          "placeId": "ChIJrS2hJAE9yUwR-pF3gb1TfqA",
+          "dataId": "0x4cc93d0124a12dad:0xa07e53bd817791fa",
+          "website": "https://www.louelauto.com/",
+          "domain": "louelauto.com",
+          "phone": "+15146941037",
+          "address": "215 Boul Hymus,Pointe-Claire, Quebec H9R 1E9,Canada",
+          "rating": 4.9,
+          "reviews": 390,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 8 AM",
+          "gps": {
+            "latitude": 45.4597955,
+            "longitude": -73.8209443
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGGtYAsYIj8D1Gd_c7oGXLQCIZDv08MregWsXIzx3foPhZKy9bGJZ8eITV17KlWBegcAUQdTob06EE-gMHZ_Z4_8pFkMRz1wIHdCXzRW4ZBDjVgCmAWGSF2V4sgE9-x8pAkLRvliA=w121-h86-k-no"
+        },
+        {
+          "title": "Auto Rental Canada",
+          "placeId": "ChIJ792gRVgZyUwR2bsx0J_oLLc",
+          "dataId": "0x4cc9195845a0ddef:0xb72ce89fd031bbd9",
+          "website": "http://www.autorentalcanada.com/french/",
+          "domain": "autorentalcanada.com",
+          "phone": "+15149908217",
+          "address": "5700 Rue D'Iberville,Montréal, QC H2G 2B3,Canada",
+          "rating": 3.4,
+          "reviews": 266,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 9 AM",
+          "gps": {
+            "latitude": 45.5448587,
+            "longitude": -73.58297979999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEHi7WOV3jPfwYtb4yQZEz5Ee2FMkSClxwbcS0MlUefPte1Rb3CYKiLv0Oo7xQzMwU79WPFe9CbUEmDO4nORitp01kwuf9vfgJ4AV7YiatCFPd0tQ_Doh2ijqS6ig2nG1UtgDXpQA=w114-h86-k-no"
+        },
+        {
+          "title": "Globe Location Auto & Camion (Car & Truck Rental)",
+          "placeId": "ChIJ4bL-SBIZyUwRJT8oJeEAtNs",
+          "dataId": "0x4cc9191248feb2e1:0xdbb400e125283f25",
+          "website": "https://www.globecar.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb",
+          "domain": "globecar.com",
+          "phone": "+15142701771",
+          "address": "7200 Boul. Saint-Laurent,Montreal, Quebec H2R 2X9,Canada",
+          "rating": 4.3,
+          "reviews": 1537,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Truck rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 7:30 AM",
+          "gps": {
+            "latitude": 45.534614,
+            "longitude": -73.61880339999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGnrDD7-V3xO_Exx7ivDvjGCbwvtm-aze7soTk0X1O1ZFGO26w27FK6Wkrg6BcilCnBGWx4p8_uNYtCTTC7IOhfldPLuMFliDs2hX55PWhU-JTznJob0fkvgTBzglSOVwEgatj4=w129-h86-k-no"
+        },
+        {
+          "title": "Dream Rentals - Luxury and Exotic Rentals",
+          "placeId": "ChIJ754ekzcjyUwRcI5GXqayayI",
+          "dataId": "0x4cc92337931e9eef:0x226bb2a65e468e70",
+          "website": "https://rentdreamcars.ca/",
+          "domain": "rentdreamcars.ca",
+          "phone": "+15145667368",
+          "address": "10490 Henri Bourassa Blvd W,Montreal, Quebec H4S 1N6,Canada",
+          "rating": 4.7,
+          "reviews": 89,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 9:30 AM",
+          "gps": {
+            "latitude": 45.492817699999996,
+            "longitude": -73.75614139999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGDb-TGhQycp_BUbG8yJwfc_yRTQlj7Sy7ebZE7qqyww0X_1h-6rV3EDyxsW_LMbSLJYtixDbMs2gwk65W6cuBplUoGJRnOvc5NjncAC2JcxeAO6zOIiucAit3V0f1tYXQ9O7E=w86-h129-k-no"
+        }
+      ]
+    },
+    {
+      "id": "8e64290f-4037-41af-8982-9892ae41637b",
+      "city": "Toronto, ON",
+      "country": "CA",
+      "ll": "@43.6532,-79.3832,12z",
+      "query": "car rental",
+      "page": 0,
+      "ranAt": 1778040345172,
+      "totalRaw": 20,
+      "chainsFiltered": 7,
+      "nonTargetFiltered": 0,
+      "results": [
+        {
+          "title": "SIXT car rental - Toronto Pearson International Airport (YYZ)",
+          "placeId": "ChIJx7Q51WY5K4gRx7LC4QhfDy8",
+          "dataId": "0x882b3966d539b4c7:0x2f0f5f08e1c2b2c7",
+          "website": "https://www.sixt.ca/car-rental/canada/toronto/toronto-airport/?utm_source=google_business&utm_medium=organic&utm_campaign=Listings&c1=CA&c2=toronto&c3=toronto-airport",
+          "domain": "sixt.ca",
+          "phone": "+18887498227",
+          "address": "3061 Orlando Dr,Mississauga, ON L4V 1R4,Canada",
+          "rating": 4.1,
+          "reviews": 1258,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 6 AM",
+          "gps": {
+            "latitude": 43.696604199999996,
+            "longitude": -79.62974229999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAH15pqT-beS5UppuHuwUNyDfhtrf7SB2RrDO3-yLK4PGTp8rOVuXWyAFeruzKfNhJRHXKJnwKhC5kHR7YF1MrqVG0BA_9fX6f1B_rWz9m4RCUmARx7dOngLoAl6XKJ_ynEdUyTuhw0-tXzi=w86-h114-k-no"
+        },
+        {
+          "title": "Blind Spot Car Rental",
+          "placeId": "ChIJEyS3w3rN1IkRV4ecBVN-zv0",
+          "dataId": "0x89d4cd7ac3b72413:0xfdce7e53059c8757",
+          "website": "",
+          "domain": "",
+          "phone": "+14164254795",
+          "address": "104 Crockford Boulevard - HUDDLE,104 Crockford Blvd Suite #103,Scarborough, ON M1R 3C3,Canada",
+          "rating": 4.8,
+          "reviews": 158,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 43.7438955,
+            "longitude": -79.2908022
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFkxrABDIHtXhvGDIeMRZcLNmN18GpPaLVUHiQ988Mgdsbto747fuRQ91YsHz08fwC_bDVPmYkIBUOfgvXry504PlSpfrcwREud3bk3AjW0uGgk-_q7aVM8SalYZgAZmjavBIGzNHYJRh4=w152-h86-k-no"
+        },
+        {
+          "title": "Iversta Car Rental",
+          "placeId": "ChIJ_eJ6_1U5K4gR9oNJdVuXhGw",
+          "dataId": "0x882b3955ff7ae2fd:0x6c84975b754983f6",
+          "website": "https://iversta.com/",
+          "domain": "iversta.com",
+          "phone": "+16478877714",
+          "address": "6305 Northam Dr #5,Mississauga, ON L4V 1W9,Canada",
+          "rating": 3.9,
+          "reviews": 1020,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car dealer",
+            "Truck rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 9 AM",
+          "gps": {
+            "latitude": 43.6962976,
+            "longitude": -79.6168057
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEU7SudpifxfPVmQiU-GuS2HavCR6adZASO0y-_KlVYtSmQYNmEX3s8fQO5aVnzLgukmsR-mn2M8fHy6w0sjFbdXRujYnecUYNRZAwz0pi2oakEY5rloHBvvJKoDwm4esFlnIk=w139-h86-k-no"
+        },
+        {
+          "title": "YYZ CAR RENTAL",
+          "placeId": "ChIJaZDtRd47K4gRET3HcK2naNc",
+          "dataId": "0x882b3bde45ed9069:0xd768a7ad70c73d11",
+          "website": "http://yyzcarrental.com/",
+          "domain": "yyzcarrental.com",
+          "phone": "+14165591111",
+          "address": "145 Belfield Rd,Etobicoke, ON M9W 1G8,Canada",
+          "rating": 4.9,
+          "reviews": 275,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 9 AM",
+          "gps": {
+            "latitude": 43.7013493,
+            "longitude": -79.5765321
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAG_oDXy2T7iLVxPnyZicVShh7zvl-DilrnIE5L8OWKFwEAx8VKFQd4J89IOpq8CB8SdDbXvkkxT4zOQIwfzbc1MIFeGPpO5VcyAoAqgdIwTrluj3ap0AGQfXNJRuuh9hJlmqqfq=w143-h86-k-no"
+        },
+        {
+          "title": "First Choice Car Rental (Toronto)",
+          "placeId": "ChIJXVrPmFrP1IkRvtG1oCwXxkg",
+          "dataId": "0x89d4cf5a98cf5a5d:0x48c6172ca0b5d1be",
+          "website": "",
+          "domain": "",
+          "phone": "+16474001607",
+          "address": "1940 Eglinton Ave E,Scarborough, ON M1L 4R1,Canada",
+          "rating": 4.8,
+          "reviews": 40,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 43.7281772,
+            "longitude": -79.2888358
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGr73sKIXhAavhxWXIw0GigUMqZdrhWI2DG_6X-zbA7zetQUtoe_im2PCSsDh3vxumamKcgkMOCyaLk5MTDSjO5HZjV-FlHIOEFz5I9wT1Y83jqDV5xJs_hnUOIIPj-6MXBHFtWgNEaFCb2=w86-h114-k-no"
+        },
+        {
+          "title": "Toronto Auto Rentals",
+          "placeId": "ChIJNz4lsobR1IkRn5GChBIcFw8",
+          "dataId": "0x89d4d186b2253e37:0xf171c128482919f",
+          "website": "http://www.torontoautorentals.com/",
+          "domain": "torontoautorentals.com",
+          "phone": "+14162935510",
+          "address": "2035 Kennedy Rd,Scarborough, ON M1T 3G2,Canada",
+          "rating": 4,
+          "reviews": 60,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "",
+          "gps": {
+            "latitude": 43.777538799999995,
+            "longitude": -79.28282449999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGgzSgPFLYUeOFcjH3JcxTB91DlR1v_4PDDE59yBqU50NSiCYnvRsK-jJ_u7lnPsCLTy7lLur3NucOioOKjgscUVuk22P4IbqAkPN0zxpEaB6_FRYsOQhwp2bk509zCcHBa3pg=w114-h86-k-no"
+        },
+        {
+          "title": "Advantage Car & Truck Rentals Downtown Toronto",
+          "placeId": "ChIJ5yA3fz_L1IkRd3laPyjDpcs",
+          "dataId": "0x89d4cb3f7f3720e7:0xcba5c3283f5a7977",
+          "website": "https://www.advantagecarrentals.com/?utm_source=google&utm_medium=organic_gmb_downtown_toronto",
+          "domain": "advantagecarrentals.com",
+          "phone": "+14163640387",
+          "address": "431 Queen St E,Toronto, ON M5A 1T5,Canada",
+          "rating": 4.5,
+          "reviews": 445,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service",
+            "Truck rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 8 AM",
+          "gps": {
+            "latitude": 43.6562097,
+            "longitude": -79.3608685
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGMuC4suIAWHWz40yUw-8pIqtv7_U065-NQv8IqCf1g4_OVgI0OBtRwc1MpTVD4q1rYZacL7Dgr1kGOFRpXqEjiAs2vOvMuD0qad9ockwOxCRH3vxgwKfVrg069yJQ9rbgFpy8w=w164-h86-k-no"
+        },
+        {
+          "title": "Routes Car Rental",
+          "placeId": "ChIJ8TNPoME7K4gRTdKeeFbnYxE",
+          "dataId": "0x882b3bc1a04f33f1:0x1163e756789ed24d",
+          "website": "https://www.routes.ca/",
+          "domain": "routes.ca",
+          "phone": "+19056779994",
+          "address": "3035 Orlando Dr,Mississauga, ON L4V 1R4,Canada",
+          "rating": 4.6,
+          "reviews": 14539,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 6 AM",
+          "gps": {
+            "latitude": 43.695997,
+            "longitude": -79.6299305
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHhSwedQSJ9RIemBEnRwYbv4TXmA5B1lcGbjYSTehXAF8qQ2TgnMQ9WVUEOf_ttUA9l4C1bPiJ-39CwAFo5pxs_aH6jHadaTdi0v8gFQ0K194b5_vdRGTOJe1WAD5R6kMYyTV75=w114-h86-k-no"
+        },
+        {
+          "title": "GTA Exotics Car Rental",
+          "placeId": "ChIJUd5tJLIzK4gRVlcCMuqvxkI",
+          "dataId": "0x882b33b2246dde51:0x42c6afea32025756",
+          "website": "https://gtaexotics.ca/",
+          "domain": "gtaexotics.ca",
+          "phone": "+19058151300",
+          "address": "3038 Yonge St Suite 6060,Toronto, ON M4N 3N1,Canada",
+          "rating": 4.8,
+          "reviews": 97,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 9 AM",
+          "gps": {
+            "latitude": 43.7246437,
+            "longitude": -79.4023582
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFGhTEWqXnSFze3CJypoUTubYMALkFmzUQN5UwXh2h98wK-B5dQBWa1MTjSXuQOIrO-miDl_Nt2Bt1r4hdMAGGnpIxbLnMTwG78tL4q4e8IbI5-GMB4xlWG_IWqRgvkEo4skoU8uw=w114-h86-k-no"
+        },
+        {
+          "title": "Zoom Rent A Car Toronto Downtown",
+          "placeId": "ChIJUerAAUzL1IkRGwJ_RCdR2a0",
+          "dataId": "0x89d4cb4c01c0ea51:0xadd95127447f021b",
+          "website": "https://zoomrentals.com/toronto-downtown-car-rentals",
+          "domain": "zoomrentals.com",
+          "phone": "+14165157700",
+          "address": "140 Carlton St. UNIT D,Toronto, ON M5A 3W7,Canada",
+          "rating": 3.7,
+          "reviews": 79,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Truck rental agency",
+            "Van rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 8 AM",
+          "gps": {
+            "latitude": 43.6629733,
+            "longitude": -79.3746808
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFYksZbD5RpwZLKqJl-QogGEQozCQpTIwImi23_TCyq9Si0AcxjClsEEHs4awlFCB0EyMyay_bAz9S2Rb1EIX6HzpifJeNrAo_bsVaiBUgrk2ddS2HFC9Cof0jOCCWAJ0AnD-CBeJgsiZt-=w129-h86-k-no"
+        },
+        {
+          "title": "Kaizen Rent A Car",
+          "placeId": "ChIJRbAI_SYwK4gRmNZuTSvXHGI",
+          "dataId": "0x882b3026fd08b045:0x621cd72b4d6ed698",
+          "website": "http://www.kaizenrentacar.com/",
+          "domain": "kaizenrentacar.com",
+          "phone": "+14166616166",
+          "address": "29 Pemican Ct #8,North York, ON M9M 2L4,Canada",
+          "rating": 4.7,
+          "reviews": 237,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 10 AM",
+          "gps": {
+            "latitude": 43.7495281,
+            "longitude": -79.53044779999999
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGABy4SXuvckyTzUnl6zdzJzU0M7E6eWzAF4fqkkS-0Z4GVvbK8ksShr046n0KfOeFmZA75FYYtvfwzgsccUnilwLz_n8T2kvPEzsInENOpn8KkTpkMQ3qTk-l23qrIEazmtpk=w114-h86-k-no"
+        },
+        {
+          "title": "Roam Long-Term Car Rentals Toronto",
+          "placeId": "ChIJl0uHqPjL1IkRmAW0zNhwEAo",
+          "dataId": "0x89d4cbf8a8874b97:0xa1070d8ccb40598",
+          "website": "https://www.roam.auto/",
+          "domain": "roam.auto",
+          "phone": "+16475605638",
+          "address": "863 Kipling Ave,Etobicoke, ON M8Z 5H1,Canada",
+          "rating": 4.8,
+          "reviews": 886,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency",
+            "Car leasing service"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 9 AM",
+          "gps": {
+            "latitude": 43.6348343,
+            "longitude": -79.5316698
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGMRckaVeQ-tMgcHyPOU2pYsjOUWHOh6FhcvXUSsfu0ui87RpTgOkaTrPClVH5UPhEpJDEsZMHG2QUCW18yyMo9zMpJED6MjLRxfg9ZWTb2LIWRhzugmibOBlHH3dnc5fKDpHaZ=w86-h86-k-no"
+        },
+        {
+          "title": "Estrada Car Rentals",
+          "placeId": "ChIJu57ZGIUxK4gRIkgkPxQPOYU",
+          "dataId": "0x882b318518d99ebb:0x85390f143f244822",
+          "website": "http://www.estradarentals.com/",
+          "domain": "estradarentals.com",
+          "phone": "+14169649978",
+          "address": "100 St Regis Crescent Unit 9,North York, ON M3J 1Y8,Canada",
+          "rating": 4.9,
+          "reviews": 94,
+          "primaryType": "Car rental agency",
+          "allTypes": [
+            "Car rental agency"
+          ],
+          "description": "",
+          "hours": "Closed · Opens 10 AM",
+          "gps": {
+            "latitude": 43.754791999999995,
+            "longitude": -79.4839696
+          },
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFgRpCgxbvxApaOTbQtqHW88ngFTkEjhoVeXxu-Q0rIy5H64YYzCKe4zmo1wuJMwgXNiDYHDIQeRJHN_Bpr3YKttlQfXSFsoKl1-HrgOvMSajss9c4N1ujoMY3rKm_JFrPjA2uQ9Q=w86-h114-k-no"
+        }
+      ]
+    }
+  ],
+  "placeDetails": {
+    "0x4cc919d096be583f:0xc00c132b5619c249": {
+      "fetchedAt": 1778040682530,
+      "data": {
+        "title": "Budget Truck Rental",
+        "rating": 4.6,
+        "reviews": 510,
+        "ratingSummary": [
+          {
+            "stars": 1,
+            "amount": 50
+          },
+          {
+            "stars": 2,
+            "amount": 4
+          },
+          {
+            "stars": 3,
+            "amount": 2
+          },
+          {
+            "stars": 4,
+            "amount": 6
+          },
+          {
+            "stars": 5,
+            "amount": 448
+          }
+        ],
+        "phone": "+15143872847",
+        "address": "5210 Rue Jean-Talon O,Montreal, Quebec H4P 1X3,Canada",
+        "types": [
+          "Car rental agency",
+          "Van rental agency"
+        ],
+        "serviceOptions": {},
+        "extensions": [
+          {
+            "service_options": [
+              "Onsite services"
+            ]
+          },
+          {
+            "accessibility": [
+              "Wheelchair accessible entrance",
+              "Wheelchair accessible parking lot"
+            ]
+          },
+          {
+            "payments": [
+              "Credit cards",
+              "Debit cards",
+              "NFC mobile payments"
+            ]
+          },
+          {
+            "parking": [
+              "Paid parking lot"
+            ]
+          }
+        ],
+        "unsupportedExtensions": [],
+        "gps": {
+          "latitude": 45.495360299999994,
+          "longitude": -73.6514091
+        },
+        "_raw": {
+          "title": "Budget Truck Rental",
+          "data_id": "0x4cc919d096be583f:0xc00c132b5619c249",
+          "reviews_link": "https://api.scrapingdog.com/google_maps/reviews?api_key=69f25a7681a517f68da3fa71&data_id=0x4cc919d096be583f:0xc00c132b5619c249",
+          "photos_link": "https://api.scrapingdog.com/google_maps/photos?api_key=69f25a7681a517f68da3fa71&data_id=0x4cc919d096be583f:0xc00c132b5619c249",
+          "posts_link": "https://api.scrapingdog.com/google_maps/posts?api_key=69f25a7681a517f68da3fa71&data_id=0x4cc919d096be583f:0xc00c132b5619c249",
+          "place_id": "ChIJP1i-ltAZyUwRScIZVisTDMA",
+          "rating": 4.6,
+          "reviews": 510,
+          "website": "https://www.budgettruck.ca/en/locations/ca/pq/montreal/j2t?utm_source=google&utm_medium=gbp&utm_campaign=budget_gbp",
+          "gps_coordinates": {
+            "latitude": 45.495360299999994,
+            "longitude": -73.6514091
+          },
+          "provider_id": "/g/12m96khhs",
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAHdnoeFhzgfQPC1OQz1bNKPwPcBqeoYVIShcmcC8qdksk32GVU_4OC3gi7dNV5iZ8zg0ce7reEh0r3TexGLrrmRCjbYfYQlx8HkpPmJwMMAX7-ghHQfTU33oIz_Kq6DKFbwUSP-=w152-h86-k-no",
+          "rating_summary": [
+            {
+              "stars": 1,
+              "amount": 50
+            },
+            {
+              "stars": 2,
+              "amount": 4
+            },
+            {
+              "stars": 3,
+              "amount": 2
+            },
+            {
+              "stars": 4,
+              "amount": 6
+            },
+            {
+              "stars": 5,
+              "amount": 448
+            }
+          ],
+          "type": [
+            "Car rental agency",
+            "Van rental agency"
+          ],
+          "type_ids": [
+            "car_rental_agency",
+            "van_rental_agency"
+          ],
+          "order_online": null,
+          "extensions": [
+            {
+              "service_options": [
+                "Onsite services"
+              ]
+            },
+            {
+              "accessibility": [
+                "Wheelchair accessible entrance",
+                "Wheelchair accessible parking lot"
+              ]
+            },
+            {
+              "payments": [
+                "Credit cards",
+                "Debit cards",
+                "NFC mobile payments"
+              ]
+            },
+            {
+              "parking": [
+                "Paid parking lot"
+              ]
+            }
+          ],
+          "unsupported_extensions": [],
+          "address": "5210 Rue Jean-Talon O,Montreal, Quebec H4P 1X3,Canada",
+          "phone": "+15143872847",
+          "hours": [
+            {
+              "Wednesday": "8 AM–5 PM"
+            },
+            {
+              "Thursday": "8 AM–6 PM"
+            },
+            {
+              "Friday": "8 AM–6 PM"
+            },
+            {
+              "Saturday": "8 AM–4 PM"
+            },
+            {
+              "Sunday": "9 AM–1 PM"
+            },
+            {
+              "Monday": "8 AM–5 PM"
+            },
+            {
+              "Tuesday": "8 AM–5 PM"
+            }
+          ],
+          "open_state": "Wednesday"
+        }
+      }
+    },
+    "0x4876034aff2fba6b:0x243941869ce3c68d": {
+      "fetchedAt": 1778103549497,
+      "data": {
+        "title": "UFODRIVE: 24/7 Car Rental - London, Canary Wharf",
+        "rating": 4.6,
+        "reviews": 20,
+        "ratingSummary": [
+          {
+            "stars": 1,
+            "amount": 2
+          },
+          {
+            "stars": 2,
+            "amount": 0
+          },
+          {
+            "stars": 3,
+            "amount": 0
+          },
+          {
+            "stars": 4,
+            "amount": 1
+          },
+          {
+            "stars": 5,
+            "amount": 17
+          }
+        ],
+        "phone": "",
+        "address": "1 Canada Square,Canary Wharf Estate, London,E14 5EW,United Kingdom",
+        "types": [
+          "Car rental agency"
+        ],
+        "serviceOptions": {},
+        "extensions": [
+          {
+            "accessibility": [
+              "Wheelchair accessible parking lot"
+            ]
+          },
+          {
+            "payments": [
+              "Credit cards",
+              "Debit cards",
+              "NFC mobile payments"
+            ]
+          }
+        ],
+        "unsupportedExtensions": [],
+        "gps": {
+          "latitude": 51.504658799999994,
+          "longitude": -0.0163088
+        },
+        "_raw": {
+          "title": "UFODRIVE: 24/7 Car Rental - London, Canary Wharf",
+          "data_id": "0x4876034aff2fba6b:0x243941869ce3c68d",
+          "reviews_link": "https://api.scrapingdog.com/google_maps/reviews?api_key=69f25a7681a517f68da3fa71&data_id=0x4876034aff2fba6b:0x243941869ce3c68d",
+          "photos_link": "https://api.scrapingdog.com/google_maps/photos?api_key=69f25a7681a517f68da3fa71&data_id=0x4876034aff2fba6b:0x243941869ce3c68d",
+          "posts_link": "https://api.scrapingdog.com/google_maps/posts?api_key=69f25a7681a517f68da3fa71&data_id=0x4876034aff2fba6b:0x243941869ce3c68d",
+          "place_id": "ChIJa7ov_0oDdkgRjcbjnIZBOSQ",
+          "rating": 4.6,
+          "reviews": 20,
+          "website": "https://www.ufodrive.com/locations/london-canary-wharf-car-rental",
+          "gps_coordinates": {
+            "latitude": 51.504658799999994,
+            "longitude": -0.0163088
+          },
+          "provider_id": "/g/11t27qrc0s",
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAGWARaZvf2V_Xkr3Myx4HmQ-P-pVtILKdg2CZlrTCdtzlcHX0d_ATiIF2ktitq7nLfVDXA0rc2OzRMdOsuKb_6imLRxlcrDFjWhyWdmpdFX4kh3av7eJUoeScaHctsQCHwv5m9L=w153-h86-k-no",
+          "rating_summary": [
+            {
+              "stars": 1,
+              "amount": 2
+            },
+            {
+              "stars": 2,
+              "amount": 0
+            },
+            {
+              "stars": 3,
+              "amount": 0
+            },
+            {
+              "stars": 4,
+              "amount": 1
+            },
+            {
+              "stars": 5,
+              "amount": 17
+            }
+          ],
+          "type": [
+            "Car rental agency"
+          ],
+          "type_ids": [
+            "car_rental_agency"
+          ],
+          "order_online": null,
+          "extensions": [
+            {
+              "accessibility": [
+                "Wheelchair accessible parking lot"
+              ]
+            },
+            {
+              "payments": [
+                "Credit cards",
+                "Debit cards",
+                "NFC mobile payments"
+              ]
+            }
+          ],
+          "unsupported_extensions": [],
+          "address": "1 Canada Square,Canary Wharf Estate, London,E14 5EW,United Kingdom",
+          "popular_times": {
+            "graph_results": {
+              "sunday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 97
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 85
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 85
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                }
+              ],
+              "monday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 28
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 34
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 80
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 34
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 22
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 34
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                }
+              ],
+              "tuesday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 88
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 91
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                }
+              ],
+              "wednesday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 91
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 80
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                }
+              ],
+              "thursday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 34
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 65
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                }
+              ],
+              "friday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 28
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 22
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 40
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 85
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 54
+                }
+              ],
+              "saturday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 80
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 45
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 34
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 57
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 34
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 42
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 100
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 77
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 60
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "0x487bb175429d7493:0x7a3b691a6a1a1938": {
+      "fetchedAt": 1778104293391,
+      "data": {
+        "title": "Palm Luxury Rentals",
+        "rating": 5,
+        "reviews": 58,
+        "ratingSummary": [
+          {
+            "stars": 1,
+            "amount": 0
+          },
+          {
+            "stars": 2,
+            "amount": 0
+          },
+          {
+            "stars": 3,
+            "amount": 0
+          },
+          {
+            "stars": 4,
+            "amount": 0
+          },
+          {
+            "stars": 5,
+            "amount": 58
+          }
+        ],
+        "phone": "+447460554398",
+        "address": "Aldow Enterprise Park,Manchester,M12 6EJ,United Kingdom",
+        "types": [
+          "Car rental agency",
+          "Car leasing service",
+          "Chauffeur service"
+        ],
+        "serviceOptions": {},
+        "extensions": [
+          {
+            "accessibility": [
+              "Wheelchair accessible parking lot"
+            ]
+          },
+          {
+            "payments": [
+              "Credit cards",
+              "Debit cards",
+              "NFC mobile payments"
+            ]
+          }
+        ],
+        "unsupportedExtensions": [],
+        "gps": {
+          "latitude": 53.4760314,
+          "longitude": -2.2197936
+        },
+        "_raw": {
+          "title": "Palm Luxury Rentals",
+          "data_id": "0x487bb175429d7493:0x7a3b691a6a1a1938",
+          "reviews_link": "https://api.scrapingdog.com/google_maps/reviews?api_key=69f25a7681a517f68da3fa71&data_id=0x487bb175429d7493:0x7a3b691a6a1a1938",
+          "photos_link": "https://api.scrapingdog.com/google_maps/photos?api_key=69f25a7681a517f68da3fa71&data_id=0x487bb175429d7493:0x7a3b691a6a1a1938",
+          "posts_link": "https://api.scrapingdog.com/google_maps/posts?api_key=69f25a7681a517f68da3fa71&data_id=0x487bb175429d7493:0x7a3b691a6a1a1938",
+          "place_id": "ChIJk3SdQnWxe0gROBkaahppO3o",
+          "rating": 5,
+          "reviews": 58,
+          "website": "https://www.palmluxuryrentals.com/",
+          "gps_coordinates": {
+            "latitude": 53.4760314,
+            "longitude": -2.2197936
+          },
+          "provider_id": "/g/11s65jztbw",
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAFO5gkKf3VRa7zu1Gwp4gMqkfshCgsmGeIDlAEDknVWYLbmaG5o2w4MtSrm2YQkiRH3lsQ77DKVU_ucA3oc3oKM_UfyQdoJwTNqKZtUJfWyCEaRs4oKdeiWDCUMP2UrQts80eWW=w86-h87-k-no",
+          "rating_summary": [
+            {
+              "stars": 1,
+              "amount": 0
+            },
+            {
+              "stars": 2,
+              "amount": 0
+            },
+            {
+              "stars": 3,
+              "amount": 0
+            },
+            {
+              "stars": 4,
+              "amount": 0
+            },
+            {
+              "stars": 5,
+              "amount": 58
+            }
+          ],
+          "type": [
+            "Car rental agency",
+            "Car leasing service",
+            "Chauffeur service"
+          ],
+          "type_ids": [
+            "car_rental_agency",
+            "car_leasing_service",
+            "chauffeur_service"
+          ],
+          "order_online": null,
+          "extensions": [
+            {
+              "accessibility": [
+                "Wheelchair accessible parking lot"
+              ]
+            },
+            {
+              "payments": [
+                "Credit cards",
+                "Debit cards",
+                "NFC mobile payments"
+              ]
+            }
+          ],
+          "unsupported_extensions": [],
+          "address": "Aldow Enterprise Park,Manchester,M12 6EJ,United Kingdom",
+          "phone": "+447460554398",
+          "popular_times": {
+            "graph_results": {
+              "sunday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 75
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                }
+              ],
+              "monday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 100
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 93
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 100
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 6
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                }
+              ],
+              "tuesday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 81
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 75
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                }
+              ],
+              "wednesday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 75
+                }
+              ],
+              "thursday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 93
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                }
+              ],
+              "friday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 87
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 81
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 12
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not busy",
+                  "busyness_score": 18
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                }
+              ],
+              "saturday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 31
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 75
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 81
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 50
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 37
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 62
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 68
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "0x47c609aaa941464b:0xb33ac31a1efdc171": {
+      "fetchedAt": 1778104460162,
+      "data": {
+        "title": "UFODRIVE",
+        "rating": 4.7,
+        "reviews": 83,
+        "ratingSummary": [
+          {
+            "stars": 1,
+            "amount": 3
+          },
+          {
+            "stars": 2,
+            "amount": 1
+          },
+          {
+            "stars": 3,
+            "amount": 0
+          },
+          {
+            "stars": 4,
+            "amount": 6
+          },
+          {
+            "stars": 5,
+            "amount": 73
+          }
+        ],
+        "phone": "",
+        "address": "Oosterdoksstraat 154,1011 DJ Amsterdam,Netherlands",
+        "types": [
+          "Car rental agency"
+        ],
+        "serviceOptions": {},
+        "extensions": [
+          {
+            "accessibility": [
+              "Wheelchair accessible entrance",
+              "Wheelchair accessible parking lot"
+            ]
+          },
+          {
+            "payments": [
+              "Credit cards",
+              "Debit cards",
+              "NFC mobile payments"
+            ]
+          },
+          {
+            "parking": [
+              "Free parking lot",
+              "Paid parking lot"
+            ]
+          }
+        ],
+        "unsupportedExtensions": [],
+        "gps": {
+          "latitude": 52.3765904,
+          "longitude": 4.9054834
+        },
+        "_raw": {
+          "title": "UFODRIVE",
+          "data_id": "0x47c609aaa941464b:0xb33ac31a1efdc171",
+          "reviews_link": "https://api.scrapingdog.com/google_maps/reviews?api_key=69f25a7681a517f68da3fa71&data_id=0x47c609aaa941464b:0xb33ac31a1efdc171",
+          "photos_link": "https://api.scrapingdog.com/google_maps/photos?api_key=69f25a7681a517f68da3fa71&data_id=0x47c609aaa941464b:0xb33ac31a1efdc171",
+          "posts_link": "https://api.scrapingdog.com/google_maps/posts?api_key=69f25a7681a517f68da3fa71&data_id=0x47c609aaa941464b:0xb33ac31a1efdc171",
+          "place_id": "ChIJS0ZBqaoJxkcRccH9HhrDOrM",
+          "rating": 4.7,
+          "reviews": 83,
+          "website": "https://www.ufodrive.com/en/locations/amsterdam-city-center",
+          "gps_coordinates": {
+            "latitude": 52.3765904,
+            "longitude": 4.9054834
+          },
+          "provider_id": "/g/11hds5zp44",
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEryx1MpVxdH93s7Yx6Kq9iCZWJVekjmsflJYxTxedvmlqfWAmPfD0ZasmT5ok7LqLR8NODD5KH1h2nDI1eZHNvHqhI5MXW3mvnUfyGIFe2y9MwHaAEBSk80GUdU8i38QfTKgY9=w86-h114-k-no",
+          "rating_summary": [
+            {
+              "stars": 1,
+              "amount": 3
+            },
+            {
+              "stars": 2,
+              "amount": 1
+            },
+            {
+              "stars": 3,
+              "amount": 0
+            },
+            {
+              "stars": 4,
+              "amount": 6
+            },
+            {
+              "stars": 5,
+              "amount": 73
+            }
+          ],
+          "type": [
+            "Car rental agency"
+          ],
+          "type_ids": [
+            "car_rental_agency"
+          ],
+          "order_online": null,
+          "extensions": [
+            {
+              "accessibility": [
+                "Wheelchair accessible entrance",
+                "Wheelchair accessible parking lot"
+              ]
+            },
+            {
+              "payments": [
+                "Credit cards",
+                "Debit cards",
+                "NFC mobile payments"
+              ]
+            },
+            {
+              "parking": [
+                "Free parking lot",
+                "Paid parking lot"
+              ]
+            }
+          ],
+          "unsupported_extensions": [],
+          "address": "Oosterdoksstraat 154,1011 DJ Amsterdam,Netherlands",
+          "popular_times": {
+            "graph_results": {
+              "sunday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 76
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 66
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                }
+              ],
+              "monday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 69
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 25
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 23
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 23
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                }
+              ],
+              "tuesday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 76
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 87
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 97
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 89
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 66
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 87
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 66
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 66
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 64
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 53
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 61
+                }
+              ],
+              "wednesday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 53
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 53
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 28
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 28
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 30
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                }
+              ],
+              "thursday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 53
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 61
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 61
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 61
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 33
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                }
+              ],
+              "friday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 61
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 61
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 66
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 51
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 79
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 64
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 53
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 48
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 35
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 64
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 76
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 66
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 56
+                }
+              ],
+              "saturday": [
+                {
+                  "time": "4 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 64
+                },
+                {
+                  "time": "5 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "6 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 92
+                },
+                {
+                  "time": "7 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "8 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 71
+                },
+                {
+                  "time": "9 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "10 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 74
+                },
+                {
+                  "time": "11 AM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 94
+                },
+                {
+                  "time": "12 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 100
+                },
+                {
+                  "time": "1 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 76
+                },
+                {
+                  "time": "2 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "3 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 41
+                },
+                {
+                  "time": "4 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "5 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 69
+                },
+                {
+                  "time": "6 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "7 PM",
+                  "info": "Usually as busy as it gets",
+                  "busyness_score": 82
+                },
+                {
+                  "time": "8 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "9 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 53
+                },
+                {
+                  "time": "10 PM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "11 PM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 64
+                },
+                {
+                  "time": "12 AM",
+                  "info": "Usually a little busy",
+                  "busyness_score": 58
+                },
+                {
+                  "time": "1 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 46
+                },
+                {
+                  "time": "2 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 43
+                },
+                {
+                  "time": "3 AM",
+                  "info": "Usually not too busy",
+                  "busyness_score": 38
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "0x48706a31db4ae329:0xe43df7625b4b6ece": {
+      "fetchedAt": 1778176644325,
+      "data": {
+        "title": "Wicked Van Hire",
+        "rating": 4.8,
+        "reviews": 93,
+        "ratingSummary": [
+          {
+            "stars": 1,
+            "amount": 4
+          },
+          {
+            "stars": 2,
+            "amount": 0
+          },
+          {
+            "stars": 3,
+            "amount": 1
+          },
+          {
+            "stars": 4,
+            "amount": 4
+          },
+          {
+            "stars": 5,
+            "amount": 84
+          }
+        ],
+        "phone": "+441584872398",
+        "address": "Yard & Unit,Weeping Cross Ln,Ludlow SY8 1JH,United Kingdom",
+        "types": [
+          "Van rental agency"
+        ],
+        "serviceOptions": {},
+        "extensions": [
+          {
+            "accessibility": [
+              "Wheelchair accessible entrance",
+              "Wheelchair accessible parking lot"
+            ]
+          },
+          {
+            "payments": [
+              "Credit cards",
+              "Debit cards",
+              "NFC mobile payments"
+            ]
+          }
+        ],
+        "unsupportedExtensions": [],
+        "gps": {
+          "latitude": 52.3665653,
+          "longitude": -2.7110327
+        },
+        "_raw": {
+          "title": "Wicked Van Hire",
+          "data_id": "0x48706a31db4ae329:0xe43df7625b4b6ece",
+          "reviews_link": "https://api.scrapingdog.com/google_maps/reviews?api_key=69f25a7681a517f68da3fa71&data_id=0x48706a31db4ae329:0xe43df7625b4b6ece",
+          "photos_link": "https://api.scrapingdog.com/google_maps/photos?api_key=69f25a7681a517f68da3fa71&data_id=0x48706a31db4ae329:0xe43df7625b4b6ece",
+          "posts_link": "https://api.scrapingdog.com/google_maps/posts?api_key=69f25a7681a517f68da3fa71&data_id=0x48706a31db4ae329:0xe43df7625b4b6ece",
+          "place_id": "ChIJKeNK2zFqcEgRzm5LW2L3PeQ",
+          "rating": 4.8,
+          "reviews": 93,
+          "website": "https://www.wickedvanhire.co.uk/",
+          "gps_coordinates": {
+            "latitude": 52.3665653,
+            "longitude": -2.7110327
+          },
+          "provider_id": "/g/1ydddkm1d",
+          "thumbnail": "https://lh3.googleusercontent.com/gps-cs-s/APNQkAEbjUn_oRA8A57sF5eiHyGzBB9A6U4z2zzZvyCxznHXhpn_-dp4_2q8edXSWK6fhQP3x6Wbb8zkjNj0U-RAQGmvwpdJUf-DetgORDD_kOWY_XD5shJDn5qnci5M08SpkYWYqzfRCQ=w152-h86-k-no",
+          "rating_summary": [
+            {
+              "stars": 1,
+              "amount": 4
+            },
+            {
+              "stars": 2,
+              "amount": 0
+            },
+            {
+              "stars": 3,
+              "amount": 1
+            },
+            {
+              "stars": 4,
+              "amount": 4
+            },
+            {
+              "stars": 5,
+              "amount": 84
+            }
+          ],
+          "type": [
+            "Van rental agency"
+          ],
+          "type_ids": [
+            "van_rental_agency"
+          ],
+          "order_online": null,
+          "extensions": [
+            {
+              "accessibility": [
+                "Wheelchair accessible entrance",
+                "Wheelchair accessible parking lot"
+              ]
+            },
+            {
+              "payments": [
+                "Credit cards",
+                "Debit cards",
+                "NFC mobile payments"
+              ]
+            }
+          ],
+          "unsupported_extensions": [],
+          "address": "Yard & Unit,Weeping Cross Ln,Ludlow SY8 1JH,United Kingdom",
+          "phone": "+441584872398",
+          "hours": [
+            {
+              "Thursday": "8 AM–5 PM"
+            },
+            {
+              "Friday": "8 AM–5 PM"
+            },
+            {
+              "Saturday": "8 AM–1 PM"
+            },
+            {
+              "Sunday": "Closed"
+            },
+            {
+              "Monday": "8 AM–5 PM"
+            },
+            {
+              "Tuesday": "8 AM–5 PM"
+            },
+            {
+              "Wednesday": "8 AM–5 PM"
+            }
+          ],
+          "open_state": "Thursday"
+        }
+      }
+    }
+  }
+}

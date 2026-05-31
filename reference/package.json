@@ -1,0 +1,16 @@
+{
+  "name": "bluebird-sourcing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lead finding",
+  "scripts": {
+    "find-leads": "node find-leads.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

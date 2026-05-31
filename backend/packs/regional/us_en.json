@@ -1,0 +1,50 @@
+{
+  "pack_id": "us_en",
+  "version": "1.0.0",
+  "display_name": "United States (English)",
+  "language": "en",
+  "locale": "en-US",
+  "country_code": "US",
+  "timezone": "America/New_York",
+  "currency": "USD",
+  "currency_symbol": "$",
+
+  "tone": {
+    "formality": "informal",
+    "directness": "high",
+    "humor": "light",
+    "relationship_style": "transactional_to_friendly",
+    "notes": "Americans respond to direct value statements and specific numbers. Lead with ROI. Use contractions freely. First-name basis from the first email. Keep emails under 120 words. Get to the point in sentence 2."
+  },
+
+  "scheduling": {
+    "nager_country_code": "US",
+    "no_send_days_of_week": [5, 6],
+    "no_send_hours_start": 18,
+    "no_send_hours_end": 8,
+    "best_send_windows": ["Tue 10:00-11:30", "Wed 14:00-15:30", "Thu 10:00-11:30"],
+    "blackout_periods": [
+      {"name": "US Thanksgiving Week", "description": "Low open rates — most operators offline"},
+      {"name": "Christmas to New Year", "description": "Dec 23 – Jan 2 industry quiet period"},
+      {"name": "July 4th Week", "description": "Peak summer rental season — operators are heads-down, not checking email"}
+    ]
+  },
+
+  "localization": {
+    "date_format": "MM/DD/YYYY",
+    "number_format": "1,000.00",
+    "greeting_style": "Hi {first_name},",
+    "sign_off": "Best,",
+    "units": "imperial",
+    "measurement_notes": "Use miles, gallons, and USD. Fleet size in number of vehicles."
+  },
+
+  "compliance": {
+    "opt_out_language": "To unsubscribe, reply STOP or click here.",
+    "required_footer": "You're receiving this because you operate a car rental business in the US. We respect your inbox.",
+    "relevant_law": "CAN-SPAM",
+    "notes": "Include physical address in footer. One-click unsubscribe required."
+  },
+
+  "cultural_notes": "US car rental operators tend to be owner-operated, especially regional and multi-location independents. Many are family businesses — this is a strong emotional hook. Summer (Memorial Day through Labor Day) and major holidays are peak periods; avoid outreach in the week leading up to them as operators are heads-down managing fleet and staffing."
+}

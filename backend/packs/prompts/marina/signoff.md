@@ -1,0 +1,1 @@
+Sign off with first name + a single short line about being available "when the marina has bandwidth". Avoid corporate signoffs ("Best regards"); marinas read those as cold-template. Never include phone numbers in the signoff — voice is reserved for explicit follow-up.

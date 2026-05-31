@@ -1,0 +1,29 @@
+{
+  "cambridge": {
+    "key": "cambridge",
+    "label": "Cambridge, England",
+    "country": "UK",
+    "domain": "google.co.uk",
+    "language": "en",
+    "lat": 52.2055314,
+    "lng": 0.1186637,
+    "ll": "@52.2055314,0.1186637,12z",
+    "metro_radius_km": 20,
+    "geocoded": true,
+    "geocodeSource": "photon",
+    "photonProps": {
+      "osm_type": "N",
+      "osm_id": 20971094,
+      "osm_key": "place",
+      "osm_value": "city",
+      "type": "district",
+      "name": "Cambridge",
+      "city": "Cambridge",
+      "county": "Cambridgeshire",
+      "state": "England",
+      "country": "United Kingdom",
+      "postcode": "CB2 3NR",
+      "countrycode": "GB"
+    }
+  }
+}
