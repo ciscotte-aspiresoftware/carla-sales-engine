@@ -1,4 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
+// Always use a relative path — Next.js rewrites proxy /api/v1/* to the
+// backend (see next.config.ts). This works in both dev (→ localhost:8000)
+// and production (→ Railway via BACKEND_URL env var).
+const BASE_URL = "/api/v1"
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
