@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./aspire_demo.db"
     packs_dir: str = "./packs"
     environment: str = "development"
+    allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
