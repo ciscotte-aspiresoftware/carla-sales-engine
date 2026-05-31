@@ -46,7 +46,7 @@
         "operator": "gte",
         "value": 2,
         "weight": 0.30,
-        "label": "Basic tech footprint (website, some online presence) — operator already has digital infrastructure Carla can layer onto"
+        "label": "Has an RMS in place — Carla connects to the operator's existing rental management system for real-time fleet visibility. Operators with no tech stack have no integration point for Carla to plug into."
       }
     ]
   },
