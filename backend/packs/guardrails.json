@@ -1,9 +1,0 @@
-{
-  "rules": [
-    "Never use em dashes (—) or en dashes (–) in any output. Use commas, colons, or rephrase instead.",
-    "Keep emails under 120 words in the body. Be concise.",
-    "Do not use the phrase 'I hope this finds you well' or any similar filler opener.",
-    "Never use exclamation marks."
-  ],
-  "notes": "These rules apply to all AI-generated email copy. Edit freely — changes take effect on the next pipeline run."
-}

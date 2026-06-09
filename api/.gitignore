@@ -1,0 +1,10 @@
+# Runtime data now lives in Supabase (USE_SUPABASE=true). These JSON stores
+# are the local-dev fallback only and can contain scraped lead/company data,
+# so keep them out of git. The static seed datasets + config are re-included
+# below (the seeder needs airports/populated-places to bootstrap a fresh box).
+data/*
+!data/airports.json
+!data/populated-places.json
+!data/icps.json
+!data/email-templates.json
+# scrape-cache/ is a subdir under data/ - covered by `data/*`, stays ignored.

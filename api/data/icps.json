@@ -1,0 +1,390 @@
+[
+  {
+    "id": "bluebird",
+    "name": "Bluebird Auto Rental",
+    "vertical": "Car Rental",
+    "portfolioCompany": "Bluebird Auto Rental Systems",
+    "countries": [
+      "UK"
+    ],
+    "searchTerms": [
+      "car rental",
+      "vehicle hire",
+      "auto rental"
+    ],
+    "cities": [
+      "London",
+      "Cambridge",
+      "Manchester"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": true,
+      "airports": true
+    },
+    "targetDescription": "an independent car rental or vehicle-hire business",
+    "customerTypes": [
+      "consumers",
+      "small businesses"
+    ],
+    "excludeTypes": [
+      "national chains",
+      "peer-to-peer marketplaces",
+      "listing or comparison sites"
+    ],
+    "excludeCompanies": [
+      "Hertz",
+      "Enterprise",
+      "Avis",
+      "Budget",
+      "Sixt",
+      "Turo",
+      "Getaround"
+    ],
+    "extraNotes": "",
+    "classifyPrompt": "Is this an independent car rental or vehicle-hire business serving consumers and small businesses? Skip national chains, peer-to-peer marketplaces, and listing or comparison sites, and specific companies like Hertz, Enterprise, Avis, Budget, Sixt, Turo, and Getaround. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "useCustomPrompt": false
+  },
+  {
+    "id": "thermeon",
+    "name": "Thermeon",
+    "vertical": "Car Rental",
+    "searchTerms": [
+      "car rental",
+      "vehicle hire",
+      "fleet rental"
+    ],
+    "cities": [
+      "London",
+      "Manchester",
+      "Birmingham",
+      "Edinburgh"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": false,
+      "rural": false,
+      "airports": true
+    },
+    "targetDescription": "an established mid-market car rental or vehicle-hire business with a fleet of 10+ vehicles, ideally with multi-location operations",
+    "customerTypes": [
+      "business travelers",
+      "corporate accounts",
+      "leisure travelers"
+    ],
+    "excludeTypes": [
+      "national chains",
+      "peer-to-peer marketplaces",
+      "listing or comparison sites",
+      "single-vehicle / hobbyist operators"
+    ],
+    "excludeCompanies": [
+      "Hertz",
+      "Enterprise",
+      "Avis",
+      "Budget",
+      "Sixt",
+      "Europcar",
+      "Turo",
+      "Getaround"
+    ],
+    "extraNotes": "Prefer operators that have been in business 5+ years and serve corporate/business travel customers, not just leisure self-drive. Multi-branch operations are a plus.",
+    "classifyPrompt": "Is this an established mid-market car rental or vehicle-hire business with a fleet of 10+ vehicles, ideally with multi-location operations serving business travelers, corporate accounts, and leisure travelers? Skip national chains, peer-to-peer marketplaces, listing or comparison sites, and single-vehicle / hobbyist operators, and specific companies like Hertz, Enterprise, Avis, Budget, Sixt, Europcar, Turo, and Getaround. Prefer operators that have been in business 5+ years and serve corporate/business travel customers, not just leisure self-drive. Multi-branch operations are a plus. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "portfolioCompany": "Thermeon",
+    "countries": [
+      "UK"
+    ]
+  },
+  {
+    "id": "nedfox-garden",
+    "name": "NedFox - Garden Centres",
+    "vertical": "Garden Centre",
+    "portfolioCompany": "NedFox",
+    "countries": [
+      "NL",
+      "UK",
+      "IE",
+      "BE"
+    ],
+    "searchTerms": [
+      "tuincentrum",
+      "tuincentrum kassa",
+      "tuincentrum software",
+      "plantenwinkel",
+      "garden centre POS"
+    ],
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "Utrecht",
+      "Eindhoven",
+      "Emmeloord",
+      "London",
+      "Dublin",
+      "Brussels",
+      "Antwerp"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": false,
+      "airports": false
+    },
+    "targetDescription": "an independent garden centre or plant nursery - a brick-and-mortar retailer selling plants, gardening supplies, and outdoor living products",
+    "customerTypes": [
+      "family-owned garden centres",
+      "independent plant nurseries",
+      "small specialty horticulture chains"
+    ],
+    "excludeTypes": [
+      "mass-market chains and big-box DIY stores that happen to sell plants",
+      "pure e-commerce with no physical store",
+      "wholesale-only growers without a retail operation",
+      "listing or comparison sites"
+    ],
+    "excludeCompanies": [
+      "Intratuin",
+      "Tuincentrum.nl",
+      "Welkoop",
+      "GAMMA",
+      "B&Q",
+      "Homebase",
+      "Wickes",
+      "Dobbies"
+    ],
+    "extraNotes": "Independent and family-owned are the priority. Multi-location operations are fine if they look independent (not a national chain). Dutch-language sites are expected - judge by the business model, not the language.",
+    "classifyPrompt": "Is this an independent garden centre or plant nursery - a brick-and-mortar retailer selling plants, gardening supplies, and outdoor living products serving family-owned garden centres, independent plant nurseries, and small specialty horticulture chains? Skip mass-market chains and big-box DIY stores that happen to sell plants, pure e-commerce with no physical store, wholesale-only growers without a retail operation, and listing or comparison sites, and specific companies like Intratuin, Tuincentrum.nl, Welkoop, GAMMA, B&Q, Homebase, Wickes, and Dobbies. Independent and family-owned are the priority. Multi-location operations are fine if they look independent (not a national chain). Dutch-language sites are expected - judge by the business model, not the language. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "useCustomPrompt": false,
+    "reportEnabled": true,
+    "reportTemplate": "## Overview\nA 2-3 sentence summary of what this business does.\n\n## Products & Services\nWhat they sell or offer, and any specialties or niche focus.\n\n## Size & Scale\nIndicators of size - number of locations, staff, years in business, anything the site reveals.\n\n## Fit for this ICP\nWhy this company is a strong fit for our product, grounded in what the website actually shows.\n\n## Notable Signals\nAnything else worth flagging - recent news, expansion, ownership, technology hints, partnerships."
+  },
+  {
+    "id": "nedfox-thrift",
+    "name": "NedFox - Thrift Stores",
+    "vertical": "Thrift Store",
+    "portfolioCompany": "NedFox",
+    "searchTerms": [
+      "kringloopwinkel",
+      "kringloopcentrum",
+      "tweedehands winkel",
+      "thrift store",
+      "charity shop",
+      "second-hand store"
+    ],
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "Utrecht",
+      "Eindhoven",
+      "London",
+      "Dublin",
+      "Brussels",
+      "Antwerp"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": false,
+      "airports": false
+    },
+    "targetDescription": "an independent thrift store, second-hand store, or charity shop selling donated goods to the public",
+    "customerTypes": [
+      "independent charity shops",
+      "small thrift store chains",
+      "community-run kringloopwinkels"
+    ],
+    "excludeTypes": [
+      "antique dealers (different POS needs)",
+      "consignment-only operations",
+      "pure e-commerce",
+      "auction houses"
+    ],
+    "excludeCompanies": [
+      "Oxfam",
+      "British Red Cross",
+      "Cancer Research UK",
+      "Salvation Army"
+    ],
+    "extraNotes": "Independent and small chains preferred. Charity shops in the UK and kringloopwinkels in NL are the same model with different naming.",
+    "classifyPrompt": "Is this an independent thrift store, second-hand store, or charity shop selling donated goods to the public serving independent charity shops, small thrift store chains, and community-run kringloopwinkels? Skip antique dealers (different POS needs), consignment-only operations, pure e-commerce, and auction houses, and specific companies like Oxfam, British Red Cross, Cancer Research UK, and Salvation Army. Independent and small chains preferred. Charity shops in the UK and kringloopwinkels in NL are the same model with different naming. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "countries": [
+      "NL",
+      "UK",
+      "IE",
+      "BE"
+    ]
+  },
+  {
+    "id": "nedfox-camping",
+    "name": "NedFox - Camping & Outdoor",
+    "vertical": "Camping & Outdoor",
+    "portfolioCompany": "NedFox",
+    "searchTerms": [
+      "kampeerwinkel",
+      "kampeerzaak",
+      "outdoor winkel",
+      "camping store",
+      "outdoor store",
+      "camping shop"
+    ],
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "Utrecht",
+      "Eindhoven",
+      "London",
+      "Dublin",
+      "Brussels"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": false,
+      "airports": false
+    },
+    "targetDescription": "an independent camping, outdoor, or adventure-sports retailer selling tents, hiking gear, camping equipment, and related outdoor goods",
+    "customerTypes": [
+      "independent camping retailers",
+      "small outdoor specialty chains",
+      "family-owned outdoor stores"
+    ],
+    "excludeTypes": [
+      "big-box outdoor chains",
+      "department stores with an outdoor section",
+      "pure e-commerce",
+      "sports general retailers (broader than camping)"
+    ],
+    "excludeCompanies": [
+      "Decathlon",
+      "Bever",
+      "Cotswold Outdoor",
+      "Snow + Rock",
+      "GO Outdoors",
+      "Blacks"
+    ],
+    "extraNotes": "Independent specialists. Volume per customer in this niche is high (3 customers = 6% of NedFox ARR), so quality of fit matters more than quantity of leads.",
+    "classifyPrompt": "Is this an independent camping, outdoor, or adventure-sports retailer selling tents, hiking gear, camping equipment, and related outdoor goods serving independent camping retailers, small outdoor specialty chains, and family-owned outdoor stores? Skip big-box outdoor chains, department stores with an outdoor section, pure e-commerce, and sports general retailers (broader than camping), and specific companies like Decathlon, Bever, Cotswold Outdoor, Snow + Rock, GO Outdoors, and Blacks. Independent specialists. Volume per customer in this niche is high (3 customers = 6% of NedFox ARR), so quality of fit matters more than quantity of leads. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}.",
+    "countries": [
+      "NL",
+      "UK",
+      "IE",
+      "BE"
+    ]
+  },
+  {
+    "id": "nedfox-personal-care",
+    "name": "NedFox - Personal Care",
+    "vertical": "Personal Care Retail",
+    "portfolioCompany": "NedFox",
+    "countries": [
+      "NL",
+      "UK",
+      "IE",
+      "BE"
+    ],
+    "searchTerms": [
+      "drogisterij",
+      "parfumerie",
+      "schoonheidssalon",
+      "beautysalon",
+      "beauty store",
+      "cosmetics shop",
+      "pharmacy retail"
+    ],
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "Utrecht",
+      "Eindhoven",
+      "London",
+      "Brussels"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": false,
+      "airports": false
+    },
+    "targetDescription": "an independent personal-care retailer - beauty store, parfumerie, drogisterij, or specialty cosmetics shop with a physical store and its own POS or retail-management software",
+    "customerTypes": [
+      "independent beauty retailers",
+      "family-owned drogisterijen",
+      "small specialty cosmetics chains"
+    ],
+    "excludeTypes": [
+      "mass-market chains",
+      "pure e-commerce / no physical store",
+      "pharmacies (rx-focused, different POS needs)",
+      "listing or comparison sites"
+    ],
+    "excludeCompanies": [
+      "Kruidvat",
+      "Etos",
+      "Trekpleister",
+      "DA",
+      "Boots",
+      "Superdrug"
+    ],
+    "extraNotes": "Independent + family-owned focus. The NL term 'drogisterij' is the closest local equivalent to a personal-care retailer; in BE/UK the equivalents differ in framing.",
+    "classifyPrompt": "Is this an independent personal-care retailer - beauty store, parfumerie, drogisterij, or specialty cosmetics shop with a physical store and its own POS or retail-management software serving independent beauty retailers, family-owned drogisterijen, and small specialty cosmetics chains? Skip mass-market chains, pure e-commerce / no physical store, pharmacies (rx-focused, different POS needs), and listing or comparison sites, and specific companies like Kruidvat, Etos, Trekpleister, DA, Boots, and Superdrug. Independent + family-owned focus. The NL term 'drogisterij' is the closest local equivalent to a personal-care retailer; in BE/UK the equivalents differ in framing. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}."
+  },
+  {
+    "id": "nedfox-bathroom",
+    "name": "NedFox - Bathroom Stores",
+    "vertical": "Bathroom Retail",
+    "portfolioCompany": "NedFox",
+    "countries": [
+      "NL",
+      "UK",
+      "IE",
+      "BE"
+    ],
+    "searchTerms": [
+      "badkamerwinkel",
+      "sanitair winkel",
+      "tegelhandel",
+      "tegelwinkel",
+      "bathroom store",
+      "bathroom showroom",
+      "tile store"
+    ],
+    "cities": [
+      "Amsterdam",
+      "Rotterdam",
+      "Utrecht",
+      "Eindhoven",
+      "London",
+      "Brussels"
+    ],
+    "coverage": {
+      "urban": true,
+      "suburban": true,
+      "rural": false,
+      "airports": false
+    },
+    "targetDescription": "an independent bathroom showroom, sanitair specialist, or tile retailer with a physical store",
+    "customerTypes": [
+      "independent bathroom showrooms",
+      "family-owned sanitair retailers",
+      "small tile-store chains"
+    ],
+    "excludeTypes": [
+      "big-box DIY chains",
+      "pure plumbing wholesalers (no retail showroom)",
+      "pure e-commerce",
+      "listing or comparison sites"
+    ],
+    "excludeCompanies": [
+      "B&Q",
+      "Wickes",
+      "Homebase",
+      "Praxis",
+      "GAMMA",
+      "Karwei",
+      "Hornbach"
+    ],
+    "extraNotes": "Specialty showrooms preferred over generic DIY. Bathroom + tile + sanitair are adjacent niches with overlapping POS needs - group them.",
+    "classifyPrompt": "Is this an independent bathroom showroom, sanitair specialist, or tile retailer with a physical store serving independent bathroom showrooms, family-owned sanitair retailers, and small tile-store chains? Skip big-box DIY chains, pure plumbing wholesalers (no retail showroom), pure e-commerce, and listing or comparison sites, and specific companies like B&Q, Wickes, Homebase, Praxis, GAMMA, Karwei, and Hornbach. Specialty showrooms preferred over generic DIY. Bathroom + tile + sanitair are adjacent niches with overlapping POS needs - group them. Reply with JSON: {\"is_match\": true|false, \"reason\": \"<one sentence>\"}."
+  }
+]

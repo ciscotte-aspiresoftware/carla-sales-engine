@@ -1,0 +1,52 @@
+# Render blueprint for the Atlas (Bluebird) Express backend.
+# Import via Render dashboard → New → Blueprint, point at this repo.
+# Secrets (sync:false) are NOT stored here — set them in the Render dashboard.
+#
+# The frontend (Vite SPA) deploys separately on Vercel; this file is backend
+# only. The backend needs an always-on Node host because of the 5s sweep cron
+# + Socket.IO — it cannot run on Vercel serverless.
+services:
+  - type: web
+    name: atlas-api
+    runtime: node
+    rootDir: api            # the repo root holds /api (Express) and /web (Vite)
+    region: ohio            # colocate with the Supabase project (us-east-2)
+    plan: free              # NOTE: free spins down after ~15m idle (cold starts;
+                            # the frontend's safe-fetch retries handle this).
+                            # Bump to a paid plan for unattended overnight sweeps.
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # ─── Persistence: flip Atlas onto Postgres (else it falls back to JSON,
+      #     which is lost on every Render restart) ───────────────────────────
+      - key: USE_SUPABASE
+        value: "true"
+      - key: SUPABASE_URL
+        value: https://zuxnpsrxscyjrrlvqcch.supabase.co
+      - key: SUPABASE_SERVICE_KEY      # service-role secret — server only
+        sync: false
+      # ─── External API keys (user-supplied; demo stubs run until set) ───────
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SCRAPINGDOG_API_KEY
+        sync: false
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: APIFY_API_TOKEN
+        sync: false
+      # ─── Runtime tunables ─────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      # Sweep cron tick. Default in code is 5s; 10 min is safer for production
+      # credit spend. Set to 0 to disable the auto-sweep loop entirely.
+      - key: BLUEBIRD_SWEEP_TICK_MS
+        value: "600000"
+      # Optional: gate POST /api/discover with x-api-key / Bearer. Leave unset
+      # to keep the endpoint open. If set, mirror it into the Vercel frontend
+      # as VITE_DISCOVER_API_KEY.
+      # - key: DISCOVER_API_KEY
+      #   sync: false

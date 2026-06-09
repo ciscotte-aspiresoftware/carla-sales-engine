@@ -1,46 +1,28 @@
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.Python
-.venv/
-venv/
-env/
-*.egg-info/
-dist/
-build/
-
-# Environment / secrets
+node_modules/
 .env
 .env.local
-.env.*.local
-backend/.env
-
-# Node
-node_modules/
-.next/
-.nuxt/
-out/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Logs
+.env.production
+.env.development
+output/
 *.log
-npm-debug.log*
-
-# DB
-*.sqlite
-*.db
-
-# OS
+.DS_Store
 Thumbs.db
+
+# Runtime / sweep state - clones start fresh (or use Supabase). The app
+# creates these on first run when USE_SUPABASE=false.
+api/data/companies.json
+api/data/sources.json
+api/data/grid.json
+api/data/search-log.json
+api/data/geocoded-cities.json
+api/data/mode.json
+
+# Frontend artifacts + env (web/ also has its own .gitignore for defence in depth)
+web/node_modules/
+web/dist/
+web/.vite/
+web/.env
+web/.env.local
+web/.env.production
+web/.env.development
+web/tsconfig.tsbuildinfo

@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+  }
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+  }
+
+  * { border-color: hsl(var(--border)); }
+  /* Body intentionally has NO background - the photo backdrop in App.tsx
+     sits at position:fixed -z-10, and any opaque body/html background
+     paints over it and hides it. The body's color (text default) is still
+     set so foreground text reads correctly before the photo loads. */
+  html, body {
+    background-color: transparent;
+  }
+  body {
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ─── Plain-background mode ─────────────────────────────────────────────
+   When the user opts out of the photo backdrop the glass cards lose their
+   refraction anchor - the translucent fills and white-on-white borders
+   that pop against a complex photo disappear entirely against flat
+   white/black. Lift each card surface a notch and trade the white-tinted
+   border for a theme-appropriate neutral so panels still read as
+   distinct. Scoped to html.bg-plain so the photo path stays untouched. */
+html.bg-plain .bg-white\/55,
+html.bg-plain .bg-white\/45,
+html.bg-plain .bg-white\/30 {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+html.bg-plain.dark .dark\:bg-white\/\[0\.02\],
+html.bg-plain.dark .dark\:bg-white\/\[0\.03\],
+html.bg-plain.dark .dark\:bg-white\/\[0\.04\],
+html.bg-plain.dark .dark\:bg-white\/\[0\.05\],
+html.bg-plain.dark .dark\:bg-white\/\[0\.06\] {
+  background-color: rgba(30, 41, 59, 0.7);
+}
+html.bg-plain .border-white\/40,
+html.bg-plain .border-white\/35,
+html.bg-plain .border-white\/30 {
+  border-color: rgba(15, 23, 42, 0.10);
+}
+html.bg-plain.dark .dark\:border-white\/10,
+html.bg-plain.dark .dark\:border-white\/\[0\.08\] {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ─── Glass-morphism background blobs ────────────────────────────────────
+   Same animated blobs valsource's dashboard uses, but driven by pure CSS
+   (no background image). Three drifting gradient orbs blurred behind the
+   page give the glass cards something interesting to refract against in
+   both light and dark mode. */
+.bb-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  opacity: 0.32;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.bb-blob-sky {
+  top: -10%;
+  left: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.55), transparent 70%);
+  animation: bb-drift-a 22s ease-in-out infinite alternate;
+}
+.bb-blob-indigo {
+  bottom: -15%;
+  right: -10%;
+  width: 55vw;
+  height: 55vw;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.55), transparent 70%);
+  animation: bb-drift-b 26s ease-in-out infinite alternate;
+}
+.bb-blob-emerald {
+  top: 30%;
+  left: 40%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.32), transparent 70%);
+  animation: bb-drift-c 30s ease-in-out infinite alternate;
+}
+@keyframes bb-drift-a {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(8vw, 6vh) scale(1.15); }
+}
+@keyframes bb-drift-b {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-6vw, -4vh) scale(1.2); }
+}
+@keyframes bb-drift-c {
+  0% { transform: translate(0, 0) scale(0.9); }
+  100% { transform: translate(-4vw, 5vh) scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bb-blob { animation: none; }
+}
+
+/* Subtle card-fade-in for staggered reveal on page mount. */
+@keyframes bb-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.bb-card-in {
+  animation: bb-card-in 320ms ease-out both;
+}
+
+/* Coverage globe cell markers. Each cell is a small DOM div positioned
+   on the globe surface via react-globe.gl. State drives color:
+   - pending:  sky, subtle
+   - scanning: red, pulsing (the "we're scanning this right now" cue)
+   - complete: emerald, solid
+   - empty:    gray, very subtle
+   - selected: white ring around whichever state color */
+.coverage-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: width 200ms, height 200ms, background-color 250ms, box-shadow 250ms;
+  pointer-events: auto;
+  border: 1px solid transparent;
+}
+.coverage-cell:hover {
+  width: 16px;
+  height: 16px;
+  z-index: 10;
+}
+.coverage-cell-pending {
+  background: rgba(125, 211, 252, 0.65);   /* sky-300 */
+  border-color: rgba(125, 211, 252, 0.85);
+}
+.coverage-cell-scanning {
+  background: rgba(248, 113, 113, 0.85);   /* red-400 */
+  border-color: rgba(248, 113, 113, 1);
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
+  animation: coverage-pulse 1.4s ease-in-out infinite;
+}
+.coverage-cell-complete {
+  background: rgba(74, 222, 128, 0.90);    /* emerald-400 */
+  border-color: rgba(74, 222, 128, 1);
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.50);
+}
+.coverage-cell-empty {
+  background: rgba(148, 163, 184, 0.40);   /* slate-400 */
+  border-color: rgba(148, 163, 184, 0.55);
+  width: 8px;
+  height: 8px;
+}
+.coverage-cell-empty:hover {
+  width: 12px;
+  height: 12px;
+}
+.coverage-cell-selected {
+  outline: 2px solid #f8fafc;
+  outline-offset: 2px;
+  z-index: 20;
+}
+
+/* Tier-2 = country-fill cells. Smaller and dimmer than Tier-1 metro
+   sub-cells so the dense city clusters stay the visual focus. The
+   active/scanning cue still animates so the user can see the cron
+   chewing through countryside cells overnight. */
+.coverage-cell-tier2 {
+  width: 7px;
+  height: 7px;
+  opacity: 0.78;
+}
+.coverage-cell-tier2:hover {
+  width: 11px;
+  height: 11px;
+  opacity: 1;
+}
+.coverage-cell-tier2.coverage-cell-empty {
+  width: 5px;
+  height: 5px;
+  opacity: 0.45;
+}
+
+@keyframes coverage-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(248, 113, 113, 0.9), 0 0 22px rgba(248, 113, 113, 0.4);
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coverage-cell-scanning { animation: none; }
+}
+
+/* ─── Coverage MAP (Leaflet) cell markers ────────────────────────────────
+   Applied to the SVG <path> elements Leaflet renders for each CircleMarker
+   via `pathOptions.className`. The pulse keyframe just oscillates fill
+   opacity - works reliably on SVG without fighting Leaflet's transforms. */
+.cm-cell {
+  transition: fill-opacity 250ms;
+  cursor: pointer;
+}
+.cm-cell-pulse {
+  animation: cm-pulse 1.2s ease-in-out infinite;
+}
+@keyframes cm-pulse {
+  0%, 100% { fill-opacity: 0.55; stroke-opacity: 1; }
+  50%      { fill-opacity: 0.95; stroke-opacity: 0.4; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cm-cell-pulse { animation: none; }
+}
+
+/* Leaflet's default panes have a white background - clashes with our dark
+   glass card. Turn the wrapper transparent so the card frame shows through
+   between tile fetches and around the map edges. */
+.leaflet-container {
+  background: transparent;
+}
+
+@keyframes nm-burst {
+  0%   { transform: translate(0, 0) scale(1);   opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.5); opacity: 0; }
+}
+.nm-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  top: 50%;
+  left: 50%;
+  margin: -3px 0 0 -3px;
+  animation: nm-burst var(--dur, 900ms) ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+  pointer-events: none;
+  box-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
+}
+.nm-burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nm-particle { animation: none; opacity: 0; }
+}

@@ -1,1 +1,0 @@
-Open with first name + a one-liner that anchors to a fleet-management or counter-time pain point. Car rental GMs respond to specific operational angles ("counter time per transaction", "fleet utilisation gaps") — vague openers ("Hope you're well") get archived.

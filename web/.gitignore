@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.vite/
+tsconfig.tsbuildinfo
+
+# Env files - VITE_* values are baked into the bundle at build time, so
+# do NOT ship a populated .env.production to a public repo. The .env.example
+# is the shareable template.
+.env
+.env.local
+.env.production
+.env.development
+
+*.log
+.DS_Store
+Thumbs.db
