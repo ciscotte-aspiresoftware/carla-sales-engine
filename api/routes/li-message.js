@@ -15,7 +15,7 @@
 
 const express = require('express');
 const { chat } = require('../utils/openai');
-const { scrapeLinkedInProfile, scrapeRecentPosts, summarizeProfile } = require('../utils/linkedin');
+const { scrapeLinkedInProfile, scrapeRecentPosts, summarizeProfile, isUsefulLiSummary, hasUsefulPosts, describeLiSummary } = require('../utils/linkedin');
 const { buildEmailPrompt } = require('../prompts/email');
 const { getSender } = require('../senders');
 const { upsertLeadInCompany, readAll } = require('./companies');
@@ -78,9 +78,14 @@ router.post('/scrape', async (req, res) => {
             return res.status(500).json({ success: false, error: 'APIFY_API_TOKEN is not configured' });
         }
 
-        // Cache hit: existing-lead mode and the cached scrape is < 30 days old.
+        // Cache hit: existing-lead mode and the cached scrape is < 30 days
+        // old AND the cached content is actually populated. Without the
+        // isUsefulLiSummary / hasUsefulPosts gate a previously-blocked
+        // Apify response (empty-string fields) would satisfy `leadRec.
+        // liSummary` and the route would serve generic data back to the
+        // rep as if it were a real scrape - same bug we fixed in /api/email.
         if (mode_existingLead && leadRec.liScrapedAt && (Date.now() - leadRec.liScrapedAt) < LINKEDIN_CACHE_MAX_AGE_MS) {
-            const hasData = leadRec.liSummary || (Array.isArray(leadRec.liPosts) && leadRec.liPosts.length > 0);
+            const hasData = isUsefulLiSummary(leadRec.liSummary) || hasUsefulPosts(leadRec.liPosts);
             if (hasData) {
                 const ageDays = Math.round((Date.now() - leadRec.liScrapedAt) / (24 * 60 * 60 * 1000));
                 console.log(`[LI Message] cache hit (${ageDays}d) for apolloId=${apolloId} - skipping re-scrape`);
@@ -121,7 +126,21 @@ router.post('/scrape', async (req, res) => {
         if (!profileSummary) {
             return res.status(502).json({ success: false, error: 'Could not scrape LinkedIn profile' });
         }
+        // If the scrape technically returned a summary object but every
+        // field is blank (Apify partial / anti-bot), surface the empty
+        // result to the caller AND skip persistence - otherwise an empty
+        // shell would land in companies.json and short-circuit the next
+        // 30 days of re-scrape attempts on this lead.
+        const summaryUseful = isUsefulLiSummary(profileSummary);
         const posts = Array.isArray(postsResult) ? postsResult : [];
+        const postsUseful = hasUsefulPosts(posts);
+        if (!summaryUseful && !postsUseful) {
+            console.warn(`[LI Message] scrape returned empty (profile=${describeLiSummary(profileSummary)}, posts=${posts.length}) - not persisting`);
+            return res.status(502).json({
+                success: false,
+                error: 'LinkedIn scrape came back empty - Apify may be throttled on this URL. Try again in a few minutes.',
+            });
+        }
 
         // Existing-lead mode: persist back so subsequent regenerates skip Apify.
         let updatedLead = leadRec;

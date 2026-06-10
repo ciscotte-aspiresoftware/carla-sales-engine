@@ -99,16 +99,24 @@ const DEFAULTS = {
         // classifier without paying for a stronger email writer, or vice
         // versa. Both default to mini for cost; gpt-4o is ~10× more per
         // token; gpt-5 is the highest quality / highest cost option.
-        // Classify = used by Email Gen URL-classify, Coverage sweep
-        //            classify, and the ICP Reclassify flow.
-        // Email    = used by Email Gen email-draft + LI Message email.
-        // Report   = used by the per-ICP markdown company report. Defaults
-        //            to gpt-4o (not mini) because reports are read by humans
-        //            and benefit from the stronger model; the binary
-        //            classify stays on mini for cost.
+        // Classify       = used by Email Gen URL-classify, Coverage sweep
+        //                  classify, the ICP Reclassify flow (verdict only).
+        // Email          = used by Email Gen email-draft + LI Message + sequences.
+        // Report         = used by the per-ICP markdown company report. Defaults
+        //                  to gpt-4o (not mini) because reports are read by humans
+        //                  and benefit from the stronger model; the binary
+        //                  classify stays on mini for cost.
+        // ICP automation = used by the ICP wizard's editorial calls (generate
+        //                  from description, regen section, rewrite classify
+        //                  prompt, terms-for-city). Low-volume one-time setup
+        //                  work where a stronger model would pay off, but kept
+        //                  on mini by default so existing setups don't change
+        //                  cost. Bump it independently if your ICP wizard
+        //                  output feels weak.
         classifyModel: 'gpt-4o-mini',
         emailModel: 'gpt-4o-mini',
         reportModel: 'gpt-4o',
+        icpAutomationModel: 'gpt-4o-mini',
     },
     linkedin: {
         // How many recent posts to pull per LinkedIn profile via Apify's
@@ -122,8 +130,26 @@ const DEFAULTS = {
 // Allowed OpenAI model identifiers. Adding a new model: append here, ship
 // to the frontend dropdown in admin.tsx. Anything not in this list gets
 // rejected on save so a typo can't accidentally land in settings.json and
-// silently break every OpenAI call.
-const ALLOWED_MODELS = ['gpt-4o-mini', 'gpt-4o', 'gpt-5'];
+// silently break every OpenAI call. Pricing for each lives in
+// api/utils/api-cost.js so the Costs page can render an accurate $/Mtok
+// card.
+const ALLOWED_MODELS = [
+    // gpt-5 family - newest, recommended for most tasks. mini and nano
+    // are the big cost wins (nano is ~50× cheaper than gpt-4o for
+    // input tokens) if classify quality holds.
+    'gpt-5',
+    'gpt-5-mini',
+    'gpt-5-nano',
+    'gpt-5.1',
+    'gpt-5.2',
+    // gpt-4.1 family - middle ground if you've benchmarked against it.
+    'gpt-4.1',
+    'gpt-4.1-mini',
+    'gpt-4.1-nano',
+    // gpt-4o family - prior generation, still solid + battle-tested.
+    'gpt-4o',
+    'gpt-4o-mini',
+];
 
 // Default file state: every group flagged useDefault: true, with `custom`
 // pre-filled from DEFAULTS so the UI can show editable inputs at the
@@ -369,9 +395,10 @@ function validateAiGroup(g) {
     }
     const c = g.custom || {};
     const out = { useDefault: false, custom: { ...DEFAULTS.ai } };
-    out.custom.classifyModel = ALLOWED_MODELS.includes(c.classifyModel) ? c.classifyModel : DEFAULTS.ai.classifyModel;
-    out.custom.emailModel    = ALLOWED_MODELS.includes(c.emailModel)    ? c.emailModel    : DEFAULTS.ai.emailModel;
-    out.custom.reportModel   = ALLOWED_MODELS.includes(c.reportModel)   ? c.reportModel   : DEFAULTS.ai.reportModel;
+    out.custom.classifyModel       = ALLOWED_MODELS.includes(c.classifyModel)       ? c.classifyModel       : DEFAULTS.ai.classifyModel;
+    out.custom.emailModel          = ALLOWED_MODELS.includes(c.emailModel)          ? c.emailModel          : DEFAULTS.ai.emailModel;
+    out.custom.reportModel         = ALLOWED_MODELS.includes(c.reportModel)         ? c.reportModel         : DEFAULTS.ai.reportModel;
+    out.custom.icpAutomationModel  = ALLOWED_MODELS.includes(c.icpAutomationModel)  ? c.icpAutomationModel  : DEFAULTS.ai.icpAutomationModel;
     return out;
 }
 

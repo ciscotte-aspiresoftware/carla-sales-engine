@@ -100,7 +100,7 @@ async function hydrateFromSupabase() {
 // routes/email.js - templates don't have to spell that part out.
 
 const SHARED_HARD_RULES = `Hard rules:
-- Never invent facts the page doesn't support.
+- Never invent facts. Every claim must be grounded in the website signals, the LinkedIn profile/posts, or the company snapshot provided below.
 - Don't use the words "synergy", "leverage", "circle back", "touch base".
 - Don't include any salutation header like "Dear" - start with "Hi {firstName}," exactly.
 - Output strictly valid JSON: {"subject": string, "body": string}. No markdown fences, no commentary.`;
@@ -132,7 +132,7 @@ Voice:
 - WRITE THE FULL EMAIL IN ${language}. Subject, greeting, body, and signoff must all be in ${language}.
 
 Structure:
-1. One-line opener referencing something concrete from their site (a city, a product detail, the booking/checkout flow).
+1. One-line opener referencing ONE specific detail about the recipient. When LinkedIn data is provided in the user message, prefer it (a recent post topic, current role detail, prior tenure at a notable employer in the same vertical). When LI is not available, fall back to something concrete from their site (a city, a product detail, the booking/checkout flow).
 2. One sentence about what ${productPitch.product} does, framed against a likely pain point you can infer from the signals.
 3. One soft ask - short call, demo, or "open to learning more?". No hard pitch.
 4. Signoff with sender's first name only.

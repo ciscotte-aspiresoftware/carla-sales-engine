@@ -19,16 +19,40 @@ const { seedIcp, seedCountry, buildIcpCells, buildCountryCells } = require('../u
 const { listCountries } = require('../utils/countries');
 const { findCityAsync } = require('../utils/cities');
 const { sweepCell } = require('../utils/sweep-pipeline');
-const { resetBudget, isPaused, requestPause, isPauseRequested } = require('../utils/grid-cron');
+const { resetBudget, isPaused, requestPause, isPauseRequested, getPauseReason } = require('../utils/grid-cron');
 const sweepState = require('../utils/sweep-state');
+const sweepSessions = require('../utils/sweep-sessions');
+const sweepErrors = require('../utils/sweep-errors');
 const { eventsSince } = require('../utils/activity-log');
 const { trackActivity } = require('../middleware/activity');
 const { getCellGeneration } = require('../utils/settings');
 
 const router = express.Router();
 
-router.get('/icps', (req, res) => {
-    res.json({ success: true, icps: listIcps() });
+router.get('/icps', async (req, res) => {
+    // Attach pending-cell counts so the Coverage page's "Paused session ·
+    // N cells waiting · Resume" banner gates correctly. Without this the
+    // route returned bare ICP records, the page set `pendingCells` to
+    // undefined, the banner's `activeIcpPending === 0` gate always tripped,
+    // and Resume was permanently hidden after every auto-pause.
+    //
+    // Same logic + same query as /api/icps, kept inline here rather than
+    // imported because routes/icps.js already centralizes it and we don't
+    // want a circular require just for one helper. One pass over
+    // grid.listCells({state:'pending'}) is cheap (indexed) even with
+    // thousands of cells.
+    const icps = listIcps();
+    try {
+        const pending = await grid.listCells({ state: 'pending' });
+        const counts = new Map();
+        for (const cell of pending) counts.set(cell.icpId, (counts.get(cell.icpId) || 0) + 1);
+        res.json({ success: true, icps: icps.map((i) => ({ ...i, pendingCells: counts.get(i.id) || 0 })) });
+    } catch (e) {
+        // Non-fatal: if the cell read fails the page still renders, just
+        // with the same broken banner gate as before - no regression.
+        console.warn(`[Grid] /icps pending-counts attach failed: ${e.message}`);
+        res.json({ success: true, icps });
+    }
 });
 
 router.get('/', async (req, res) => {
@@ -211,7 +235,7 @@ router.post('/seed-country', async (req, res) => {
 //                          or only NL country fill). The scope is also persisted
 //                          as the "last active scope" for this ICP so the UI
 //                          can show a "last: Amsterdam" chip across page loads.
-router.post('/reset-budget', trackActivity('sweep_resumed'), (req, res) => {
+router.post('/reset-budget', trackActivity('sweep_resumed'), async (req, res) => {
     const { icp, scope } = req.body || {};
     const cleanScope = (scope && scope.type)
         ? { type: String(scope.type), value: scope.value == null ? null : String(scope.value) }
@@ -220,7 +244,10 @@ router.post('/reset-budget', trackActivity('sweep_resumed'), (req, res) => {
         ? `${cleanScope.type}${cleanScope.value ? `=${cleanScope.value}` : ''}`
         : 'no-scope';
     console.log(`[Sweep Cron] ↻ Resume sweeping requested - budget reset${icp ? ` (icp=${icp} scope=${label})` : ''}`);
-    resetBudget(icp || null, cleanScope);
+    // resetBudget is async now (it persists the new sweep_sessions row).
+    // Await so the response only fires after the session id is allocated -
+    // keeps the UI's subsequent /sweep-state call from racing the create.
+    await resetBudget(icp || null, cleanScope);
     res.json({ success: true });
 });
 
@@ -238,11 +265,18 @@ router.get('/sweep-state', (req, res) => {
     // operator clicked Pause and the moment the in-flight cell's classify
     // chain drains and writes its checkpoint. Frontend renders a "Pausing…
     // current company will finish first" indicator during that window.
+    // pauseReason lets the Coverage page distinguish operator pauses from
+    // auto-pauses (budget cap hit, no work in scope). The big blue "Resume
+    // sweeping" banner is gated to 'manual' only - auto-pauses are an
+    // expected end-of-session, not an interruption, and the scope action
+    // button below the picker re-labels itself to "Resume sweeping…" for
+    // those cases instead.
     res.json({
         success: true,
         lastScopes: sweepState.getAll(),
         paused: isPaused(),
         pauseRequested: isPauseRequested(),
+        pauseReason: getPauseReason(),
     });
 });
 
@@ -257,6 +291,68 @@ router.get('/sweep-state', (req, res) => {
 router.post('/pause', trackActivity('sweep_paused'), (req, res) => {
     requestPause();
     res.json({ success: true, paused: isPaused(), pauseRequested: isPauseRequested() });
+});
+
+// GET /api/grid/last-paused-session - the single most recent operator-paused
+// session, used by the Coverage page to surface "Last paused: NedFox-Garden ·
+// Netherlands - click to switch view" chip when the operator's current
+// picker selection doesn't match where they actually stopped.
+//
+// Scope is intentionally narrowed to status='paused' AND pause_reason='manual'
+// so an auto-pause (budget cap hit, no work) doesn't fire the chip - those
+// are expected end-of-session states, not interruptions to recover from.
+// Returns null when the most recent session was either still running, ended
+// cleanly, or auto-paused.
+router.get('/last-paused-session', async (req, res) => {
+    try {
+        // Pull the latest 5 (cheap, indexed) and pick the first 'paused' +
+        // 'manual' row. We don't filter in SQL to avoid two round-trips
+        // when the operator's recent activity was a clean completion - one
+        // listRecent call covers both the chip and the underlying need.
+        const recent = await sweepSessions.listRecent({ limit: 5 });
+        const lastManual = (recent || []).find(
+            (s) => s.status === 'paused' && s.pause_reason === 'manual',
+        ) || null;
+        res.json({ success: true, session: lastManual });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// GET /api/grid/sessions - persisted sweep-session history.
+//
+// Read by the Coverage page's "Recent sessions" panel. Each row is one
+// Resume click (or a server-recovered crashed session). Counters survive
+// restarts so the operator can see what was happening last time even
+// after a redeploy. Optional ?icpId= scopes to one ICP.
+router.get('/sessions', async (req, res) => {
+    try {
+        const items = await sweepSessions.listRecent({
+            limit: Math.max(1, Math.min(parseInt(req.query.limit, 10) || 20, 100)),
+            icpId: req.query.icpId || null,
+        });
+        res.json({ success: true, sessions: items });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// GET /api/grid/errors - persisted per-cell sweep errors.
+//
+// Reviewed when a rep wants to know "what went wrong on that Manchester
+// run?" - returns the cell-level errors recorded by the cron's catch path.
+// ?sessionId narrows to one session; otherwise returns the recent globals.
+router.get('/errors', async (req, res) => {
+    try {
+        const items = await sweepErrors.listRecent({
+            sessionId: req.query.sessionId || null,
+            icpId: req.query.icpId || null,
+            limit: Math.max(1, Math.min(parseInt(req.query.limit, 10) || 50, 200)),
+        });
+        res.json({ success: true, errors: items });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 // Activity feed - newest events first. Frontend polls every few seconds

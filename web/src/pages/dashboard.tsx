@@ -27,6 +27,8 @@ import {
   IconSparkles,
   IconMapPin,
   IconArrowRight,
+  IconActivity,
+  IconRecycle,
 } from '@tabler/icons-react'
 import { fetchCompanies, type CompanyRecord } from '@/lib/api'
 import { useWorkspace } from '@/context/workspace-context'
@@ -42,25 +44,77 @@ interface IcpSummary {
   countries?: string[]
 }
 
+// Shape returned by GET /api/grid/sessions. Mirrors the sweep_sessions
+// schema (migration 0011) so the panel can render any persisted row.
+interface SweepSession {
+  id: string
+  started_at: string
+  ended_at: string | null
+  icp_id: string | null
+  scope_type: 'city' | 'country' | 'all' | null
+  scope_value: string | null
+  status: 'running' | 'paused' | 'completed' | 'crashed'
+  pause_reason: string | null
+  cells_attempted: number
+  cells_succeeded: number
+  cells_errored: number
+  places_found: number
+  leads_qualified: number
+}
+
+// Shape returned by GET /api/icps/jobs/reclassify. Mirrors reclassify_jobs
+// (migration 0014). Workspace filtering happens client-side via icp_id ↔
+// scopedIcps.
+interface ReclassifyJob {
+  id: string
+  icp_id: string
+  status: 'pending' | 'running' | 'paused' | 'cancelled' | 'completed' | 'crashed'
+  total: number
+  processed: number
+  qualified: number
+  rejected: number
+  flipped: number
+  errors: number
+  current_domain: string | null
+  created_at: string
+  finished_at: string | null
+}
+
 export default function DashboardPage() {
   const { workspace } = useWorkspace()
   const [icps, setIcps] = useState<IcpSummary[]>([])
   const [companies, setCompanies] = useState<CompanyRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Recent pipeline activity from the persisted queues. Pulled in the
+  // same refresh() so a Refresh click updates the whole page in one go.
+  // Sessions/jobs fetched globally (no server-side workspace filter);
+  // we narrow client-side via the scopedIcps set so the queue list stays
+  // consistent with the ICP scope above.
+  const [sweepSessions, setSweepSessions] = useState<SweepSession[]>([])
+  const [reclassifyJobs, setReclassifyJobs] = useState<ReclassifyJob[]>([])
 
   const refresh = async () => {
     setLoading(true)
     setError(null)
     try {
-      const [icpsRes, companiesRes] = await Promise.all([
+      const [icpsRes, companiesRes, sessionsRes, jobsRes] = await Promise.all([
         fetch(`${API}/api/icps`).then((r) => r.json()),
         // Server filtering by portfolioCompany when a workspace is picked
         // keeps the dashboard fast even as the DB grows.
         fetchCompanies(workspace ? { portfolioCompany: workspace } : {}),
+        // Sweep sessions + reclassify jobs are workspace-filtered client-
+        // side (the routes only support per-ICP filtering, and the
+        // dashboard's scope can span several ICPs in a workspace). Soft-
+        // fail to empty arrays so a Supabase blip doesn't blank the whole
+        // page - the rest of the dashboard still loads.
+        fetch(`${API}/api/grid/sessions?limit=20`).then((r) => r.json()).catch(() => ({ success: false })),
+        fetch(`${API}/api/icps/jobs/reclassify?limit=20`).then((r) => r.json()).catch(() => ({ success: false })),
       ])
       if (icpsRes?.success) setIcps(icpsRes.icps)
       setCompanies(companiesRes.companies)
+      if (sessionsRes?.success) setSweepSessions(sessionsRes.sessions || [])
+      if (jobsRes?.success) setReclassifyJobs(jobsRes.jobs || [])
     } catch (e: any) {
       setError(e.message || 'Failed to load dashboard')
     } finally {
@@ -146,6 +200,26 @@ export default function DashboardPage() {
   }, [companies, scopedIcps])
 
   const icpName = (id: string) => scopedIcps.find((i) => i.id === id)?.name || id
+
+  // Workspace-scope the persisted queues. Sessions with icp_id===null
+  // (scope='all') pass through in "All Companies" mode and pass through
+  // in any workspace too (they touched every ICP). Top 6 rows for each
+  // panel keeps the dashboard scannable without scrolling.
+  const scopedSessions = useMemo(() => {
+    const ids = new Set(scopedIcps.map((i) => i.id))
+    const filtered = workspace
+      ? sweepSessions.filter((s) => !s.icp_id || ids.has(s.icp_id))
+      : sweepSessions
+    return filtered.slice(0, 6)
+  }, [sweepSessions, scopedIcps, workspace])
+
+  const scopedReclassifyJobs = useMemo(() => {
+    const ids = new Set(scopedIcps.map((i) => i.id))
+    const filtered = workspace
+      ? reclassifyJobs.filter((j) => ids.has(j.icp_id))
+      : reclassifyJobs
+    return filtered.slice(0, 6)
+  }, [reclassifyJobs, scopedIcps, workspace])
 
   return (
     <div className="space-y-4">
@@ -267,6 +341,129 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Second two-column row: persisted pipeline activity. Mirrors the
+          Recent sessions / Recent jobs panels that live deeper inside
+          Coverage + the ICP editor's Reclassify tab, so the dashboard
+          carries a "what's the pipeline doing right now" answer without
+          forcing the rep to navigate three pages to assemble it. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Recent sweep sessions - one row per Resume click, including
+            crashed-recovered sessions. Counters come from the persisted
+            sweep_sessions row so the dashboard survives a redeploy. */}
+        <Card className={GLASS}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <IconActivity className="h-4 w-4 text-sky-500" />
+              <h3 className="text-sm font-semibold">Recent sweep sessions</h3>
+              <span className="text-xs text-muted-foreground">- coverage queue</span>
+              <div className="flex-1" />
+              <NavLink to="/coverage" className="text-[10px] text-sky-600 dark:text-sky-400 hover:underline">View all →</NavLink>
+            </div>
+            {loading && scopedSessions.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                <IconLoader2 className="h-4 w-4 mx-auto mb-2 animate-spin" />
+                Loading…
+              </div>
+            ) : scopedSessions.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                No sweep sessions yet. Hit <span className="font-semibold">Resume sweeping</span> on Coverage to start one.
+              </div>
+            ) : (
+              <ul className="space-y-1">
+                {scopedSessions.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex items-center gap-2 text-xs px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors"
+                  >
+                    <SessionStatusBadge status={s.status} />
+                    <span className="flex-1 min-w-0 truncate">
+                      <span className="font-medium">{s.icp_id ? icpName(s.icp_id) : 'All ICPs'}</span>
+                      {s.scope_value && (
+                        <span className="text-muted-foreground"> · {s.scope_value}</span>
+                      )}
+                    </span>
+                    <span className="text-muted-foreground tabular-nums shrink-0">
+                      {s.cells_succeeded}/{s.cells_attempted} cells
+                    </span>
+                    {s.leads_qualified > 0 && (
+                      <span className="text-emerald-700 dark:text-emerald-400 tabular-nums shrink-0">
+                        +{s.leads_qualified} lead{s.leads_qualified === 1 ? '' : 's'}
+                      </span>
+                    )}
+                    {s.cells_errored > 0 && (
+                      <span className="text-red-700 dark:text-red-400 tabular-nums shrink-0">
+                        {s.cells_errored} err
+                      </span>
+                    )}
+                    <span className="text-muted-foreground tabular-nums opacity-70 shrink-0">
+                      {relativeTime(new Date(s.started_at).getTime())}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent reclassify jobs - one row per Reclassify click. Same
+            shape as the in-tab "Recent reclassify jobs" strip but rolled
+            up to the dashboard for "is anything classifying right now?". */}
+        <Card className={GLASS}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <IconRecycle className="h-4 w-4 text-violet-500" />
+              <h3 className="text-sm font-semibold">Recent reclassify jobs</h3>
+              <span className="text-xs text-muted-foreground">- icp queue</span>
+              <div className="flex-1" />
+              <NavLink to="/icp" className="text-[10px] text-sky-600 dark:text-sky-400 hover:underline">View all →</NavLink>
+            </div>
+            {loading && scopedReclassifyJobs.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                <IconLoader2 className="h-4 w-4 mx-auto mb-2 animate-spin" />
+                Loading…
+              </div>
+            ) : scopedReclassifyJobs.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                No reclassify jobs yet. Open an ICP and use the <span className="font-semibold">Reclassify</span> tab to re-run cached companies against an updated prompt.
+              </div>
+            ) : (
+              <ul className="space-y-1">
+                {scopedReclassifyJobs.map((j) => (
+                  <li
+                    key={j.id}
+                    className="flex items-center gap-2 text-xs px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors"
+                  >
+                    <ReclassifyStatusBadge status={j.status} />
+                    <span className="flex-1 min-w-0 truncate">
+                      <span className="font-medium">{icpName(j.icp_id)}</span>
+                      {j.current_domain && (j.status === 'running' || j.status === 'pending') && (
+                        <span className="text-muted-foreground"> · {j.current_domain}</span>
+                      )}
+                    </span>
+                    <span className="text-muted-foreground tabular-nums shrink-0">
+                      {j.processed}/{j.total}
+                    </span>
+                    {j.flipped > 0 && (
+                      <span className="text-amber-700 dark:text-amber-400 tabular-nums shrink-0 font-semibold">
+                        {j.flipped} flipped
+                      </span>
+                    )}
+                    {j.errors > 0 && (
+                      <span className="text-red-700 dark:text-red-400 tabular-nums shrink-0">
+                        {j.errors} err
+                      </span>
+                    )}
+                    <span className="text-muted-foreground tabular-nums opacity-70 shrink-0">
+                      {relativeTime(new Date(j.created_at).getTime())}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Quick links footer - common next actions. Cheap to add and
           reduces the "now where do I go?" friction the first time
           someone lands on the dashboard. */}
@@ -322,6 +519,41 @@ function QuickLink({ to, icon, label }: { to: string; icon: React.ReactNode; lab
       {icon}
       <span>{label}</span>
     </NavLink>
+  )
+}
+
+// Compact status pill for sweep sessions. Same color rules as the
+// Recent Sessions panel on Coverage so the dashboard reads consistently
+// when you cross-reference. Width is fixed-character so the right side
+// of each row aligns.
+function SessionStatusBadge({ status }: { status: SweepSession['status'] }) {
+  const tone =
+    status === 'running' ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+    : status === 'completed' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+    : status === 'paused' ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300'
+    : 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300'
+  return (
+    <span className={cn('inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wider shrink-0 w-[68px] justify-center', tone)}>
+      {status === 'running' && <IconLoader2 className="h-2.5 w-2.5 mr-0.5 animate-spin" />}
+      {status}
+    </span>
+  )
+}
+
+// Mirror of SessionStatusBadge for reclassify jobs. Separate function
+// because reclassify has 'pending'/'cancelled' statuses that sweep
+// doesn't share, and overlapping logic in one helper would muddle both.
+function ReclassifyStatusBadge({ status }: { status: ReclassifyJob['status'] }) {
+  const tone =
+    status === 'running' || status === 'pending' ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+    : status === 'completed' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+    : status === 'cancelled' ? 'border-muted-foreground/30 bg-muted/30 text-muted-foreground'
+    : 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300'
+  return (
+    <span className={cn('inline-flex items-center rounded-full border px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wider shrink-0 w-[72px] justify-center', tone)}>
+      {(status === 'running' || status === 'pending') && <IconLoader2 className="h-2.5 w-2.5 mr-0.5 animate-spin" />}
+      {status}
+    </span>
   )
 }
 

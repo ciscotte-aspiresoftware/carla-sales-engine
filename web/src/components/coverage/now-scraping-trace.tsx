@@ -35,6 +35,17 @@ const COMPANY_TYPES = new Set([
   'company_rejected',
 ])
 
+// Higher number = more current. In-flight companies (still scraping or
+// classifying) sort above finished verdicts. Used to surface the live
+// activity at the TOP of the panel regardless of event-id timing - which
+// otherwise lets a qualified event from a company that started earlier
+// leapfrog the scrape_start of a company that's currently in flight,
+// because the two pipeline stages run in parallel.
+function stageRank(type: string): number {
+  if (type === 'company_scrape_start' || type === 'company_classify_start') return 1
+  return 0
+}
+
 export default function NowScrapingTrace({ events, limit = 5 }: Props) {
   // Keep the LATEST event per company - we don't want a single Acme to take
   // up two rows for "scrape_start" AND "qualified". Group by domain || title.
@@ -46,7 +57,16 @@ export default function NowScrapingTrace({ events, limit = 5 }: Props) {
     if (!existing || existing.id < e.id) latestByCompany.set(key, e)
   }
   const rows = Array.from(latestByCompany.values())
-    .sort((a, b) => b.id - a.id)
+    // In-flight first (stage 1), then verdicts (stage 0). Within each
+    // group, newest event id wins so a "just finished" verdict appears
+    // above older verdicts AND a "just started" scrape appears above an
+    // earlier-started classify.
+    .sort((a, b) => {
+      const sa = stageRank(a.type)
+      const sb = stageRank(b.type)
+      if (sa !== sb) return sb - sa
+      return b.id - a.id
+    })
     .slice(0, limit)
 
   if (rows.length === 0) return null

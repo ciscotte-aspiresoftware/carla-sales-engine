@@ -64,6 +64,7 @@ interface AiCustom {
   classifyModel: string
   emailModel: string
   reportModel: string
+  icpAutomationModel: string
 }
 
 interface LinkedinCustom {
@@ -889,9 +890,12 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
               <Badge variant="secondary" className="uppercase tracking-wide text-[10px] bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30">
                 Report · {effective.reportModel}
               </Badge>
+              <Badge variant="secondary" className="uppercase tracking-wide text-[10px] bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30">
+                ICP automation · {effective.icpAutomationModel}
+              </Badge>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Pick the OpenAI model for each job independently: <b>classify</b> (the qualified/rejected verdict), <b>email / LI message</b> generation, and the <b>markdown report</b>. Applies on the next call - no restart.
+              Pick the OpenAI model for each job independently: <b>classify</b> (the qualified/rejected verdict), <b>email, LI message & sequences</b>, the <b>markdown report</b>, and <b>ICP automation</b> (wizard auto-fill / regen-section / terms-for-city). Applies on the next call - no restart.
             </p>
           </div>
         </div>
@@ -917,7 +921,7 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
 
         {!useDefault && (
           <div className="space-y-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <ModelPicker
                 label="Classify (verdict)"
                 value={custom.classifyModel}
@@ -926,7 +930,7 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
                 hint={`Default ${defaults.classifyModel}`}
               />
               <ModelPicker
-                label="Email & LI message"
+                label="Email, LI & sequences"
                 value={custom.emailModel}
                 options={allowedModels}
                 onChange={(v) => setCustom((c) => ({ ...c, emailModel: v }))}
@@ -939,9 +943,21 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
                 onChange={(v) => setCustom((c) => ({ ...c, reportModel: v }))}
                 hint={`Default ${defaults.reportModel}`}
               />
+              <ModelPicker
+                label="ICP automation"
+                value={custom.icpAutomationModel}
+                options={allowedModels}
+                onChange={(v) => setCustom((c) => ({ ...c, icpAutomationModel: v }))}
+                hint={`Default ${defaults.icpAutomationModel}`}
+              />
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Cost: <code>gpt-4o-mini</code> is the baseline. <code>gpt-4o</code> is ~10× more per token. <code>gpt-5</code> is the most accurate and most expensive. Reports default to gpt-4o since they're read by humans; verdicts stay on mini for cost.
+              Cost: <code>gpt-5-nano</code> ($0.05/Mtok in) is the cheapest. <code>gpt-4o-mini</code>{' '}
+              ($0.15/Mtok) is the proven baseline. <code>gpt-5</code> and <code>gpt-4o</code> are
+              mid-tier at $1.25 and $2.50/Mtok respectively. <code>gpt-5.2-pro</code> ($21/Mtok) is
+              the strongest model and 140× the price of nano - reserve for jobs where accuracy
+              genuinely beats cost. See live $/Mtok + spend by model on the{' '}
+              <a href="/costs" className="underline">Costs</a> page.
             </p>
           </div>
         )}

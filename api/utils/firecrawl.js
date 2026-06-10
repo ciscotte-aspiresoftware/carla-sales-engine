@@ -19,6 +19,7 @@
 
 const FirecrawlApp = require('@mendable/firecrawl-js').default;
 const { getFirecrawl } = require('./settings');
+const { recordUsage, priceService } = require('./api-cost');
 
 const FIRECRAWL_KEYS = [
     process.env.FIRECRAWL_API_KEY,
@@ -66,9 +67,19 @@ async function scrapeOnePage(url, options = {}) {
         const idx = currentKeyIndex;
         triedThisRequest.add(idx);
         const firecrawl = new FirecrawlApp({ apiKey: FIRECRAWL_KEYS[idx] });
+        const startedAt = Date.now();
         try {
             const response = await firecrawl.scrapeUrl(url, scrapeOpts);
+            const durationMs = Date.now() - startedAt;
             console.log(`[Firecrawl] scrape ${url} via key ${idx + 1} (${response?.markdown?.length || 0} md chars)`);
+            recordUsage({
+                service: 'firecrawl',
+                operation: 'scrape',
+                units: 1,
+                usdCost: priceService('firecrawl', 1),
+                durationMs,
+                metadata: { url, mdChars: response?.markdown?.length || 0 },
+            });
             return response;
         } catch (err) {
             if (isCreditOrRateError(err) && FIRECRAWL_KEYS.length > 1) {
@@ -97,6 +108,7 @@ async function crawlSite(url, maxPages, options = {}) {
         const idx = currentKeyIndex;
         triedThisRequest.add(idx);
         const firecrawl = new FirecrawlApp({ apiKey: FIRECRAWL_KEYS[idx] });
+        const startedAt = Date.now();
         try {
             // SDK v1: crawlUrl returns when the crawl completes (or
             // status='scraping' polled internally). data is the page array.
@@ -108,6 +120,7 @@ async function crawlSite(url, maxPages, options = {}) {
                 },
                 ...options,
             });
+            const durationMs = Date.now() - startedAt;
             const pages = Array.isArray(response?.data) ? response.data : [];
             if (pages.length === 0) {
                 // Treat empty crawl like a failed scrape so callers can
@@ -117,6 +130,14 @@ async function crawlSite(url, maxPages, options = {}) {
             }
             const totalChars = pages.reduce((s, p) => s + (p?.markdown?.length || 0), 0);
             console.log(`[Firecrawl] crawl ${url} via key ${idx + 1} (${pages.length} pages, ${totalChars} md chars)`);
+            recordUsage({
+                service: 'firecrawl',
+                operation: 'crawl',
+                units: pages.length,
+                usdCost: priceService('firecrawl', pages.length),
+                durationMs,
+                metadata: { url, pages: pages.length, mdChars: totalChars },
+            });
 
             const sections = pages.map((p, i) => {
                 const title = p?.metadata?.title || `Page ${i + 1}`;

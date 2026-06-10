@@ -23,6 +23,7 @@ import {
   IconRotateClockwise,
   IconChevronDown,
   IconChevronUp,
+  IconRobot,
 } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,13 +37,14 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Markdown } from '@/components/ui/markdown'
-import { GLASS } from '@/lib/glass'
+import { GLASS, GLASS_SUBTLE } from '@/lib/glass'
 import { cn } from '@/lib/utils'
 import {
   classifyUrl,
   overrideClassification,
   fetchLeads,
   generateEmail,
+  enrichLead,
   fetchEmailTemplates,
   suggestEmailTemplate,
   enrichLeadPhone,
@@ -55,6 +57,7 @@ import {
   type ScrapedContacts,
 } from '@/lib/api'
 import { API_BASE } from '@/lib/api-base'
+import { safeFetchJson } from '@/lib/safe-fetch'
 import { useWorkspace } from '@/context/workspace-context'
 import { useAccountsCount } from '@/context/accounts-count-context'
 
@@ -114,6 +117,42 @@ export default function PipelinePage() {
   const [icps, setIcps] = useState<IcpOption[]>([])
   const [selectedIcpId, setSelectedIcpId] = useState('')
   const [activeIcpId, setActiveIcpId] = useState<string | null>(null)
+  // Pool of qualified companies for the selected ICP. Populated on ICP
+  // pick so the rep can search/click instead of pasting a URL. Empty
+  // until they touch an ICP - we don't pre-fetch on page mount because
+  // most reps arrive via the prefill hash (Sourcing → Sales Agent) or
+  // companyId param (My Accounts) and never use the picker.
+  const [icpCompanies, setIcpCompanies] = useState<Array<{ id: string; name?: string; domain?: string; url?: string; country?: string }>>([])
+  const [icpCompaniesLoading, setIcpCompaniesLoading] = useState(false)
+  // Search query for the company picker. When empty + focused, shows the
+  // top 8 by name. When typed, filters by name + domain (client-side -
+  // even a long-running portfolio company rarely has > 1k rows in one ICP).
+  const [companySearch, setCompanySearch] = useState('')
+  const [companyPickerOpen, setCompanyPickerOpen] = useState(false)
+
+  // ─── View / outreach-config state ────────────────────────────────────
+  // Top-level panel: 'workspace' shows Steps 1-3 (pick ICP, find leads,
+  // configure outreach); 'email' replaces the workspace with a full-width
+  // email editor + always-visible Sent/Skipped buttons. The Confirm/Reject
+  // bar for My-Accounts-originated flows moves into the email panel so the
+  // rep can't miss it (the prior layout pushed it below the fold). Switching
+  // is internal state, NOT URL routing, so back-arrow preserves all leads/
+  // classification state without a re-fetch.
+  const [view, setView] = useState<'workspace' | 'email'>('workspace')
+  // Step 1 collapse - user-controlled toggle, not auto. When true, the
+  // classification card renders as a 1-line summary so Steps 2+3 get more
+  // vertical room. Defaults to false (full card) so first-time reps see
+  // the verdict + report in full.
+  const [step1Collapsed, setStep1Collapsed] = useState(false)
+  // Drives the pulse-ring on the Email tab pill - flips true the moment an
+  // email lands, clears the moment the rep switches to the Email tab so it
+  // stops nagging once they've seen the draft. Same pattern as the valsource
+  // agent page (emailReady state).
+  const [emailReady, setEmailReady] = useState(false)
+  // Step 3 outreach config. Default template id falls back to the ICP's
+  // bound template on selection (see effect below).
+  const [outreachTemplateId, setOutreachTemplateId] = useState<string>('')
+  const [outreachCustomInstruction, setOutreachCustomInstruction] = useState('')
   // True when the latest classify reused a cached scrape (no Firecrawl call).
   const [fromCache, setFromCache] = useState(false)
   // True when the verdict + report were served from a prior stored result
@@ -184,11 +223,13 @@ export default function PipelinePage() {
     }
   }
 
-  // Load the email-template catalog once on mount. The picker dropdown
-  // narrows to the current workspace + the active classification's ICP
-  // (when available) so the rep only sees templates that make sense.
+  // Load the email-template catalog once on mount. Channel filter is
+  // explicit so the LinkedIn-message templates (managed on /li-message)
+  // don't pollute the email picker - they're shaped differently (no
+  // subject line, no signoff format) and would generate broken output
+  // if the model tried to use one for an email draft.
   useEffect(() => {
-    fetchEmailTemplates()
+    fetchEmailTemplates({ channel: 'email' })
       .then((r) => setTemplates(r.templates))
       .catch(() => { /* non-fatal - picker stays empty, email gen falls back to default */ })
   }, [])
@@ -224,6 +265,45 @@ export default function PipelinePage() {
   // used in the override popup + classification card.
   const activeIcpName = icps.find((i) => i.id === activeIcpId)?.name || activeIcpId || ''
 
+  // Fetch the pool of qualified companies for the picker whenever the rep
+  // picks (or changes) an ICP. ?match=true scopes to companies whose
+  // classifier verdict is_match===true for THIS ICP - hides rejected and
+  // unclassified rows so the picker only shows actionable accounts.
+  // Empty ICP → clear the list so search results don't leak across ICPs.
+  useEffect(() => {
+    if (!selectedIcpId) { setIcpCompanies([]); return }
+    let cancel = false
+    setIcpCompaniesLoading(true)
+    ;(async () => {
+      try {
+        const res = await safeFetchJson(
+          `${API_BASE}/api/companies?icp=${encodeURIComponent(selectedIcpId)}&match=true`,
+        )
+        if (cancel) return
+        const list = (res as { companies?: Array<{ id: string; name?: string; domain?: string; url?: string; country?: string }> }).companies || []
+        setIcpCompanies(list)
+      } catch {
+        if (!cancel) setIcpCompanies([])
+      } finally {
+        if (!cancel) setIcpCompaniesLoading(false)
+      }
+    })()
+    return () => { cancel = true }
+  }, [selectedIcpId])
+
+  // Client-side filter for the picker dropdown. No cap on the list - the
+  // popover is scrollable (max-h-72 below) so the rep can reach every
+  // qualified company in the ICP without typing. Prior 12-item cap was a
+  // popover-tightness hack but made "where are the other 55?" the FAQ.
+  const filteredCompanies = useMemo(() => {
+    const q = companySearch.trim().toLowerCase()
+    if (!q) return icpCompanies
+    return icpCompanies.filter((c) => {
+      const hay = `${c.name || ''} ${c.domain || ''} ${c.country || ''}`.toLowerCase()
+      return hay.includes(q)
+    })
+  }, [icpCompanies, companySearch])
+
   // Templates available in the picker. Filtered by workspace (so a
   // NedFox rep doesn't see Bluebird templates by default). If the rep
   // wants to use a template from another portfolio company, they can
@@ -234,6 +314,21 @@ export default function PipelinePage() {
     const w = workspace.toLowerCase()
     return templates.filter((t) => (t.portfolioCompany || '').toLowerCase() === w)
   }, [templates, workspace])
+
+  // After the visible-templates list resolves, anchor activeTemplateId so
+  // the <select> value always matches a real option. The empty-value
+  // placeholder is gone, so without this the browser would render the
+  // first option as visually selected but our state would still be '' -
+  // submitting the empty string would silently fall back to backend
+  // default resolution which is fine but confusing. Also re-anchor when
+  // the current selection drops out of the workspace filter (the rep
+  // switched workspaces).
+  useEffect(() => {
+    if (visibleTemplates.length === 0) return
+    if (!activeTemplateId || !visibleTemplates.some((t) => t.id === activeTemplateId)) {
+      setActiveTemplateId(visibleTemplates[0].id)
+    }
+  }, [visibleTemplates, activeTemplateId])
 
   // Resolved sender label for the email card header - pulls from the
   // active template if one is picked, else falls back to "Fazal" so the
@@ -353,6 +448,13 @@ export default function PipelinePage() {
   const [activeLead, setActiveLead] = useState<Lead | null>(null)
   const [email, setEmail] = useState<GeneratedEmail | null>(null)
   const [emailLoading, setEmailLoading] = useState(false)
+  // Mid-flight enrichment for a lead we're about to generate an email for.
+  // Stored as the apolloId of the in-flight lead so the lead row can show
+  // a "Enriching…" badge while the email + LinkedIn URL aren't visible yet.
+  // Cleared as soon as the enriched lead is folded back into the leads list,
+  // BEFORE the GPT email-gen call - so the rep sees the contact details
+  // appear first, then the email starts streaming below.
+  const [preEnrichingApolloId, setPreEnrichingApolloId] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -500,6 +602,56 @@ export default function PipelinePage() {
     }
   }
 
+  // Auto-fetch decision-makers as soon as classification lands qualified.
+  // Apollo search-only mode is FREE (no enrichment credits burned - only
+  // names + obfuscated last names + titles), so there's no reason to
+  // make the rep click. The per-lead "Reveal" button is what spends an
+  // Apollo credit; lead discovery itself is just an HTTP request.
+  // Skips when:
+  //   - classification didn't qualify
+  //   - leads already fetched (don't retrigger on every render)
+  //   - we're already in flight (handleFetchLeads guards this too but
+  //     doubling up keeps the effect deterministic)
+  // The fromAccount path used to trigger this elsewhere; consolidating
+  // here so both flows behave the same.
+  useEffect(() => {
+    if (!classification || classification.is_match !== true) return
+    if (leads !== null) return
+    if (leadsLoading) return
+    handleFetchLeads()
+    // handleFetchLeads is stable enough for this dep array; using a
+    // ref would just hide the same warning. Keep deps lean so the effect
+    // doesn't accidentally retrigger from unrelated re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classification, leads, leadsLoading])
+
+  // Reveal-only enrichment. Splits the prior "Reveal & generate" coupling
+  // - the rep clicks Reveal first, sees the unmasked name + verified
+  // email + LinkedIn, THEN decides whether to spend GPT credits by
+  // clicking Generate. Same Apollo endpoint as the pre-enrich step in
+  // handleGenerateEmail; flagging via preEnrichingApolloId so the row
+  // shows the spinner.
+  async function handleRevealLead(lead: Lead) {
+    if (!lead.apolloId || !companyId || preEnrichingApolloId === lead.apolloId) return
+    if (lead.enriched) return // already revealed - nothing to do
+    setPreEnrichingApolloId(lead.apolloId)
+    try {
+      const eRes = await enrichLead(companyId, lead.apolloId)
+      const updated = eRes.lead
+      if (leads) {
+        setLeads(leads.map((l) => (l.apolloId === lead.apolloId ? updated : l)))
+      }
+      // Promote to active lead so Step 3's Generate button targets this
+      // person automatically - rep doesn't have to click Generate on the
+      // row, they can just hit the big Step 3 button next.
+      setActiveLead(updated)
+    } catch (err: any) {
+      setLeadsWarnings([...leadsWarnings, `Reveal failed: ${err.message || String(err)}`])
+    } finally {
+      setPreEnrichingApolloId(null)
+    }
+  }
+
   async function handleFetchLeads() {
     if (!classification || leadsLoading) return
     setLeadsLoading(true)
@@ -528,14 +680,54 @@ export default function PipelinePage() {
     if (!classification || emailLoading) return
     setActiveLead(lead)
     setEmail(null)
-    setEmailLoading(true)
     setEmailError(null)
     setCopied(false)
 
+    // Phase 1: pre-enrich if needed. We do the Apollo enrichment BEFORE
+    // kicking off email generation so the lead row visibly populates the
+    // verified email + LinkedIn URL first, then the email starts drafting
+    // below it. Prior behaviour did both server-side inside /api/email,
+    // which meant the rep saw "enrich to reveal email" right up until the
+    // GPT response landed - confusing because the email had nothing to
+    // attach to visually.
+    //
+    // Skipped when:
+    //   - already enriched (don't burn another Apollo credit)
+    //   - no apolloId (legacy paste flows without Apollo data)
+    //   - no companyId (paste-classify flow can't persist back)
+    // In any of those cases the email-gen route's server-side fallback
+    // still tries to enrich if it can, so we don't lose data.
+    let workingLead = lead
+    if (!lead.enriched && lead.apolloId && companyId) {
+      setPreEnrichingApolloId(lead.apolloId)
+      try {
+        const eRes = await enrichLead(companyId, lead.apolloId)
+        workingLead = eRes.lead
+        // Splice the enriched copy back into both `leads` (so the row
+        // updates) and `activeLead` (so the email panel header reflects
+        // the new name/email immediately).
+        if (leads) {
+          setLeads(leads.map(l => (l.apolloId === lead.apolloId ? workingLead : l)))
+        }
+        setActiveLead(workingLead)
+      } catch (err: any) {
+        // Don't block email gen on enrich failure - the backend's email
+        // route will retry server-side. Surface a non-blocking warning so
+        // the rep knows credits / Apollo issues happened.
+        setLeadsWarnings([...leadsWarnings, `Enrichment failed: ${err.message || String(err)}`])
+      } finally {
+        setPreEnrichingApolloId(null)
+      }
+    }
+
+    // Phase 2: email generation. Pass the (now-enriched) workingLead so
+    // the server-side path has no enrichment work left to do - it skips
+    // the redundant Apollo call when `enriched: true` is already set.
+    setEmailLoading(true)
     try {
       const res = await generateEmail({
         classification,
-        lead,
+        lead: workingLead,
         companyId: companyId || undefined,
         // Template takes priority over the legacy senderId field. The
         // backend falls back to the Bluebird-Fazal template if neither
@@ -543,18 +735,25 @@ export default function PipelinePage() {
         templateId: activeTemplateId || undefined,
         icpId: fromAccount?.icpId || activeIcpId || undefined,
         senderId: activeTemplateId ? undefined : 'fazal',
+        // Step 3's "Custom prompt" textarea - free-form steering, optional.
+        // Empty string => not sent. Backend appends it to the user message
+        // so GPT respects the rep's specific guidance for THIS draft.
+        customInstruction: outreachCustomInstruction.trim() || undefined,
       })
       setEmail(res.email)
-      // Server may have enriched the lead (revealed email + LinkedIn) as
-      // part of the email-gen flow. Swap the enriched copy back into our
-      // leads list so the row's badge updates and the next click on the
-      // same row skips re-enrichment.
+      // Switch to the email tab as soon as the draft lands. The Email tab
+      // pill pulses (ring + dot) until the rep clicks it - same recency cue
+      // the valsource agent uses so a fresh draft is impossible to miss.
+      setEmailReady(true)
+      setView('email')
+      // Server may have done LinkedIn scraping during email gen (separate
+      // from Apollo enrich). Swap that copy in too so the People page
+      // picks up the LI summary + posts.
       if (res.lead && leads) {
         const updatedLeads = leads.map(l => (l.apolloId === res.lead.apolloId ? res.lead : l))
         setLeads(updatedLeads)
         setActiveLead(res.lead)
       }
-      // Surface enrichment warnings (e.g. Apollo credits exhausted) if any.
       if (res.warnings?.length) {
         setLeadsWarnings([...leadsWarnings, ...res.warnings])
       }
@@ -582,27 +781,95 @@ export default function PipelinePage() {
     // viewport. The Main wrapper still provides the px-6/8 padding off
     // the sidebar, so cards aren't kissing the edges.
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Sales Agent</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+      {/* Title and description on the SAME line (description aligned to
+          baseline so it reads as a continuation). flex-wrap drops the
+          description below on narrow viewports so it doesn't squish. */}
+      <div className="flex items-baseline flex-wrap gap-x-4 gap-y-1">
+        <h1 className="text-2xl font-bold tracking-tight shrink-0">Sales Agent</h1>
+        <p className="text-sm text-muted-foreground min-w-0">
           {fromAccount
             ? <>Drafting outreach for <span className="font-semibold text-foreground">{fromAccount.companyName}</span> - classification pre-loaded from My Accounts, finding decision-makers now.</>
             : <>Pick an ICP, paste a company website URL - we'll classify the business against that ICP, find decision-makers, and draft an outreach email.</>}
         </p>
       </div>
 
-      {/* ─── Pipeline layout: 2 columns on desktop ────────────────────────
-          Left: Report (full viewport height, narrower).
-          Right: Leads (top, scrolls) + Email (bottom, long-form, gets ~2x
-                 the height of Leads). The right column is a vertical flex
-                 so the cards split the available height proportionally
-                 instead of fighting for space.
-          Stacks vertically on mobile/tablet (default). */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-6 lg:h-[calc(100vh-180px)]">
+      {/* Sales Agent / Email tab toggle - left-aligned, sits on its own
+          row directly under the header. Mirrors the Runs/Templates strip
+          on /sequences. Always visible (even pre-classify) so the rep can
+          see the Email tab is the next destination. Email is disabled
+          until a draft exists and pulses while fresh (cleared on click). */}
+      <div className={cn(GLASS_SUBTLE, 'inline-flex items-center rounded-md p-0.5 gap-0.5')}>
+        <button
+          onClick={() => setView('workspace')}
+          className={cn(
+            'px-3 py-1.5 rounded text-xs transition-colors flex items-center gap-1.5',
+            view === 'workspace'
+              ? 'bg-sky-500/15 text-sky-700 dark:text-sky-300 font-semibold'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+          title={view === 'email' ? 'Back to the workspace - classification + leads stay loaded' : undefined}
+        >
+          <IconRobot className="h-3.5 w-3.5" /> Sales Agent
+        </button>
+        <button
+          onClick={() => {
+            if (!email) return
+            setView('email')
+            setEmailReady(false)
+          }}
+          disabled={!email}
+          className={cn(
+            'px-3 py-1.5 rounded text-xs transition-colors flex items-center gap-1.5 relative',
+            view === 'email'
+              ? 'bg-sky-500/15 text-sky-700 dark:text-sky-300 font-semibold'
+              : 'text-muted-foreground hover:text-foreground',
+            !email && 'opacity-50 cursor-not-allowed hover:text-muted-foreground',
+            emailReady && 'ring-2 ring-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 animate-pulse',
+          )}
+          title={!email ? 'Generate an email first to enable this tab' : undefined}
+        >
+          <IconMail className="h-3.5 w-3.5" /> Email
+          {emailReady && <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />}
+        </button>
+      </div>
+
+      {/* The grid template flexes when Step 1 is collapsed - Step 1 shrinks
+          to a narrow rail (280px) and the right column (Steps 2 + 3 / the
+          email panel) gets the rest of the viewport. Defaults to the
+          1fr:1.5fr split when Step 1 is expanded. When view='email', the
+          grid collapses to a single column so Step 3 (which has the email)
+          takes the entire width. */}
+      <div className={cn(
+        'grid grid-cols-1 gap-6',
+        // Workspace view pins to viewport so Steps 2+3 don't waste vertical
+        // space. Email view lets the grid content-size - the Body textarea
+        // there uses a viewport-relative calc for its own height, so no
+        // ancestor flex anchor is needed and CardContent's overflow-y-auto
+        // won't introduce a second scrollbar.
+        view === 'workspace' && 'lg:h-[calc(100vh-180px)]',
+        view === 'email'
+          ? 'lg:grid-cols-1'
+          : step1Collapsed
+            ? 'lg:grid-cols-[280px_1fr]'
+            : 'lg:grid-cols-[1fr_1.5fr]',
+      )}>
 
       {/* ─── Step 1: URL → classify (or "From My Accounts" if skipped) ── */}
+      {/* Hidden when view='email' - the rep is reviewing the draft, not
+          re-analysing. The Sales Agent tab toggle restores it.
+          Note: must use a render conditional (not a `hidden` class) because
+          Tailwind's `lg:flex` media-query rule wins over the unprefixed
+          `hidden` utility at desktop breakpoints, leaving the card visible
+          even when view==='email'. */}
+      {view !== 'email' && (
       <Card className={cn(GLASS, 'bb-card-in', 'lg:h-full lg:flex lg:flex-col lg:min-h-0')}>
         <CardHeader>
+          {/* Collapse / expand toggle - top-right of the card header.
+              Lets the rep narrow Step 1 to a 1-line summary so Steps
+              2 + 3 (or the email panel) get more vertical + horizontal
+              room. User-controlled; doesn't auto-collapse on classify. */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
           {fromAccount ? (
             <>
               <CardTitle className="flex items-center gap-2">
@@ -622,7 +889,40 @@ export default function PipelinePage() {
               <CardDescription>Pick an ICP, then analyze any company website against it.</CardDescription>
             </>
           )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep1Collapsed((v) => !v)}
+              className="shrink-0 text-muted-foreground hover:text-foreground p-1 -m-1 rounded-md hover:bg-foreground/[0.05]"
+              title={step1Collapsed ? 'Expand Step 1' : 'Collapse Step 1 to give Steps 2/3 more room'}
+            >
+              {step1Collapsed
+                ? <IconChevronDown className="h-3.5 w-3.5" />
+                : <IconChevronUp className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+          {/* Collapsed-state summary - only shown when collapsed AND we have
+              a classification to summarise. Tells the rep at a glance who
+              the company is and the verdict without expanding the card. */}
+          {step1Collapsed && classification && (
+            <div className="mt-2 text-[11px] text-muted-foreground truncate">
+              <span className={cn(
+                'font-medium',
+                classification.is_match === true ? 'text-emerald-600 dark:text-emerald-400' :
+                classification.is_match === false ? 'text-red-600 dark:text-red-400' :
+                'text-foreground',
+              )}>
+                {classification.is_match === true ? '✓' : classification.is_match === false ? '✗' : '·'}{' '}
+                {classification.name || classification.title || classification.domain || 'Company'}
+              </span>
+              {activeIcpName && <span> · {activeIcpName}</span>}
+            </div>
+          )}
         </CardHeader>
+        {/* Collapse hides everything below the header. The Card itself
+            still renders so the layout (grid template change) animates
+            smoothly. Re-expand from the chevron in the header. */}
+        {!step1Collapsed && (
         <CardContent className="space-y-3 lg:flex-1 lg:overflow-y-auto lg:min-h-0">
           {fromAccount ? (
             // Inline "pre-loaded" banner. Shows the account context (which
@@ -664,6 +964,84 @@ export default function PipelinePage() {
                   ))}
                 </select>
               </div>
+
+              {/* Existing-company picker. Shown once an ICP is selected so
+                  the rep can either (a) type to find a previously classified
+                  company already in our DB, or (b) skip this row entirely
+                  and paste a URL below. Reuses /api/companies?icp=X&match=true
+                  which the Sequences picker also hits - server-side filter
+                  ensures we only surface qualified accounts. */}
+              {selectedIcpId && (
+                <div className="relative">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">Pick</label>
+                    <Input
+                      placeholder={
+                        icpCompaniesLoading
+                          ? 'Loading existing accounts…'
+                          : icpCompanies.length === 0
+                            ? 'No qualified companies in this ICP yet. Paste a URL below.'
+                            : `Search ${icpCompanies.length} existing compan${icpCompanies.length === 1 ? 'y' : 'ies'} in this ICP, or paste a URL below`
+                      }
+                      value={companySearch}
+                      onChange={(e) => { setCompanySearch(e.target.value); setCompanyPickerOpen(true) }}
+                      onFocus={() => setCompanyPickerOpen(true)}
+                      onBlur={() => setTimeout(() => setCompanyPickerOpen(false), 150)}
+                      disabled={classifyLoading || icpCompanies.length === 0}
+                      className="text-xs"
+                    />
+                  </div>
+                  {companyPickerOpen && filteredCompanies.length > 0 && (
+                    <div className="absolute z-10 left-0 right-0 mt-1 rounded-md border border-border bg-background shadow-lg overflow-hidden">
+                      <ul className="max-h-80 overflow-y-auto">
+                        {filteredCompanies.map((c) => (
+                          <li key={c.id}>
+                            <button
+                              type="button"
+                              // onMouseDown (not onClick) so the blur on the
+                              // input doesn't fire first and close the popover
+                              // before the click registers.
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                const target = c.url || (c.domain ? `https://${c.domain}` : '')
+                                if (target) {
+                                  setUrl(target)
+                                  setCompanySearch('')
+                                  setCompanyPickerOpen(false)
+                                }
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-foreground/[0.05] transition-colors flex items-center gap-2"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-medium truncate">{c.name || c.domain || '(unnamed)'}</div>
+                                <div className="text-[10px] text-muted-foreground truncate">
+                                  {c.domain && <>{c.domain}</>}
+                                  {c.country && <> · {c.country}</>}
+                                </div>
+                              </div>
+                              <span className="text-[10px] text-sky-600 dark:text-sky-400 shrink-0">use →</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      {/* Footer count so the rep knows the full size of the
+                          ICP cohort and whether they're seeing all of it or
+                          a search-filtered subset. */}
+                      <div className="border-t border-border bg-muted/30 px-3 py-1.5 text-[10px] text-muted-foreground">
+                        {companySearch.trim()
+                          ? <>Showing {filteredCompanies.length} of {icpCompanies.length} - keep typing to narrow</>
+                          : <>All {icpCompanies.length} qualified · scroll for more</>}
+                      </div>
+                    </div>
+                  )}
+                  {companyPickerOpen && filteredCompanies.length === 0 && companySearch.trim() && icpCompanies.length > 0 && (
+                    <div className="absolute z-10 left-0 right-0 mt-1 rounded-md border border-border bg-background shadow-lg px-3 py-2 text-[11px] text-muted-foreground italic">
+                      No matches in this ICP - paste a URL below to classify a new company.
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <Input
                   placeholder="https://example-company.com"
@@ -722,7 +1100,9 @@ export default function PipelinePage() {
           )}
           {classification && <ScrapedContactsBlock contacts={contacts} />}
         </CardContent>
+        )}{/* /!step1Collapsed */}
       </Card>
+      )}{/* /view !== email */}
 
       {/* ─── Right column: Leads (top) + Email (bottom) ──────────────────
           On mobile `display: contents` makes Step 2 and Step 3 act as
@@ -734,10 +1114,9 @@ export default function PipelinePage() {
       <div className="contents lg:flex lg:flex-col lg:gap-6 lg:min-h-0">
 
       {/* ─── Step 2: leads ─────────────────────────────────────────────── */}
-      {/* Always-render so the slot stays in place during the pipeline.
-          Placeholder while disabled, real content once a URL has been
-          classified. Internal scroll handles long lead lists. */}
-      {!showLeadsCard ? (
+      {/* Hidden via render-conditional (same Tailwind override caveat as
+          Step 1) when view='email' - the rep is focused on the draft. */}
+      {view !== 'email' && (!showLeadsCard ? (
         <Card className={cn(GLASS, 'bb-card-in', 'opacity-60', 'lg:flex-1 lg:flex lg:flex-col lg:min-h-0')} style={{ animationDelay: '80ms' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-muted-foreground">
@@ -786,8 +1165,33 @@ export default function PipelinePage() {
               </div>
             )}
             {leads && leads.length === 0 && (
-              <div className="text-sm text-muted-foreground">
-                No decision-makers found in Apollo for this domain.
+              // Apollo returned no decision-makers - common for tiny ops
+              // (single-location, founder-only, no LinkedIn presence). Offer
+              // a no-name "general" email straight from here so the rep
+              // doesn't have to figure out that the Step 3 Generate button
+              // also covers this case. Same handler the Step 3 button uses.
+              <div className="space-y-2 rounded-md border border-amber-300/40 bg-amber-50/30 dark:bg-amber-950/20 p-3">
+                <div className="text-sm text-muted-foreground">
+                  No decision-makers found in Apollo for this domain.
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleGenerateEmail({
+                    firstName: '',
+                    lastName: '',
+                    title: '',
+                    email: null,
+                    emailStatus: null,
+                    linkedinUrl: null,
+                    hasEmail: false,
+                    apolloId: null,
+                  } as Lead)}
+                  disabled={emailLoading || !classification}
+                >
+                  {emailLoading ? <IconLoader2 className="h-3 w-3 animate-spin" /> : <IconMail className="h-3 w-3" />}
+                  Generate general email
+                </Button>
               </div>
             )}
             {leads && leads.length > 0 && (
@@ -797,13 +1201,14 @@ export default function PipelinePage() {
                     key={lead.apolloId || i}
                     lead={lead}
                     isActive={activeLead?.apolloId === lead.apolloId}
-                    onGenerate={() => handleGenerateEmail(lead)}
-                    disabled={emailLoading && activeLead?.apolloId !== lead.apolloId}
+                    onReveal={() => handleRevealLead(lead)}
+                    onSelect={() => setActiveLead(lead)}
                     enrichingPhone={!!lead.apolloId && phoneEnriching.has(lead.apolloId)}
                     onGetPhone={() => handleGetPhone(lead)}
                     phoneEmpty={!!lead.apolloId && !!phoneEmpty[lead.apolloId]}
                     phoneError={lead.apolloId ? phoneError[lead.apolloId] || null : null}
                     canGetPhone={!!lead.apolloId && !!companyId}
+                    preEnriching={!!lead.apolloId && preEnrichingApolloId === lead.apolloId}
                   />
                 ))}
               </div>
@@ -817,54 +1222,73 @@ export default function PipelinePage() {
             )}
           </CardContent>
         </Card>
-      )}
+      ))}
 
-      {/* ─── Step 3: email ─────────────────────────────────────────────── */}
-      {/* Always-render so the grid keeps three columns. Real card once a
-          lead has been picked; placeholder until then. */}
-      {!showLeadsCard || !activeLead ? (
-        <Card className={cn(GLASS, 'bb-card-in', 'opacity-60', 'lg:flex-[2] lg:flex lg:flex-col lg:min-h-0')} style={{ animationDelay: '160ms' }}>
+      {/* ─── Step 3: outreach config + email ────────────────────────────── */}
+      {/* Unified card. Pre-classify it's a dim placeholder. Once classified
+          the config (template + custom instruction + Generate / Sequence
+          buttons) is ALWAYS visible - the prior code hid these behind
+          activeLead so reps who had no leads (or hadn't clicked one yet)
+          never saw the template selector exists. The email subject+body
+          editor appears below the config once a draft is generated. */}
+      {!showLeadsCard ? (
+        <Card className={cn(GLASS, 'bb-card-in', 'opacity-60', 'lg:flex lg:flex-col lg:min-h-0', view === 'email' ? 'lg:flex-1' : 'lg:flex-none')} style={{ animationDelay: '160ms' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-muted-foreground">
-              <IconMail className="h-5 w-5" /> Step 3 · Outreach email
+              <IconMail className="h-5 w-5" /> Step 3 · Outreach
             </CardTitle>
             <CardDescription>
-              {!showLeadsCard
-                ? 'Pick a lead in step 2 to draft an email.'
-                : 'Click "Reveal & generate" or "Generate email" on a lead to draft the outreach.'}
+              Analyze a company in Step 1 to enable outreach.
             </CardDescription>
           </CardHeader>
         </Card>
       ) : (
-        <Card className={cn(GLASS, 'bb-card-in', 'lg:flex-[2] lg:flex lg:flex-col lg:min-h-0')} style={{ animationDelay: '160ms' }}>
+        <Card className={cn(GLASS, 'bb-card-in', 'lg:flex lg:flex-col lg:min-h-0', view === 'email' ? 'lg:flex-1' : 'lg:flex-none')} style={{ animationDelay: '160ms' }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <IconMail className="h-5 w-5" /> Step 3 · Outreach email
-            </CardTitle>
+            {/* In Email view the rep already knows they're looking at the
+                outreach draft (the tab label says so). Drop the "Step 3 ·
+                Outreach" title to clean up vertical space - keep the
+                "From X to Y" description so the recipient is obvious. */}
+            {view !== 'email' && (
+              <CardTitle className="flex items-center gap-2">
+                <IconMail className="h-5 w-5" /> Step 3 · Outreach
+              </CardTitle>
+            )}
             <CardDescription>
-              From {senderLabel} to{' '}
-              <span className="font-medium">
-                {activeLead.firstName} {activeLead.lastName || ''}
-              </span>
-              {activeLead.email && <span className="text-xs text-muted-foreground"> · {activeLead.email}</span>}
+              {activeLead && (activeLead.firstName || activeLead.lastName)
+                ? <>From {senderLabel} to <span className="font-medium">{activeLead.firstName} {activeLead.lastName || ''}</span>{activeLead.email && <span className="text-xs text-muted-foreground"> · {activeLead.email}</span>}</>
+                : leads && leads.length === 0 && classification
+                  ? <>From {senderLabel} to <span className="font-medium">{classification.name || classification.domain}</span> <span className="text-xs text-muted-foreground">· general (no contact identified)</span></>
+                  : 'Reveal then Select a lead above, or click Generate for a no-name email.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 lg:flex-1 lg:overflow-y-auto lg:min-h-0">
+            {/* ── Config block: Sales Agent tab only ──────────────────
+                In the Email tab we strip everything but the draft + the
+                Sent/Skip decision so the rep can focus on review. To
+                tweak the prompt and regenerate, the rep clicks back to
+                the Sales Agent tab. */}
+            {view === 'workspace' && (
+              <>
+
             {/* Template picker - drives sender persona + system prompt.
-                When the rep arrives from My Accounts, the auto-suggest
-                pre-fills this; otherwise they can pick before generating
-                or change between regenerations. Filtered by workspace so
-                a NedFox rep doesn't see Bluebird templates by default. */}
+                Filtered by workspace so a NedFox rep doesn't see Bluebird
+                templates by default. */}
             {visibleTemplates.length > 0 && (
               <div className="flex items-center gap-2">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">Template</label>
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0 w-20">Template</label>
+                {/* No "Default (X)" placeholder option - it was always the
+                    same as picking the seeded fazal-bluebird template
+                    explicitly (the backend's empty-templateId path resolved
+                    to it by ICP), so it showed up twice and confused reps
+                    into thinking there were "3 templates" when there were
+                    really 2 (seeded + their custom). */}
                 <select
                   value={activeTemplateId}
                   onChange={(e) => setActiveTemplateId(e.target.value)}
                   className="text-xs border border-border rounded-md bg-background text-foreground px-2 py-1 [color-scheme:light_dark] flex-1"
                   disabled={emailLoading}
                 >
-                  <option value="">Default (Fazal - Bluebird)</option>
                   {visibleTemplates.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name} · {t.portfolioCompany} · {t.language}
@@ -873,8 +1297,92 @@ export default function PipelinePage() {
                 </select>
               </div>
             )}
+
+            {/* Custom instruction - free-form steering the rep can write
+                BEFORE generating. Appended to the user message in the
+                prompt so GPT picks up things like "mention their recent
+                expansion" or "keep it under 60 words". Persists across
+                regenerations on the same lead. */}
+            <div className="flex items-start gap-2">
+              <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0 w-20 mt-1.5">Custom prompt</label>
+              <textarea
+                value={outreachCustomInstruction}
+                onChange={(e) => setOutreachCustomInstruction(e.target.value)}
+                placeholder="Optional · steer the draft, e.g. 'anchor on their recent location expansion' or 'no jargon'"
+                rows={2}
+                className="flex-1 text-xs border border-border rounded-md bg-background text-foreground px-2 py-1.5 [color-scheme:light_dark] resize-y"
+                disabled={emailLoading}
+              />
+            </div>
+
+            {/* Action button - lives only on the Sales Agent tab. The
+                rep edits config here, hits Generate, and the page auto-
+                switches to the Email tab for review. */}
+            <div className="flex items-center gap-2 flex-wrap pt-1">
+              {(() => {
+                // Generate is enabled in two cases:
+                //   - No leads were found (Apollo returned 0) → generate a
+                //     no-name email using the classification + scraped contacts.
+                //   - The rep has Revealed a lead (activeLead.enriched true)
+                //     and that reveal isn't still in flight.
+                // If leads exist but none have been revealed yet, the rep
+                // needs to click Reveal on a lead row first - we don't
+                // silently couple Reveal+Generate any more.
+                const noLeadsFlow = !leads || leads.length === 0
+                const hasEnrichedActive = !!activeLead && !!activeLead.enriched && preEnrichingApolloId === null
+                const canGenerate = !emailLoading && !!classification && (noLeadsFlow || hasEnrichedActive)
+                const hint = noLeadsFlow
+                  ? 'No Apollo leads on this company - will generate a no-name "Hello," email.'
+                  : !activeLead
+                    ? 'Click Reveal on a lead above to spend an Apollo credit, then click Generate.'
+                    : !activeLead.enriched
+                      ? 'Reveal this lead first - we need their verified email + LI before generating.'
+                      : preEnrichingApolloId
+                        ? 'Reveal in flight - wait for it to land.'
+                        : ''
+                return (
+                  <Button
+                    onClick={() => {
+                      const target = activeLead || (leads && leads[0])
+                      if (target) handleGenerateEmail(target)
+                      else if (classification) {
+                        // No-leads path - pass an empty lead shape; backend
+                        // prompt builder falls back to "Hi there," greeting.
+                        handleGenerateEmail({
+                          firstName: '',
+                          lastName: '',
+                          title: '',
+                          email: null,
+                          emailStatus: null,
+                          linkedinUrl: null,
+                          hasEmail: false,
+                          apolloId: null,
+                        } as Lead)
+                      }
+                    }}
+                    disabled={!canGenerate}
+                    className="bg-sky-600 hover:bg-sky-700 text-white"
+                    title={hint || undefined}
+                  >
+                    {emailLoading ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" /> : <IconMail className="h-3.5 w-3.5" />}
+                    {email ? 'Regenerate email' : noLeadsFlow ? 'Generate general email' : 'Generate email'}
+                  </Button>
+                )
+              })()}
+            </div>
+              </>
+            )}
+
+            {/* ── Email block: appears once the draft lands ──────────── */}
+            {/* Hidden in workspace view to keep Step 3 compact (Step 2 gets
+                the extra vertical space). When generation completes the
+                page auto-switches to email view where Step 3 takes full
+                width and renders the Subject/Body editor below. While
+                generating we still show a small inline spinner so the rep
+                gets feedback without leaving the workspace. */}
+
             {emailLoading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
                 <IconLoader2 className="h-4 w-4 animate-spin" />
                 Generating email…
               </div>
@@ -885,8 +1393,17 @@ export default function PipelinePage() {
                 <div>{emailError}</div>
               </div>
             )}
-            {email && (
-              <div className="space-y-3">
+            {email && view === 'email' && (
+              // Viewport-based textarea height instead of a flex-1 chain.
+              // CardContent uses `space-y-3` (margin, not flex), so any
+              // flex-1 on nested children would have no flex parent to
+              // grow against and the textarea would collapse to its
+              // ~2-row HTML default. Calc subtracts the fixed chrome
+              // above + below (page title, tab strip, Card padding,
+              // Subject row, Body label, Copy button, Confirm/Reject bar
+              // if shown). Tuning: bump the 360px term up if anything new
+              // gets added above or below the textarea in email view.
+              <div className="space-y-3 border-t border-border/40 pt-3">
                 <div>
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Subject</div>
                   <div className="rounded-md border bg-muted/30 px-3 py-2 text-sm font-medium">
@@ -898,16 +1415,22 @@ export default function PipelinePage() {
                   <textarea
                     value={email.body}
                     onChange={(e) => setEmail({ ...email, body: e.target.value })}
-                    className="min-h-[180px] w-full resize-y rounded-md border bg-background px-3 py-2 text-sm font-mono leading-relaxed shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    // rows sizes the textarea to the email's actual line
+                    // count so it ends right where the email ends - that
+                    // leaves Copy + the Sent/Skip card visible below
+                    // without scrolling. Floor of 8 keeps it from looking
+                    // cramped if the model returns a tiny stub. +2 adds a
+                    // small buffer below the signoff so the resize handle
+                    // and the last line aren't touching. resize-y still
+                    // lets the rep drag bigger if they want.
+                    rows={Math.max(8, (email.body.match(/\n/g) || []).length + 2)}
+                    className="w-full resize-y rounded-md border bg-background px-3 py-2 text-sm font-mono leading-relaxed shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Button onClick={handleCopyEmail} size="sm">
                     <IconCopy className="h-3 w-3" />
                     {copied ? 'Copied!' : 'Copy to clipboard'}
-                  </Button>
-                  <Button onClick={() => handleGenerateEmail(activeLead)} size="sm" variant="outline">
-                    <IconRefresh className="h-3 w-3" /> Regenerate
                   </Button>
                 </div>
               </div>
@@ -922,8 +1445,12 @@ export default function PipelinePage() {
           Once a rep has worked an account through the Sales Agent, they
           confirm or reject it right here without bouncing back to the
           Accounts page. Writes the same per-ICP review. Only shown in the
-          from-Accounts flow - a paste-classify URL has no account to mark. */}
-      {fromAccount && (
+          from-Accounts flow - a paste-classify URL has no account to mark.
+          Lives inside the Email tab now so the rep makes the Sent/Skip
+          call right after reviewing the draft (the natural workflow).
+          When still on the Sales Agent tab, the strip is suppressed -
+          the rep should review the email before deciding either way. */}
+      {fromAccount && view === 'email' && (
         <Card className={cn(GLASS, 'bb-card-in')}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -1263,34 +1790,33 @@ function RejectForm({
 function LeadRow({
   lead,
   isActive,
-  onGenerate,
-  disabled,
+  onReveal,
+  onSelect,
   enrichingPhone,
   onGetPhone,
   phoneEmpty,
   phoneError,
   canGetPhone,
+  preEnriching,
 }: {
   lead: Lead
   isActive: boolean
-  onGenerate: () => void
-  disabled: boolean
+  onReveal: () => void
+  // Marks this row as the active lead - Step 3's Generate button will
+  // target this lead. Doesn't spend any credits; pure UI selection.
+  onSelect: () => void
   enrichingPhone: boolean
   onGetPhone: () => void
   phoneEmpty: boolean
   phoneError: string | null
   canGetPhone: boolean
+  // True ONLY while the email-gen handler is waiting on Apollo to reveal
+  // this row's email + LI. Shows a spinning "Enriching…" badge so the rep
+  // sees something is happening on this row.
+  preEnriching: boolean
 }) {
   const fullName = `${lead.firstName} ${lead.lastName || ''}`.trim() || '(unknown)'
   const isEnriched = !!lead.enriched
-
-  // Button label communicates the cost: "Reveal & generate" warns the user
-  // that this click will spend an Apollo credit on this person, while
-  // "Generate email" / "Regenerate" indicates the lead is already enriched
-  // and only OpenAI is hit.
-  let buttonLabel = 'Reveal & generate'
-  if (isActive) buttonLabel = 'Regenerate'
-  else if (isEnriched) buttonLabel = 'Generate email'
 
   return (
     <div
@@ -1305,7 +1831,12 @@ function LeadRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-sm truncate">{fullName}</span>
-          {isEnriched && (
+          {preEnriching && (
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300">
+              <IconLoader2 className="h-2.5 w-2.5 animate-spin mr-1" /> Enriching…
+            </Badge>
+          )}
+          {isEnriched && !preEnriching && (
             <Badge variant="success" className="text-[9px] px-1.5 py-0">
               <IconCheck className="h-2.5 w-2.5" /> Enriched
             </Badge>
@@ -1364,10 +1895,29 @@ function LeadRow({
         )}
       </div>
       <div className="flex flex-col items-end gap-1.5">
-        <Button size="sm" variant={isActive ? 'default' : 'outline'} onClick={onGenerate} disabled={disabled}>
-          <IconMail className="h-3 w-3" />
-          {buttonLabel}
-        </Button>
+        {/* Two row actions only:
+              - Reveal (when not enriched) → spends an Apollo credit to
+                fetch verified email + LinkedIn.
+              - Select (when enriched, not active) → marks this lead as
+                the target for Step 3's Generate. Pure UI, no credits.
+              - Selected pill (when enriched + active) → no button; the
+                rep can see this is the lead Step 3 will draft for.
+            Generate lives ONLY in Step 3 now so there's exactly one
+            "send GPT credits" surface in the flow. */}
+        {!isEnriched ? (
+          <Button size="sm" variant="outline" onClick={onReveal} disabled={preEnriching} title="Reveal verified email + LinkedIn (1 Apollo credit)">
+            {preEnriching ? <IconLoader2 className="h-3 w-3 animate-spin" /> : <IconCheck className="h-3 w-3" />}
+            {preEnriching ? 'Revealing…' : 'Reveal'}
+          </Button>
+        ) : isActive ? (
+          <Badge variant="outline" className="text-[10px] px-2 py-1 border-emerald-500/60 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+            <IconCheck className="h-3 w-3" /> Selected
+          </Badge>
+        ) : (
+          <Button size="sm" variant="outline" onClick={onSelect} title="Make this the lead Step 3 generates for">
+            Select
+          </Button>
+        )}
         {/* Get-phone is only useful when the lead is already enriched but
             came back without a phone - that's the retry case. For brand-new
             leads, the main Reveal & generate already grabs phone for free

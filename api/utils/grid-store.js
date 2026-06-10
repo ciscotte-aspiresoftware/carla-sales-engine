@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { isEnabled, getClient } = require('../db');
+const { safeWrite } = require('./safe-write');
 
 const DATA_DIR = path.resolve(__dirname, '..', 'data');
 const FILE = path.join(DATA_DIR, 'grid.json');
@@ -220,9 +221,19 @@ async function updateCell(id, updates) {
     if (isEnabled()) {
         const patch = cellUpdatesToRow(updates);
         patch.updated_at = new Date().toISOString();
-        const { data, error } = await getClient().from('grid_cells').update(patch).eq('id', id).select('*').maybeSingle();
-        if (error || !data) return null;
-        return cellRowToObj(data);
+        // safeWrite retries transient Supabase failures (network blips,
+        // gateway hiccups) so a cell update that briefly fails doesn't
+        // leave the cell in stale state. Returns null on permanent
+        // failure - the caller (sweep pipeline) handles that path.
+        try {
+            const { data, error } = await safeWrite(`updateCell ${id}`, () =>
+                getClient().from('grid_cells').update(patch).eq('id', id).select('*').maybeSingle(),
+            );
+            if (error || !data) return null;
+            return cellRowToObj(data);
+        } catch {
+            return null;
+        }
     }
     const data = await readAll();
     const idx = data.cells.findIndex(c => c.id === id);

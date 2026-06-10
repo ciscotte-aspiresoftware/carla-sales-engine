@@ -25,7 +25,12 @@ const EMAIL_JUNK_RE = /\.(png|jpe?g|gif|svg|webp|ico|css|js)$/i;
 const EMAIL_JUNK_DOMAINS = ['example.com', 'sentry.io', 'wixpress.com', 'domain.com', 'email.com', 'yourcompany.com'];
 
 // ─── Phone ────────────────────────────────────────────────────────────
-const TEL_RE = /tel:([+\d][\d\s().-]{5,})/gi;
+// Parens are not legal in a real tel: URL (would be percent-encoded) so
+// they're excluded - including them let captures bleed past the URL's
+// real end, e.g. <a href="tel:7135103235">…</a>) 1300 → "7135103235) 1300".
+// Spaces are kept because RFC 3966 allows hyphens/spaces inside the
+// number itself; tel:+1 832 510 6936 is valid.
+const TEL_RE = /tel:([+\d][\d\s.-]{5,})/gi;
 // Free-text phone candidates. Deliberately broad - validated downstream
 // by stripping to digits and checking the count. Three shapes:
 //   +44 20 1234 5678   (international)
@@ -36,7 +41,11 @@ const PHONE_FREE_RE = /(?:\+\d[\d\s().-]{6,}\d)|(?:\(\d{2,5}\)[\s.-]?\d[\d\s.-]{
 // Phone-shaped non-phones the loose regex would otherwise grab:
 //   • opening-hours ranges: "09.00-17.00", "9:00 - 17:30"
 //   • single times:         "09.00"
-//   • dates:                "25-05-2026", "01/01/26"
+//   • dates DD-first:       "25-05-2026", "01/01/26"
+//   • dates YYYY-first:     "2017-07-12", "2017-07-12 18" (ISO 8601 timestamps
+//                           - these appear in scraped review feeds + post logs
+//                           and look exactly like phone numbers to the loose
+//                           regex: 4-2-2-2 dash chunks with 10 digits total)
 //   • decimal coordinates:  "51.8306625" (NL lat scrapped from map blocks)
 //   • registration IDs:     "8596.94.008" (NL KvK), "202.4752.5607" (structured codes)
 //   • IBAN fragments:       "0000 4187 1146" (4+ leading zeros never appear in phone systems)
@@ -44,6 +53,12 @@ const PHONE_FREE_RE = /(?:\+\d[\d\s().-]{6,}\d)|(?:\(\d{2,5}\)[\s.-]?\d[\d\s.-]{
 const TIME_RANGE_RE = /\d{1,2}[.:]\d{2}\s*[-–-]\s*\d{1,2}[.:]\d{2}/;
 const TIME_RE = /^\s*\d{1,2}[.:]\d{2}\s*$/;
 const DATE_RE = /\b\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\b/;
+// ISO 8601 date: YYYY-MM-DD with optional time tail (" 18", " 18:30", "T18:30").
+// Anchored on a 4-digit year + dash/slash + 1-2 digit month + dash/slash + 1-2
+// digit day so a real phone like "1234-567-8901" (which has only 4 digits in
+// the first chunk) doesn't false-match - the day chunk must be 1-2 digits, the
+// month chunk must be 1-2 digits.
+const ISO_DATE_RE = /\b\d{4}[-/.][01]?\d[-/.][0-3]?\d(?:[\sT]\d{1,2}(?::\d{2})?)?\b/;
 
 // ─── LinkedIn ─────────────────────────────────────────────────────────
 const LI_PERSON_RE = /(?:https?:\/\/)?(?:[a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9_%-]+/gi;
@@ -68,7 +83,7 @@ function uniqLower(arr) {
 // (25052026), not a phone. E.164 caps the upper bound at 15.
 function isPlausiblePhone(raw) {
     const s = String(raw).trim();
-    if (TIME_RANGE_RE.test(s) || TIME_RE.test(s) || DATE_RE.test(s)) return false;
+    if (TIME_RANGE_RE.test(s) || TIME_RE.test(s) || DATE_RE.test(s) || ISO_DATE_RE.test(s)) return false;
     const digits = s.replace(/[^\d]/g, '');
     if (digits.length < 9 || digits.length > 15) return false;
     if (/^(\d)\1+$/.test(digits)) return false; // 0000000, 1111111

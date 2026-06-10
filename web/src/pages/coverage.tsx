@@ -23,6 +23,7 @@ import { GLASS, GLASS_SUBTLE } from '@/lib/glass'
 const CoverageGlobe = lazy(() => import('@/components/coverage/coverage-globe'))
 const CoverageMap = lazy(() => import('@/components/coverage/coverage-map'))
 import NowSweepingPanel from '@/components/coverage/now-sweeping-panel'
+import RecentSessionsPanel from '@/components/coverage/recent-sessions'
 import NowScrapingTrace from '@/components/coverage/now-scraping-trace'
 import GlobePlaceholder from '@/components/coverage/globe-placeholder'
 import { useSweepEvents } from '@/hooks/use-sweep-events'
@@ -253,6 +254,16 @@ export default function CoveragePage() {
   const [rescanError, setRescanError] = useState<string | null>(null)
   // 'all' = every city in the ICP; otherwise the city label being targeted.
   const [activeCity, setActiveCity] = useState<string>('all')
+  // Auto-cancel a stale preview whenever the user changes the ICP, scope
+  // (city/country toggle), picked city, or picked country. Otherwise the
+  // preview shows cells for the OLD selection while the controls reflect
+  // the NEW one - confusing UX that required the rep to manually click
+  // "Cancel preview" first. Idempotent: setting null when it's already
+  // null is harmless, so we don't bother guarding the no-op case.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only the four pickers
+  useEffect(() => {
+    setPreview(null)
+  }, [activeIcp, scope, activeCity, activeCountry])
   // View mode swaps based on zoom: 'globe' for big-picture / pre-seed,
   // 'map' for street-level cell inspection. Pre-seed (no cells) we force
   // 'globe' UNLESS a preview is active - the user just clicked Preview
@@ -325,15 +336,34 @@ export default function CoveragePage() {
     // multi-city seed by accident. "All cities" is still in the dropdown
     // as a deliberate choice. Falls back to "all" only if the ICP has no
     // cities listed (edge case for newly-created ICPs).
+    //
+    // RACE-CONDITION GUARD: the "← Last paused" chip's click handler
+    // batches setActiveIcp + setActiveCity. After React renders the new
+    // state, THIS effect fires (activeIcp changed). Before the guard, it
+    // would unconditionally re-write activeCity back to icp.cities[0],
+    // landing the user on London when they meant Manchester. Now we only
+    // override if the current value isn't a valid choice for the new ICP -
+    // explicit clicks (chip, programmatic) are preserved; switches from
+    // the picker still get the "first city" default because the prior
+    // ICP's city is almost always invalid in the new ICP.
     const nextIcp = icps.find((i) => i.id === activeIcp)
-    const firstCity = nextIcp?.cities?.[0]
-    setActiveCity(firstCity || 'all')
-    // Same idea for country: snap to the FIRST country the ICP targets, so
-    // the dropdown shows a valid selection. The dropdown itself is filtered
-    // below to only the ICP's countries (e.g. NedFox - Garden Centres has
-    // only NL ticked, so other markets shouldn't be pickable here).
-    const firstCountry = nextIcp?.countries?.[0]
-    if (firstCountry) setActiveCountry(firstCountry)
+    const cities = (nextIcp?.cities || []).map((c) => String(c).toLowerCase())
+    const currentCityValid = activeCity === 'all' || cities.includes(String(activeCity || '').toLowerCase())
+    if (!currentCityValid) {
+      const firstCity = nextIcp?.cities?.[0]
+      setActiveCity(firstCity || 'all')
+    }
+    // Same idea for country, same guard: only snap to the first country
+    // when the current value isn't allowed for this ICP. A chip click that
+    // set activeCountry='NL' would have been clobbered by the old
+    // unconditional setActiveCountry(firstCountry) on the next render.
+    const countries = (nextIcp?.countries || []).map((c) => String(c).toUpperCase())
+    const currentCountryValid = countries.includes(String(activeCountry || '').toUpperCase())
+    if (!currentCountryValid) {
+      const firstCountry = nextIcp?.countries?.[0]
+      if (firstCountry) setActiveCountry(firstCountry)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIcp, icps])
 
   // Defensive country re-snap. Belt-and-suspenders alongside the snap above:
@@ -697,12 +727,47 @@ export default function CoveragePage() {
   // company will finish first" indicator. Cleared on Resume.
   const [pauseRequested, setPauseRequested] = useState<boolean>(false)
   const [pauseClickBusy, setPauseClickBusy] = useState<boolean>(false)
+  // The cron's reason for being paused:
+  //   'manual'  - operator clicked Pause (banner shows + Resume CTA)
+  //   'budget'  - per-ICP cell cap hit (auto-pause; scope button relabels to "Resume sweeping…", banner hidden)
+  //   'no_work' - no pending cells in scope (auto-pause; scope button shows "All swept" if scope is done)
+  //   'boot'    - fresh restart, no session to resume (no banner)
+  //   null      - cron is running
+  const [pauseReason, setPauseReason] = useState<string | null>('boot')
+  // The most recent operator-paused session. Drives the "← Last paused:
+  // {icp} · {scope} ({time}) - click to switch view" chip near the Resume
+  // button. Null when the most recent session ended cleanly / auto-paused /
+  // is still running, OR when the current picker selection already matches
+  // (no need to nudge the user back to where they already are).
+  interface LastPausedSession {
+    id: string
+    started_at: string
+    icp_id: string | null
+    scope_type: 'city' | 'country' | 'all' | null
+    scope_value: string | null
+    cells_succeeded: number
+    cells_attempted: number
+  }
+  const [lastPausedSession, setLastPausedSession] = useState<LastPausedSession | null>(null)
   const refreshLastScopes = async () => {
     try {
       const r = await fetch(`${API}/api/grid/sweep-state`).then((res) => res.json())
       if (r?.success && r.lastScopes) setLastScopes(r.lastScopes)
       if (r?.success && typeof r.paused === 'boolean') setCronPaused(r.paused)
       if (r?.success && typeof r.pauseRequested === 'boolean') setPauseRequested(r.pauseRequested)
+      // pauseReason is the new field added 2026-06-08 - tolerate missing
+      // (older backend) by leaving the previous value in place. The banner
+      // gate below treats null as "not paused" so an older backend just
+      // falls back to the previous "banner always shows when paused"
+      // behavior - no regression.
+      if (r?.success && (typeof r.pauseReason === 'string' || r.pauseReason === null)) {
+        setPauseReason(r.pauseReason)
+      }
+      // Piggyback the "last paused session" fetch on the same poll cadence
+      // so the chip refreshes without a second timer. Cheap call - one
+      // sweep_sessions LIMIT 5 over an indexed table.
+      const lp = await fetch(`${API}/api/grid/last-paused-session`).then((res) => res.json())
+      if (lp?.success) setLastPausedSession(lp.session || null)
     } catch { /* non-fatal - chip just stays stale */ }
   }
   useEffect(() => { void refreshLastScopes() }, [])
@@ -983,7 +1048,9 @@ export default function CoveragePage() {
   // with a single button whose label and action reflect the actual state.
   // The state-derivation here is purely client-side from existing data
   // (cells + sweep progress + active scope).
-  const [seedConfirmOpen, setSeedConfirmOpen] = useState(false)
+  // (seedConfirmOpen removed - the in-page popover had repeated layout /
+  // click-interception bugs. Seed + sweep now goes through a native
+  // window.confirm() in the main button's action, which is bulletproof.)
   const [overflowOpen, setOverflowOpen] = useState(false)
   // Position the overflow menu via viewport coordinates instead of inline
   // absolute positioning. The Coverage header card uses GLASS, which has
@@ -1047,7 +1114,22 @@ export default function CoveragePage() {
     })
   }, [cells, scope, activeCity, activeCountry])
   const currentScopePending = currentScopeCells.filter((c) => c.state === 'pending').length
+  // "Done" in the strict sense - a cell that hit a terminal state.
   const currentScopeDone = currentScopeCells.filter((c) => c.state === 'complete' || c.state === 'no_new' || c.state === 'empty').length
+  // "Touched" widens the resume signal beyond terminal states. A cell that
+  // got paused mid-sweep stays in `state='pending'` with a `pause_checkpoint`
+  // JSONB attached (lead list cached, nextIdx saved); without this check the
+  // button would say "Sweep" instead of "Resume sweeping" for a scope where
+  // every cell was paused mid-flight (the case that hit Manchester after a
+  // manual pause). Also counts cells that just got past the Scrapingdog step
+  // (`placesFound > 0`) or have ever been scanned (`lastScannedAt` set) so
+  // partial progress shows up as resume-worthy too.
+  const currentScopeTouched = currentScopeCells.filter((c) =>
+    c.state === 'complete' || c.state === 'no_new' || c.state === 'empty'
+    || !!c.pauseCheckpoint
+    || (c.placesFound || 0) > 0
+    || !!c.lastScannedAt,
+  ).length
   const currentScopeLabel = scope === 'country'
     ? (countries.find((c) => c.code === activeCountry)?.name || activeCountry || 'a country')
     : (!activeCity || activeCity === 'all' ? 'all cities' : activeCity)
@@ -1085,7 +1167,6 @@ export default function CoveragePage() {
       setError(e.message)
     } finally {
       setSeeding(false)
-      setSeedConfirmOpen(false)
     }
   }
 
@@ -1116,7 +1197,21 @@ export default function CoveragePage() {
       return {
         kind: 'seedNeeded',
         label: `Seed + sweep ${currentScopeLabel}`,
-        action: () => setSeedConfirmOpen(true),
+        // Direct one-click action via a native confirm() prompt. The
+        // earlier in-page seed-confirm popover had repeated layout /
+        // pointer-events bugs (sat above the main button, intercepted
+        // clicks, never fired) - one of those bugs broke the Confirm
+        // button click silently. The native confirm() can't be styled
+        // but it's bulletproof and gives the rep the credit warning
+        // before any /seed POST goes out.
+        action: () => {
+          const ok = typeof window === 'undefined' || window.confirm(
+            `Seed + sweep ${currentScopeLabel}?\n\n`
+            + `This will generate cells for ${currentScopeLabel} and immediately start the sweep.\n\n`
+            + `Spends Scrapingdog credits.`
+          )
+          if (ok) void handleSeedAndSweepDirect()
+        },
         disabled: previewing || seeding,
         variant: 'default',
       }
@@ -1124,12 +1219,18 @@ export default function CoveragePage() {
     if (currentScopePending === 0) {
       return { kind: 'allDone', label: 'All swept ✓', action: () => {}, disabled: true, variant: 'outline' }
     }
-    // Pending cells exist - sweep them. (We don't distinguish "first start"
-    // vs "resume after budget hit" - both call reset-budget, and a single
-    // unambiguous label is friendlier than two near-identical buttons.)
+    // Pending cells exist - relabel based on whether this scope has any
+    // prior activity. "Touched" covers terminal states (complete/no_new/
+    // empty) AND cells paused mid-sweep with a checkpoint AND cells that
+    // got past the Scrapingdog search step (placesFound>0) AND cells that
+    // were ever scanned (lastScannedAt). All of those are resume situations
+    // - the user already spent some credits + GPT time here and just needs
+    // to keep going. Both actions still call handleResetBudget; the verb
+    // matches reality.
+    const isResume = currentScopeTouched > 0
     return {
       kind: 'sweep',
-      label: `Sweep ${currentScopePending} cell${currentScopePending === 1 ? '' : 's'} in ${currentScopeLabel}`,
+      label: `${isResume ? 'Resume sweeping' : 'Sweep'} ${currentScopePending} cell${currentScopePending === 1 ? '' : 's'} in ${currentScopeLabel}`,
       action: handleResetBudget,
       disabled: false,
       variant: 'default',
@@ -1249,6 +1350,13 @@ export default function CoveragePage() {
             {/* ICP picker moved to its own row below - the filters above
                 ("Portfolio Co." and "Vertical") narrow what shows in it. */}
           </div>
+          {/* Cell legend - sits at the right of the top row, fills the
+              empty space that was already there. Two compact clusters:
+              State (cell fill colors used on globe + map) and Tier
+              (stroke colors that only show up on country-fill cells in
+              the map view, where each cell's stroke encodes its density
+              source). Kept tiny so it never dominates the controls. */}
+          <CellLegend />
         </div>
 
         {/* ── Row 1: ICP picker ─────────────────────────────────────────── */}
@@ -1375,6 +1483,61 @@ export default function CoveragePage() {
           </span>
         </div>
 
+        {/* Last-paused session chip. Renders only when the most recent
+            operator-paused session differs from the current picker selection
+            - i.e. you stopped sweeping somewhere then navigated away. One
+            click restores the picker so the next Resume targets the same
+            scope you actually stopped at. Lives in its own row above the
+            action row so it can't shove the main button or interfere with
+            the seed-confirm popover's absolute positioning underneath. */}
+        {(() => {
+          if (!lastPausedSession) return null
+          const lp = lastPausedSession
+          const sameIcp = lp.icp_id === activeIcp
+          const sameScope =
+            (lp.scope_type === 'city' && scope === 'city' && (lp.scope_value || '').toLowerCase() === (activeCity || '').toLowerCase())
+            || (lp.scope_type === 'country' && scope === 'country' && (lp.scope_value || '').toUpperCase() === (activeCountry || '').toUpperCase())
+            || (lp.scope_type === 'all' && scope === 'country' && !activeCountry)
+          if (sameIcp && sameScope) return null
+          const icpName = icps.find((i) => i.id === lp.icp_id)?.name || lp.icp_id || '(unknown ICP)'
+          const scopeLabel = lp.scope_type === 'city'
+            ? lp.scope_value || 'city'
+            : lp.scope_type === 'country'
+              ? lp.scope_value || 'country'
+              : 'all scopes'
+          const ago = (() => {
+            const ms = Date.now() - new Date(lp.started_at).getTime()
+            if (ms < 60_000) return 'just now'
+            if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m ago`
+            if (ms < 86_400_000) return `${Math.round(ms / 3_600_000)}h ago`
+            return `${Math.round(ms / 86_400_000)}d ago`
+          })()
+          return (
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (lp.icp_id) setActiveIcp(lp.icp_id)
+                  if (lp.scope_type === 'city') {
+                    setScope('city')
+                    if (lp.scope_value) setActiveCity(lp.scope_value)
+                  } else if (lp.scope_type === 'country') {
+                    setScope('country')
+                    if (lp.scope_value) setActiveCountry(lp.scope_value)
+                  }
+                }}
+                className="inline-flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 px-2 py-1 text-[10px] font-medium hover:bg-amber-500/15 max-w-full"
+                title={`Switch the picker to ${icpName} · ${scopeLabel} (paused ${ago}, ${lp.cells_succeeded}/${lp.cells_attempted} cells done) so the next Resume targets the same scope you actually stopped at`}
+              >
+                <span className="shrink-0">← Last paused:</span>
+                <span className="font-semibold truncate max-w-[14rem]">{icpName}</span>
+                <span className="shrink-0">· {scopeLabel}</span>
+                <span className="shrink-0 opacity-70">({ago})</span>
+              </button>
+            </div>
+          )
+        })()}
+
         {/* ── Row 4: Actions ────────────────────────────────────────────── */}
         <div className="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-border/40">
           <Button
@@ -1424,7 +1587,13 @@ export default function CoveragePage() {
               </Button>
             </>
           ) : (
-            /* The contextual main button. Label + action are state-driven. */
+            /* The contextual main button. Label + action are state-driven.
+               IMPORTANT: this div is `relative` so the seed-confirm popover
+               can position absolutely beneath it. Don't add flex / extra
+               siblings here - the "Last paused" chip lives in its own row
+               BELOW the action row (rendered after the close of this whole
+               action div) so it can't shove the button or steal clicks
+               from the popover. */
             <div className="relative">
               <Button
                 size="sm"
@@ -1448,34 +1617,6 @@ export default function CoveragePage() {
                 {mainButton.label}
               </Button>
 
-              {/* Seed + sweep confirmation popover. Only rendered when the
-                  main button is in seedNeeded state and the user just clicked
-                  it. Positioned absolutely below the button so it doesn't
-                  push surrounding layout. */}
-              {seedConfirmOpen && (
-                <div className="absolute top-full mt-2 left-0 z-40 w-80 rounded-md border border-border bg-popover shadow-lg p-3 space-y-2">
-                  <div className="text-xs font-semibold">Seed + sweep {currentScopeLabel}?</div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    This will generate cells for {currentScopeLabel} and immediately start the sweep.
-                    <br />
-                    Spends Scrapingdog credits.
-                  </p>
-                  <div className="flex items-center gap-2 justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setSeedConfirmOpen(false)}
-                      disabled={seeding}
-                      className="text-[11px] px-2 py-1 rounded hover:bg-muted/40"
-                    >
-                      Cancel
-                    </button>
-                    <Button size="sm" onClick={handleSeedAndSweepDirect} disabled={seeding}>
-                      {seeding ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Play className="h-3 w-3 mr-1" />}
-                      Confirm
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -1612,26 +1753,52 @@ export default function CoveragePage() {
           (city / country) rather than the global queue. */}
       {(() => {
         const activeIcpPending = filteredIcps.find((i) => i.id === activeIcp)?.pendingCells || 0
-        if (!activeIcp || !cronPaused || activeIcpPending === 0) return null
+        // Banner is for MANUAL pauses only - the operator hit the Pause
+        // button mid-session and we want to make Resume one click away.
+        // Auto-pauses (budget cap hit, no work left in scope) are an
+        // expected end-of-session, not an interruption; for those, the
+        // contextual scope button below the picker relabels itself to
+        // "Resume sweeping N cells in {scope}" so the action is still
+        // discoverable without duplicating a giant banner.
+        if (!activeIcp || !cronPaused || activeIcpPending === 0 || pauseReason !== 'manual') return null
         const icpName = filteredIcps.find((i) => i.id === activeIcp)?.name || activeIcp
+        // Make the scope (Manchester, Birmingham, NL, etc.) huge in the
+        // banner so the rep can't mistake which resume they're about to
+        // fire - the most common confusion has been "wait, is this
+        // resuming Birmingham or Manchester?" when bouncing between cities
+        // within the same ICP. The text-2xl scope label sits between the
+        // paused-session header and the explanation line so it reads top-
+        // to-bottom: state → target → action.
+        const scopeLabel = scope === 'country'
+          ? (activeCountry || 'no country')
+          : (activeCity && activeCity !== 'all' ? activeCity : 'all cities')
         return (
-          <div className="px-3 py-2 mb-4 rounded-md text-xs flex items-center gap-3 flex-wrap border border-sky-500/40 bg-sky-500/10 text-sky-800 dark:text-sky-200">
-            <Pause className="h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
+          <div className="px-3 py-2 mb-4 rounded-md text-xs flex items-start gap-3 flex-wrap border border-sky-500/40 bg-sky-500/10 text-sky-800 dark:text-sky-200">
+            <Pause className="h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400 mt-1" />
             <div className="flex-1 min-w-0">
-              <span className="font-semibold">Paused session</span>
-              <span className="text-muted-foreground">
-                {' · '}
-                <span className="font-mono">{activeIcpPending}</span> pending cell{activeIcpPending === 1 ? '' : 's'} for <span className="font-medium text-foreground">{icpName}</span>
-              </span>
-              <div className="text-[10px] text-muted-foreground italic mt-0.5">
-                The cron boots paused after every backend restart. Click Resume to start sweeping the current {scope === 'country' ? 'country' : 'city'} scope.
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold">Paused session</span>
+                <span className="text-muted-foreground">
+                  ·{' '}
+                  <span className="font-mono">{activeIcpPending}</span> pending cell{activeIcpPending === 1 ? '' : 's'} for <span className="font-medium text-foreground">{icpName}</span>
+                </span>
+              </div>
+              <div className="mt-1 flex items-baseline gap-2 flex-wrap">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Resume target</span>
+                <span className="text-2xl font-bold leading-none text-sky-700 dark:text-sky-200 truncate">{scopeLabel}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  ({scope === 'country' ? 'country fill' : 'city scope'})
+                </span>
+              </div>
+              <div className="text-[10px] text-muted-foreground italic mt-1">
+                The cron boots paused after every backend restart. Click Resume to start sweeping the {scope === 'country' ? 'country' : 'city'} above.
               </div>
             </div>
             <Button
               size="sm"
               onClick={handleResetBudget}
               disabled={sweepStarting}
-              title={`Resume sweeping for ${icpName} (${scope === 'country' ? activeCountry || 'no country' : activeCity || 'all cities'})`}
+              title={`Resume sweeping for ${icpName} (${scopeLabel})`}
               className="h-7 text-xs shrink-0"
             >
               {sweepStarting
@@ -1842,9 +2009,69 @@ export default function CoveragePage() {
                 </>
               )}
               <ActivityLog activity={activity} isAnyActive={isAnyActive} />
+              {/* Persisted sweep-session history. Collapsed by default so
+                  it doesn't compete with the live activity feed above.
+                  Backed by sweep_sessions in Supabase - survives restart. */}
+              {activeIcp && (
+                <div className="mt-3">
+                  <RecentSessionsPanel icpId={activeIcp} />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
+      </div>
+    </div>
+  )
+}
+
+// Compact two-cluster legend for the cell colors shown on the globe + map.
+// State cluster (fill colors): pending / scanning / complete / no_new /
+// empty. Tier cluster (stroke colors on country-fill cells in the map
+// view only): urban / suburban / rural / airport / sparse. Kept in a
+// single-row layout with tiny dot swatches so it doesn't compete visually
+// with the controls on the left side of the header. Hex values kept in
+// sync with coverage-globe.tsx and coverage-map.tsx - if either drifts
+// the legend reads wrong without errors, so update both at once.
+function CellLegend() {
+  // State fill colors. Pulse is just a tooltip hint; the actual pulse
+  // animation lives on the globe scanning ring + map cm-cell-pulse class.
+  const STATE = [
+    { label: 'Pending',  color: '#7dd3fc', help: 'queued for sweep' },
+    { label: 'Scanning', color: '#f87171', help: 'in flight (pulsing)' },
+    { label: 'Complete', color: '#4ade80', help: 'found qualified leads' },
+    { label: 'No new',   color: '#fbbf24', help: 'swept; all already known' },
+    { label: 'Empty',    color: '#94a3b8', help: 'swept; no leads at this resolution' },
+  ]
+  // Country-fill tier strokes. Only relevant when scope=country in the
+  // map view; on the globe these are state-coloured solids regardless.
+  const TIER = [
+    { label: 'Urban',    color: '#0284c7', help: '≥7 km radius city centres' },
+    { label: 'Suburban', color: '#7c3aed', help: 'mid-density cells' },
+    { label: 'Rural',    color: '#16a34a', help: 'sparse residential / town' },
+    { label: 'Airport',  color: '#d97706', help: 'airport hubs (per ICP toggle)' },
+    { label: 'Sparse',   color: '#166534', help: 'rural backstop hex' },
+  ]
+  return (
+    <div className="ml-auto flex items-center gap-3 text-[10px] text-muted-foreground">
+      <div className="flex items-center gap-1.5 flex-wrap" title="Cell fill = sweep state">
+        <span className="uppercase tracking-wider font-semibold opacity-70">State</span>
+        {STATE.map((s) => (
+          <span key={s.label} className="inline-flex items-center gap-1" title={s.help}>
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+      <span className="opacity-30">|</span>
+      <div className="flex items-center gap-1.5 flex-wrap" title="Country-fill cell stroke = density source (map view only)">
+        <span className="uppercase tracking-wider font-semibold opacity-70">Tier</span>
+        {TIER.map((t) => (
+          <span key={t.label} className="inline-flex items-center gap-1" title={t.help}>
+            <span className="inline-block h-2.5 w-2.5 rounded-full border-2 bg-transparent" style={{ borderColor: t.color }} />
+            {t.label}
+          </span>
+        ))}
       </div>
     </div>
   )

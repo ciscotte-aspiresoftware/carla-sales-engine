@@ -316,9 +316,22 @@ async function sweepCell(icp, cell) {
             message: `Fetching places for ${cell.parentCity || 'cell'} (${newTerms.length} term${newTerms.length === 1 ? '' : 's'}${maxPages > 1 ? ` × ${maxPages} pages` : ''})`,
         });
         const allRaw = [];
-        for (const term of newTerms) {
+        // Pause flag captured from the search phase. If we bail here we
+        // skip the rest of the cell (no filter, no IIFE creation), leaving
+        // the cell pending. Next Resume picks the same cell up; search_log
+        // dedup means already-completed terms aren't re-run for free, and
+        // partial-page terms (where pause hit mid-pagination, before
+        // searchLog.add fired) re-run from page 0 - one Scrapingdog call
+        // worst-case per partial term. Without this, every search call
+        // queued before pause was already in flight serially and burned
+        // ~30 credits per pause.
+        let pausedDuringSearch = false;
+        outer: for (const term of newTerms) {
+            if (isPauseRequested()) { pausedDuringSearch = true; break; }
             let termCount = 0;
+            let completedAllPages = true;
             for (const pageOffset of pageOffsets) {
+                if (isPauseRequested()) { pausedDuringSearch = true; completedAllPages = false; break outer; }
                 const { results: termResults } = await searchMaps({
                     query: term,
                     ll: cell.ll,
@@ -335,13 +348,33 @@ async function sweepCell(icp, cell) {
                 // this location. Saves credits on sparse areas.
                 if (got < 20) break;
             }
-            if (icp.vertical) {
+            // Only log to search_log when EVERY page for this term completed.
+            // A partial term (pause mid-pagination) gets re-run on resume so
+            // we don't keep half-fetched results that the dedup would then
+            // assume are complete.
+            if (completedAllPages && icp.vertical) {
                 searchLog.add(icp.vertical, cell.lat, cell.lng, term, {
                     cellId: cell.id,
                     icpId: icp.id,
                     resultCount: termCount,
                 });
             }
+        }
+        if (pausedDuringSearch) {
+            console.log(`[Sweep] ⏸ ${cell.parentCity}/${cell.id.slice(0, 8)} PAUSED during search phase (${allRaw.length} raw places fetched so far - discarded; resume re-runs unrun terms via search_log dedup)`);
+            await grid.updateCell(cell.id, {
+                state: 'pending',
+                lastScannedAt: Date.now(),
+            });
+            pushEvent({
+                type: 'cell_complete',
+                icpId: icp.id,
+                cellId: cell.id,
+                parentCity: cell.parentCity || null,
+                state: 'pending',
+                message: `${cell.parentCity || 'cell'} paused during search - will resume from unrun terms`,
+            });
+            return { placesFound: 0, leadsQualified: 0, chainsFiltered: 0, nonTargetFiltered: 0, alreadyKnown: 0, touchedDomains: [] };
         }
         pushEvent({
             type: 'places_fetched',
@@ -523,6 +556,13 @@ async function sweepCell(icp, cell) {
                                 rating: place.rating,
                                 reviews: place.reviews,
                                 placeId: place.placeId,
+                                // Scrapingdog's `data_id` is the identifier the
+                                // /google_maps/places (full place details) endpoint
+                                // takes. Persisting it here lets the rep click
+                                // "Recover details" on a stub row and get title/
+                                // phone/address back in one paid call (5 credits)
+                                // - rather than burning 10 to lat/lng re-search.
+                                dataId: place.dataId,
                                 definitionHash: computeIcpDefinitionHash(icp),
                             },
                             scrapedAt: Date.now(),
@@ -552,8 +592,21 @@ async function sweepCell(icp, cell) {
             // Per-iteration progress events fire from inside this IIFE so
             // the activity feed shows scrape progress for every company,
             // not just a single "Sweeping London" line.
+            //
+            // PAUSE GATE: check isPauseRequested() AFTER awaiting prevScrape
+            // (i.e. right before we'd actually fire Firecrawl). Without this,
+            // the for-loop kicks off all N scrape IIFEs synchronously, then
+            // the serial chain just barrels through every queued Firecrawl
+            // call even after Pause - burning credits on rows that will
+            // never classify. Returning `{ ok: false, skipped: true }` lets
+            // the matched classify IIFE recognize the skip and also bail
+            // without trying to scrape a placeholder.
             const myScrape = (async () => {
                 await prevScrape;
+                if (isPauseRequested()) {
+                    if (firstSkippedIdx === -1) firstSkippedIdx = placeIdx;
+                    return { ok: false, skipped: true };
+                }
                 console.log(`[Sweep]   ▷ [${companyIdx}/${totalFresh}] scrape START: ${place.title || domain} (${domain})`);
                 pushEvent({
                     type: 'company_scrape_start',
@@ -593,10 +646,19 @@ async function sweepCell(icp, cell) {
                     await prevClassifyForThis;
                 } catch { /* swallow previous-iteration errors */ }
 
-                // Mid-cell pause checkpoint. The first iteration to land here
-                // after the operator clicks Pause records its 0-based index;
-                // every subsequent iteration sees the flag and also bails.
-                // Companies' scrapes have already cached (free), so resume
+                // Recognize the scrape-side pause skip. When the scrape IIFE
+                // bailed because pause was requested, we just propagate the
+                // same skip - don't classify, don't write a "scrape error"
+                // row, just leave the cell's checkpoint to record the
+                // resume position.
+                if (scrapeResult?.skipped) {
+                    if (firstSkippedIdx === -1) firstSkippedIdx = placeIdx;
+                    return;
+                }
+
+                // Mid-cell pause checkpoint (classify side). Catches the case
+                // where pause came in AFTER our scrape completed but BEFORE
+                // we got to classify - the scrape is already cached so resume
                 // re-runs from this index with cache hits = no waste.
                 if (isPauseRequested()) {
                     if (firstSkippedIdx === -1) firstSkippedIdx = placeIdx;
@@ -625,6 +687,9 @@ async function sweepCell(icp, cell) {
                                 rating: place.rating,
                                 reviews: place.reviews,
                                 placeId: place.placeId,
+                                // See no-website path above for the rationale -
+                                // dataId is what /google_maps/places needs.
+                                dataId: place.dataId,
                                 definitionHash: computeIcpDefinitionHash(icp),
                             },
                             scrapedAt: Date.now(),

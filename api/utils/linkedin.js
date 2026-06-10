@@ -15,6 +15,7 @@
 
 const axios = require('axios');
 const { getLinkedin } = require('./settings');
+const { recordUsage, priceService } = require('./api-cost');
 
 const APIFY_TOKENS = [
     process.env.APIFY_API_TOKEN,
@@ -154,7 +155,19 @@ async function scrapeLinkedInProfile(linkedinUrl) {
             { profileScraperMode: 'Profile details no email ($4 per 1k)', queries: [linkedinUrl] },
             'linkedin_profile_scraper'
         );
-        console.log(`[Apify] Profile scrape done in ${((Date.now() - startTime) / 1000).toFixed(1)}s - ${profiles?.length || 0} result(s)`);
+        const durationMs = Date.now() - startTime;
+        console.log(`[Apify] Profile scrape done in ${(durationMs / 1000).toFixed(1)}s - ${profiles?.length || 0} result(s)`);
+        // Apify charges per profile attempted (Harvest API actor), so log
+        // even when the result list is empty.
+        recordUsage({
+            service: 'apify',
+            operation: 'profile_scrape',
+            unitsIn: 1,
+            units: 1,
+            usdCost: priceService('apify', 1, 'profile'),
+            durationMs,
+            metadata: { linkedinUrl, profilesReturned: profiles?.length || 0 },
+        });
         if (!profiles || profiles.length === 0) return null;
         return summarizeProfile(profiles[0]);
     } catch (err) {
@@ -179,7 +192,18 @@ async function scrapeRecentPosts(linkedinUrl) {
             { urls: [linkedinUrl], limitPerSource, deepScrape: true },
             'linkedin_posts_scraper'
         )) || [];
-        console.log(`[Apify] Posts scrape done in ${((Date.now() - startTime) / 1000).toFixed(1)}s - ${posts.length} post(s)`);
+        const durationMs = Date.now() - startTime;
+        console.log(`[Apify] Posts scrape done in ${(durationMs / 1000).toFixed(1)}s - ${posts.length} post(s)`);
+        // Apify charges per post returned (supreme_coder actor, ~$0.001 each).
+        recordUsage({
+            service: 'apify',
+            operation: 'posts_scrape',
+            unitsOut: posts.length,
+            units: posts.length,
+            usdCost: priceService('apify', posts.length, 'post'),
+            durationMs,
+            metadata: { linkedinUrl, postsReturned: posts.length, limitPerSource },
+        });
         return posts.slice(0, limitPerSource).map(post => {
             const text = (post.text || post.content || '').substring(0, 500);
             // Date field comes back under different names; check the
@@ -282,10 +306,52 @@ function formatPostsForPrompt(posts) {
     return { postsText, hiringSignal };
 }
 
+// A scraped LI summary is "useful" only when at least one of the fields
+// the email prompt actually reads is populated with non-empty text.
+// summarizeProfile() returns an object full of empty-string defaults when
+// Apify hits a blocked/partial response, and the original cache check
+// `liSummary && ...` accepted that empty shell as a valid cache hit -
+// generic emails got anchored forever for that lead. Both /api/email and
+// /api/li-message use this so the cache semantics stay aligned. Keep in
+// sync with buildLinkedInBlock's `if (s.X)` checks in prompts/email.js.
+function isUsefulLiSummary(s) {
+    if (!s || typeof s !== 'object') return false;
+    const fields = ['headline', 'current', 'about', 'experience', 'location', 'promotions'];
+    for (const f of fields) {
+        if (typeof s[f] === 'string' && s[f].trim()) return true;
+    }
+    if (s.recentPromotion && s.recentPromotion.newRole) return true;
+    return false;
+}
+
+// At least one post must have actual body text - empty arrays and arrays of
+// date-only stubs don't count as cache content.
+function hasUsefulPosts(posts) {
+    if (!Array.isArray(posts) || posts.length === 0) return false;
+    return posts.some((p) => p && typeof p.text === 'string' && p.text.trim());
+}
+
+// Compact tag string for logs so the operator can see at a glance which LI
+// fields are feeding the prompt.
+function describeLiSummary(s) {
+    if (!s) return 'empty';
+    const tags = [];
+    if (s.headline) tags.push('headline');
+    if (s.current) tags.push('current');
+    if (s.about) tags.push('about');
+    if (s.experience) tags.push('experience');
+    if (s.location) tags.push('location');
+    if (s.recentPromotion) tags.push('recentPromotion');
+    return tags.length ? tags.join('+') : 'empty';
+}
+
 module.exports = {
     scrapeLinkedInProfile,
     scrapeRecentPosts,
     summarizeProfile,
     postMonthsAgo,
     formatPostsForPrompt,
+    isUsefulLiSummary,
+    hasUsefulPosts,
+    describeLiSummary,
 };

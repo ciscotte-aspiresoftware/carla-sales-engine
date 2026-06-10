@@ -717,8 +717,17 @@ function ModeButton({ active, onClick, icon, children }: { active: boolean; onCl
       type="button"
       onClick={onClick}
       className={cn(
-        'flex items-center justify-center gap-1.5 h-8 text-xs rounded-md transition-colors',
-        active ? 'bg-background shadow text-foreground font-medium' : 'text-muted-foreground hover:text-foreground',
+        'flex items-center justify-center gap-1.5 h-8 text-xs rounded-md transition-colors border',
+        active
+          // Active: sky-blue fill matches LinkedIn branding + the segmented
+          // controls on Costs / Coverage so the "this is the selected mode"
+          // signal is consistent across the app.
+          ? 'bg-sky-500/20 border-sky-500/40 text-sky-700 dark:text-sky-300 font-semibold'
+          // Inactive: faint sky bg + persistent border + sky-tinted icon
+          // (via [&_svg]:text-sky-500/70) + a slow pulsing glow ring
+          // (mode-hint-pulse). All three combined so reps see "this is a
+          // button I can switch to" at rest, not just on hover.
+          : 'bg-sky-500/[0.04] border-sky-500/20 text-foreground/80 [&_svg]:text-sky-500/70 hover:bg-sky-500/10 hover:border-sky-500/40 hover:text-foreground mode-hint-pulse',
       )}
     >
       {icon}

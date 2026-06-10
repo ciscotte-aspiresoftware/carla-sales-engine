@@ -38,11 +38,14 @@ import {
   IconRotateClockwise,
   IconAlertCircle,
   IconMail,
+  IconMailForward,
+  IconCloudDownload,
 } from '@tabler/icons-react'
 import {
   fetchCompanies,
   submitReview,
   clearReview,
+  recoverPlaceDetails,
   type CompanyRecord,
   type Review,
   type Classification,
@@ -82,11 +85,21 @@ type LaneKey = 'pending' | 'confirmed' | 'rejected' | 'needs-check'
 // Build a Google Maps deep link for a company we couldn't scrape (no
 // website). Prefers the exact place_id when we captured one, else falls
 // back to a name + address search.
-function googleMapsUrl(name?: string | null, address?: string | null, placeId?: string | null): string {
-  const q = encodeURIComponent([name, address].filter(Boolean).join(' ') || (name || ''))
-  return placeId
-    ? `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(placeId)}`
-    : `https://www.google.com/maps/search/?api=1&query=${q}`
+function googleMapsUrl(name?: string | null, address?: string | null, placeId?: string | null, coords?: { lat?: number; lng?: number } | null): string {
+  // Falls back to GPS coordinates when neither name nor address are
+  // populated - happens on "Needs check" stubs where Scrapingdog's
+  // initial search returned just a pin. Without this, the link's query
+  // string would be empty and Google Maps just opens to the world map.
+  if (placeId) {
+    const q = encodeURIComponent([name, address].filter(Boolean).join(' ') || (name || ''))
+    return `https://www.google.com/maps/search/?api=1&query=${q}&query_place_id=${encodeURIComponent(placeId)}`
+  }
+  const nameQ = [name, address].filter(Boolean).join(' ')
+  if (nameQ) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nameQ)}`
+  if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) {
+    return `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`
+  }
+  return `https://www.google.com/maps/search/?api=1&query=`
 }
 
 export default function AccountsPage() {
@@ -106,6 +119,15 @@ export default function AccountsPage() {
   const sendToSalesAgent = (company: CompanyRecord, icpId: string) => {
     const params = new URLSearchParams({ companyId: company.id, icp: icpId })
     navigate(`/email?${params.toString()}`)
+  }
+
+  // Drop into the Sequences page with this company + ICP pre-selected so
+  // the rep can kick off a multi-step sequence run. The Sequences page
+  // detects these params on mount and opens its "New run" dialog with the
+  // company snapshot already loaded - no need to retype anything.
+  const startSequence = (company: CompanyRecord, icpId: string) => {
+    const params = new URLSearchParams({ startCompany: company.id, startIcp: icpId })
+    navigate(`/sequences?${params.toString()}`)
   }
 
   const [icps, setIcps] = useState<IcpSummary[]>([])
@@ -361,7 +383,7 @@ export default function AccountsPage() {
             <LaneTab label="Pending" icon={<IconClock className="h-3 w-3" />} count={counts.pending} active={lane === 'pending'} onPick={() => setLane('pending')} color="amber" />
             <LaneTab label="Confirmed" icon={<IconCircleCheck className="h-3 w-3" />} count={counts.confirmed} active={lane === 'confirmed'} onPick={() => setLane('confirmed')} color="emerald" />
             <LaneTab label="Rejected" icon={<IconCircleX className="h-3 w-3" />} count={counts.rejected} active={lane === 'rejected'} onPick={() => setLane('rejected')} color="red" />
-            <LaneTab label="Needs check" icon={<IconAlertCircle className="h-3 w-3" />} count={counts['needs-check']} active={lane === 'needs-check'} onPick={() => setLane('needs-check')} color="orange" />
+            <LaneTab label="Needs check" icon={<IconAlertCircle className="h-3 w-3" />} count={counts['needs-check']} active={lane === 'needs-check'} onPick={() => setLane('needs-check')} color="orange" urgent={counts['needs-check'] > 0} />
             {activeIcpMeta && (
               <span className="ml-auto text-[11px] text-muted-foreground italic">
                 {activeIcpMeta.vertical} · {activeIcpMeta.portfolioCompany || '-'}
@@ -401,6 +423,7 @@ export default function AccountsPage() {
                   onReject={(reason, note) => handleReview(c.id, 'rejected', reason, note)}
                   onUndo={() => handleUndo(c.id)}
                   onSendToSalesAgent={() => sendToSalesAgent(c, activeIcp)}
+                  onStartSequence={() => startSequence(c, activeIcp)}
                   onChanged={refresh}
                 />
               ))}
@@ -419,6 +442,7 @@ function LaneTab({
   active,
   color,
   onPick,
+  urgent = false,
 }: {
   label: string
   icon: React.ReactNode
@@ -426,6 +450,10 @@ function LaneTab({
   active: boolean
   color: 'amber' | 'emerald' | 'red' | 'orange'
   onPick: () => void
+  // When true (used by Needs check when there are items waiting), the tab
+  // overrides its base color to red AND bumps the count to a bigger, bolder
+  // glyph - the goal is the rep can't miss that there's something to action.
+  urgent?: boolean
 }) {
   const accents = {
     amber:   'bg-amber-500/20 border-amber-500/60 text-amber-700 dark:text-amber-300',
@@ -439,14 +467,21 @@ function LaneTab({
       onClick={onPick}
       className={cn(
         'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs border transition-colors',
-        active
-          ? `${accents[color]} font-semibold`
-          : 'border-border text-muted-foreground hover:bg-muted/40',
+        urgent
+          ? cn(accents.red, 'font-semibold')
+          : active
+            ? `${accents[color]} font-semibold`
+            : 'border-border text-muted-foreground hover:bg-muted/40',
       )}
     >
       {icon}
       <span>{label}</span>
-      <span className="tabular-nums opacity-80">{count}</span>
+      <span className={cn(
+        'tabular-nums',
+        urgent
+          ? 'text-sm font-bold text-red-700 dark:text-red-300 px-1.5 py-px rounded-md bg-red-500/30'
+          : 'opacity-80',
+      )}>{count}</span>
     </button>
   )
 }
@@ -462,6 +497,7 @@ function AccountCard({
   onReject,
   onUndo,
   onSendToSalesAgent,
+  onStartSequence,
   onChanged,
 }: {
   company: CompanyRecord
@@ -471,10 +507,15 @@ function AccountCard({
   onReject: (reason: string, note: string) => void
   onUndo: () => void
   onSendToSalesAgent: () => void
+  onStartSequence: () => void
   onChanged: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
+  // "Needs check" recover button - per-card loading + error state so two
+  // adjacent cards can run concurrently without their spinners aliasing.
+  const [recovering, setRecovering] = useState(false)
+  const [recoverErr, setRecoverErr] = useState<string | null>(null)
   const cls = (company.classifications?.[icpId] || company.classification || {}) as Classification & { city?: string; country?: string; rating?: number; reviews?: number; title?: string; phone?: string; address?: string; signals?: string[]; fleetSizeHint?: string; fleetVehicleTypes?: string[]; bookingPlatformHints?: string[]; tagline?: string }
   const review: Review | undefined = company.reviews?.[icpId]
 
@@ -542,22 +583,76 @@ function AccountCard({
         )}
 
         {/* No-website / unscrapeable company → surface the Google Maps facts
-            we DO have so a human can look it up and decide. */}
+            we DO have so a human can look it up and decide. When the
+            initial Scrapingdog search returned a stub (no title/phone/
+            address either - just GPS), the Recover button below spends
+            5-10 credits to refetch the full place record. */}
         {lane === 'needs-check' && (
-          <div className="text-xs rounded-md border border-orange-500/30 bg-orange-500/5 px-2.5 py-2 space-y-1">
+          <div className="text-xs rounded-md border border-orange-500/30 bg-orange-500/5 px-2.5 py-2 space-y-1.5">
             <div className="font-semibold text-orange-700 dark:text-orange-300 flex items-center gap-1.5">
               <IconAlertCircle className="h-3 w-3" /> Look this one up manually
             </div>
             {cls.phone && <div><span className="opacity-70">Phone:</span> {cls.phone}</div>}
             {cls.address && <div><span className="opacity-70">Address:</span> {cls.address}</div>}
-            <a
-              href={googleMapsUrl(cls.title || (cls as any).name || company.domain, cls.address, (cls as any).placeId)}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
-            >
-              <IconExternalLink className="h-3 w-3" /> Open in Google Maps
-            </a>
+            {/* GPS fallback - when Scrapingdog didn't return phone/address
+                but we did capture coordinates from gps_coordinates, show
+                them so the rep has something to feed Google Maps. */}
+            {!cls.phone && !cls.address && company.location?.lat != null && company.location?.lng != null && (
+              <div className="text-muted-foreground">
+                <span className="opacity-70">Coords:</span>{' '}
+                <span className="font-mono">{company.location.lat.toFixed(5)}, {company.location.lng.toFixed(5)}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-3 flex-wrap pt-0.5">
+              <a
+                href={googleMapsUrl(cls.title || (cls as any).name || company.domain, cls.address, (cls as any).placeId, company.location)}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
+              >
+                <IconExternalLink className="h-3 w-3" /> Open in Google Maps
+              </a>
+              {/* Recover button - spends Scrapingdog credits to refetch
+                  the full place record (title/phone/address/rating). The
+                  base cost is 5 credits when the row has a stored
+                  dataId/placeId, 10 when neither and the backend has to
+                  lat/lng re-search to find one. The cost shows up in the
+                  Costs page after the call. Disabled if the row already
+                  has title - no point re-paying for what we have. */}
+              {!cls.title && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (recovering) return
+                    setRecovering(true); setRecoverErr(null)
+                    try {
+                      const res = await recoverPlaceDetails(company.id, icpId)
+                      if (!res.success) throw new Error('Recovery failed')
+                      // Trigger parent refresh so the card re-renders with
+                      // the newly-populated fields without a full page
+                      // reload. The parent's refresh() pulls every lane
+                      // from the API.
+                      onChanged()
+                    } catch (e: any) {
+                      setRecoverErr(e?.message || 'Recovery failed')
+                    } finally {
+                      setRecovering(false)
+                    }
+                  }}
+                  disabled={recovering}
+                  className="inline-flex items-center gap-1 rounded-md border border-sky-500/40 bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-500/15 disabled:opacity-60"
+                  title="Spend 5 Scrapingdog credits (10 if no dataId stored) to refetch title/phone/address from Google Maps' full place endpoint"
+                >
+                  {recovering
+                    ? <IconLoader2 className="h-3 w-3 animate-spin" />
+                    : <IconCloudDownload className="h-3 w-3" />}
+                  {recovering ? 'Recovering…' : 'Recover details (5 credits)'}
+                </button>
+              )}
+              {recoverErr && (
+                <span className="text-[10px] text-red-600 dark:text-red-400">{recoverErr}</span>
+              )}
+            </div>
           </div>
         )}
 
@@ -634,6 +729,17 @@ function AccountCard({
             >
               <IconMail className="h-3.5 w-3.5 mr-1.5" />
               Sales Agent
+            </Button>
+          )}
+          {lane !== 'rejected' && lane !== 'needs-check' && (
+            <Button
+              size="sm"
+              onClick={onStartSequence}
+              variant="outline"
+              title="Open Sequences page with a new multi-step run pre-staged for this account"
+            >
+              <IconMailForward className="h-3.5 w-3.5 mr-1.5" />
+              Sequence
             </Button>
           )}
           <div className="flex-1" />

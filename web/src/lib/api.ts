@@ -246,6 +246,10 @@ export function generateEmail(args: {
   templateId?: string  // explicit template pick - takes priority
   icpId?: string       // for auto-suggest when no templateId is provided
   senderId?: string    // legacy - kept for paste-classify flow
+  // Optional free-form steering the rep typed in Step 3's "Custom prompt"
+  // textarea. Appended to the user message in the prompt so GPT respects
+  // it without overriding the template's voice rules.
+  customInstruction?: string
 }) {
   return postJson<{
     success: true
@@ -552,6 +556,17 @@ export function clearReview(companyId: string, icpId: string) {
   return getJson<{ success: true; company: CompanyRecord }>(
     `/api/companies/${encodeURIComponent(companyId)}/reviews/${encodeURIComponent(icpId)}`,
     { method: 'DELETE' },
+  )
+}
+
+// Spend Scrapingdog credits to fill in title/phone/address/etc on a
+// Needs-check row whose original /google_maps search returned a stub.
+// Costs 5 credits when the row has a stored dataId/placeId, 10 credits
+// when neither and we have to lat/lng re-search to find one.
+export function recoverPlaceDetails(companyId: string, icpId: string) {
+  return getJson<{ success: true; company: CompanyRecord; creditsSpent: number }>(
+    `/api/companies/${encodeURIComponent(companyId)}/recover-place-details/${encodeURIComponent(icpId)}`,
+    { method: 'POST' },
   )
 }
 

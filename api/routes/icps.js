@@ -24,14 +24,17 @@
 
 const express = require('express');
 const { getIcpFull, listIcpsFull, listPortfolioCompanies, createIcp, updateIcp, deleteIcp, computeIcpDefinitionHash, pickTermsForCell } = require('../utils/icps');
-const { listByVertical, setClassificationForIcp } = require('./companies');
+const { listByVertical } = require('./companies');
 const grid = require('../utils/grid-store');
 const { trackActivity } = require('../middleware/activity');
 const scrapeCache = require('../utils/scrape-cache');
-const { pushEvent } = require('../utils/activity-log');
+// pushEvent + setClassificationForIcp used to fire inside the inline reclassify
+// loop; they moved to utils/reclassify-worker.js when the job queue replaced
+// it. Kept the requires out of this file so the lint hint stays clean.
 const { chat } = require('../utils/openai');
 const { getAi } = require('../utils/settings');
-const { ICP_GENERATE_SYSTEM, ICP_IMPROVE_SYSTEM } = require('../prompts/icp-generate');
+const { ICP_GENERATE_SYSTEM, ICP_IMPROVE_SYSTEM, getPortfolioBrief } = require('../prompts/icp-generate');
+const reclassifyJobs = require('../utils/reclassify-jobs');
 
 const router = express.Router();
 
@@ -207,12 +210,21 @@ router.post('/generate', async (req, res) => {
         const taskInstruction = sectionKey
             ? `\n\nReturn ONLY the JSON fields for the "${sectionKey}" section: ${SECTION_FIELDS[sectionKey].join(', ')}. Omit every other field. Keep the same JSON envelope shape (top-level keys, just only the requested ones populated).`
             : '';
+        // Splice the portfolio-company brief (Bluebird/Thermeon/NedFox →
+        // factual product + market + excludeCompanies summary) between the
+        // company name and the operator's free-text description. The model
+        // reads the brief as authoritative configuration for searchTerms /
+        // customerTypes / excludeCompanies / vertical / countries / cities,
+        // then the description adds intent on top. Falls back to '' for
+        // unknown portfolio companies, in which case the prompt reads
+        // exactly as before.
+        const portfolioBrief = getPortfolioBrief(portfolioCompany);
         const raw = await chat(
             [
                 { role: 'system', content: ICP_GENERATE_SYSTEM + taskInstruction },
-                { role: 'user', content: `Portfolio company: ${portfolioCompany || '(none)'}\n\nDescription:\n${String(description).trim()}${contextBlock}` },
+                { role: 'user', content: `Portfolio company: ${portfolioCompany || '(none)'}${portfolioBrief}\n\nDescription:\n${String(description).trim()}${contextBlock}` },
             ],
-            { model: getAi().classifyModel, temperature: 0.3, response_format: { type: 'json_object' } },
+            { model: getAi().icpAutomationModel, temperature: 0.3, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -272,12 +284,19 @@ router.post('/improve', async (req, res) => {
             excludeCompanies: current.excludeCompanies,
             extraNotes: current.extraNotes,
         };
+        // Same portfolio-company brief injection as /generate. The improver
+        // benefits even more than the generator because it can spot when
+        // the current ICP is missing dominant-brand exclusions or has
+        // language-wrong search terms for the portfolio's markets - both
+        // failure modes the brief documents explicitly.
+        const improvePortfolioName = portfolioCompany || current.portfolioCompany || null;
+        const improveBrief = getPortfolioBrief(improvePortfolioName);
         const raw = await chat(
             [
                 { role: 'system', content: ICP_IMPROVE_SYSTEM },
-                { role: 'user', content: `Portfolio company: ${portfolioCompany || current.portfolioCompany || '(none)'}\n\nCurrent ICP:\n${JSON.stringify(snapshot, null, 2)}` },
+                { role: 'user', content: `Portfolio company: ${improvePortfolioName || '(none)'}${improveBrief}\n\nCurrent ICP:\n${JSON.stringify(snapshot, null, 2)}` },
             ],
-            { model: getAi().classifyModel, temperature: 0.3, response_format: { type: 'json_object' } },
+            { model: getAi().icpAutomationModel, temperature: 0.3, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -292,6 +311,93 @@ router.post('/improve', async (req, res) => {
     } catch (err) {
         console.error(`[ICPs] ✗ IMPROVE error after ${Date.now() - startedAt}ms:`, err.message);
         res.status(500).json({ success: false, error: err.message || 'improve failed' });
+    }
+});
+
+// ─── POST /generate-report-template ─────────────────────────────────────
+// AI-fill the markdown report template (the per-company brief structure)
+// from the ICP's description / vertical / customer types. The default
+// template is generic ("Overview / Products & Services / Size & Scale /
+// Fit for this ICP / Notable Signals") - this endpoint tailors the
+// section list to what THIS rep actually cares about for THIS ICP. E.g.
+// for an indie car rental ICP you might get "Fleet & Vehicle Mix /
+// Booking & Counter Tech / Locations & Coverage" instead of the generic
+// "Products & Services".
+//
+// Body: { description, vertical?, portfolioCompany?, customerTypes?, extraNotes? }
+// Returns: { success: true, reportTemplate: "## Overview\n..." } - raw
+// markdown, NOT JSON (templates are markdown text by definition).
+//
+// Uses icpAutomationModel (the Admin-configurable wizard tier), NOT
+// classifyModel - this is one-time editorial work where a stronger model
+// pays off.
+const REPORT_TEMPLATE_SYSTEM = `You design markdown report templates that a sales rep fills out PER COMPANY they're researching. The rep runs your template against each prospect's scraped website; another GPT call writes one section at a time using whatever the page actually shows.
+
+Given an ICP description, output a markdown template tailored to the lens THIS ICP needs - the sections that would matter to a rep prospecting under this ICP's product / vertical / target customer.
+
+Structure rules:
+- 4 to 6 sections (always include an Overview and a Fit-for-this-ICP section, the others are yours to design).
+- Each section is one ## heading followed by ONE short instructional sentence telling the writer what to fill in.
+- Section headings should be specific to the ICP's vertical and angle - "## Fleet Composition" beats "## Products & Services" for a car rental ICP, "## Booking Tech in Use" beats "## Notable Signals" for a hospitality-tech ICP. Reuse the generic headings only when nothing more specific applies.
+- The instructional sentence under each heading should hint at what to look for in the website (e.g. "Number of vehicles, brands, replacement vs. economy mix"), not what to write verbatim.
+- The Overview section is always first; the Fit-for-this-ICP section is always last so the rep ends on the pitch angle.
+
+Output rules:
+- Plain markdown ONLY. No code fences. No preamble. No commentary. No JSON envelope.
+- ## headings (two hashes), nothing deeper.
+- One blank line between sections.
+- Total output under 600 characters - this is a TEMPLATE, not a sample report.
+
+Bad example (don't do this):
+"Here is a template tailored to your ICP: ## Overview..."
+
+Good example:
+"## Overview
+2-3 sentence summary of what this business does.
+
+## Fleet & Locations
+..."`;
+
+router.post('/generate-report-template', async (req, res) => {
+    const { description, vertical, portfolioCompany, customerTypes, extraNotes } = req.body || {};
+    const desc = String(description || '').trim();
+    const vert = String(vertical || '').trim();
+    if (!desc && !vert) {
+        return res.status(400).json({ success: false, error: 'Need at least one of: description, vertical - GPT has nothing to anchor the template structure to otherwise' });
+    }
+    const startedAt = Date.now();
+    console.log(`[ICPs] ▶ GENERATE-REPORT-TEMPLATE vertical="${vert}" desc="${desc.slice(0, 60)}..."`);
+    try {
+        const userPayload = [
+            `Portfolio company: ${portfolioCompany || '(none)'}`,
+            vert ? `Vertical: ${vert}` : null,
+            desc ? `Target description:\n${desc}` : null,
+            Array.isArray(customerTypes) && customerTypes.length ? `Customer types: ${customerTypes.join(', ')}` : null,
+            extraNotes && String(extraNotes).trim() ? `Extra notes:\n${String(extraNotes).trim()}` : null,
+        ].filter(Boolean).join('\n\n');
+        const raw = await chat(
+            [
+                { role: 'system', content: REPORT_TEMPLATE_SYSTEM },
+                { role: 'user', content: userPayload },
+            ],
+            { model: getAi().icpAutomationModel, temperature: 0.3 },
+        );
+        // Defensive cleanup - strip any code fences the model might emit
+        // despite the rule, trim whitespace. Doesn't validate structure
+        // beyond "non-empty" because the rep is reviewing it anyway.
+        const cleaned = String(raw || '')
+            .replace(/^```(?:markdown|md)?\n?/i, '')
+            .replace(/\n?```\s*$/, '')
+            .trim();
+        if (!cleaned) {
+            console.warn('[ICPs] ✗ GENERATE-REPORT-TEMPLATE empty response');
+            return res.status(502).json({ success: false, error: 'AI returned an empty template' });
+        }
+        console.log(`[ICPs] ✓ GENERATE-REPORT-TEMPLATE ${Date.now() - startedAt}ms | ${cleaned.length} chars`);
+        res.json({ success: true, reportTemplate: cleaned });
+    } catch (err) {
+        console.error(`[ICPs] ✗ GENERATE-REPORT-TEMPLATE error after ${Date.now() - startedAt}ms:`, err.message);
+        res.status(500).json({ success: false, error: err.message || 'generate-report-template failed' });
     }
 });
 
@@ -354,7 +460,7 @@ router.post('/distribute-search-terms', async (req, res) => {
                 { role: 'system', content: DISTRIBUTE_SYSTEM },
                 { role: 'user', content: `Terms: ${JSON.stringify(cleanTerms)}\nCountries: ${JSON.stringify(cleanCountries)}` },
             ],
-            { model: getAi().classifyModel, temperature: 0.1, response_format: { type: 'json_object' } },
+            { model: getAi().icpAutomationModel, temperature: 0.1, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -459,7 +565,7 @@ router.post('/terms-for-city', async (req, res) => {
                 { role: 'system', content: TERMS_FOR_CITY_SYSTEM },
                 { role: 'user', content: JSON.stringify(userPayload, null, 2) },
             ],
-            { model: getAi().classifyModel, temperature: 0.2, response_format: { type: 'json_object' } },
+            { model: getAi().icpAutomationModel, temperature: 0.2, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -871,7 +977,7 @@ router.post('/:id/reclassify', trackActivity('reclassify_run'), async (req, res)
         : null;
 
     const startedAt = Date.now();
-    console.log(`[Reclassify] ▶ START icp="${icp.id}" vertical="${icp.vertical}" cities=${allCities ? 'ALL' : (wantedCities ? `[${wantedCities.join(', ')}]` : 'ICP default')} domains=${wantedDomains ? wantedDomains.size : 'all'} force=${force}`);
+    console.log(`[Reclassify] ▶ ENQUEUE icp="${icp.id}" vertical="${icp.vertical}" cities=${allCities ? 'ALL' : (wantedCities ? `[${wantedCities.join(', ')}]` : 'ICP default')} domains=${wantedDomains ? wantedDomains.size : 'all'} force=${force}`);
 
     try {
         const all = await listByVertical(icp.vertical);
@@ -887,27 +993,95 @@ router.post('/:id/reclassify', trackActivity('reclassify_run'), async (req, res)
         });
         console.log(`[Reclassify]   ├─ targets: ${targets.length} cached companies in "${icp.vertical}"`);
 
-        let processed = 0;
-        let qualified = 0;
-        let rejected = 0;
-        let skipped = 0;
-        let errors = 0;
-        let flipped = 0;        // verdict changed since last classification
-        // Per-company results - returned in the JSON response so the UI can
-        // populate the after-the-fact diff view if the user re-opens the
-        // tab after the run completed (the streamed pushEvent log only
-        // covers in-flight viewers).
-        const results = [];
+        if (targets.length === 0) {
+            return res.json({ success: true, jobId: null, total: 0, message: 'No matching companies found' });
+        }
 
-        pushEvent({
-            type: 'cell_start',
-            icpId: icp.id,
-            cellId: 'reclassify',
-            parentCity: null,
-            message: `Reclassify started - ${targets.length} cached ${icp.vertical} companies for ICP "${icp.name}"`,
+        // Build the worker's input shape (one entry per target). Snapshot
+        // the existing classification so the worker can compute "flipped"
+        // without re-reading the company row at processing time.
+        const queueTargets = targets.map((company) => {
+            const old = company.classifications && company.classifications[icp.id];
+            return {
+                domain: company.domain,
+                companyName: company.classification?.name || company.classification?.title || null,
+                city: company.city || null,
+                oldVerdict: old ? { is_match: !!old.is_match, reason: old.reason || '' } : null,
+            };
         });
 
-        for (const company of targets) {
+        const { jobId, total } = await reclassifyJobs.enqueue({
+            icpId: icp.id,
+            force,
+            targets: queueTargets,
+            metadata: {
+                vertical: icp.vertical,
+                cities: allCities ? 'all' : (wantedCities || 'icp-default'),
+                requestedBy: req.headers['x-user'] || null,
+            },
+        });
+        console.log(`[Reclassify] ✓ ENQUEUED job=${jobId} total=${total} in ${Date.now() - startedAt}ms`);
+        return res.json({ success: true, jobId, total });
+    } catch (err) {
+        console.error(`[Reclassify] ✗ ENQUEUE error after ${Date.now() - startedAt}ms:`, err.message);
+        return res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─── Reclassify job status / listing / cancel ───────────────────────────
+// All three endpoints sit alongside the enqueue route so the API surface
+// for "reclassify" is one tree the frontend can discover from one place.
+
+router.get('/jobs/reclassify', async (req, res) => {
+    try {
+        const icpId = req.query.icp || null;
+        const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
+        const list = await reclassifyJobs.listRecentJobs({ icpId, limit });
+        res.json({ success: true, jobs: list });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+router.get('/jobs/reclassify/:id', async (req, res) => {
+    try {
+        const job = await reclassifyJobs.getJob(req.params.id);
+        if (!job) return res.status(404).json({ success: false, error: 'job not found' });
+        const results = await reclassifyJobs.listJobResults(req.params.id, { limit: 500 });
+        res.json({ success: true, job, results });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+router.post('/jobs/reclassify/:id/cancel', async (req, res) => {
+    try {
+        const job = await reclassifyJobs.getJob(req.params.id);
+        if (!job) return res.status(404).json({ success: false, error: 'job not found' });
+        await reclassifyJobs.requestCancel(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/* DELETED: legacy inline reclassify body
+async function _legacyInlineReclassify(icp, targets, force, startedAt, res) {
+    let processed = 0;
+    let qualified = 0;
+    let rejected = 0;
+    let skipped = 0;
+    let errors = 0;
+    let flipped = 0;
+    const results = [];
+    pushEvent({
+        type: 'cell_start',
+        icpId: icp.id,
+        cellId: 'reclassify',
+        parentCity: null,
+        message: `Reclassify started - ${targets.length} cached ${icp.vertical} companies for ICP "${icp.name}"`,
+    });
+    for (const company of targets) {
             // Capture the BEFORE-state for this ICP so the streamed event +
             // response payload can show old → new diff. The UI uses this to
             // highlight "flipped" companies (qualified → rejected and vice
@@ -1048,5 +1222,6 @@ router.post('/:id/reclassify', trackActivity('reclassify_run'), async (req, res)
         res.status(500).json({ success: false, error: err.message });
     }
 });
+*/
 
 module.exports = router;

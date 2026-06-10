@@ -26,6 +26,8 @@ import AdminPage from '@/pages/admin'
 import WikiPage from '@/pages/wiki'
 import DiscoverPage from '@/pages/discover'
 import ActivityPage from '@/pages/activity'
+import CostsPage from '@/pages/costs'
+import SequencesPage from '@/pages/sequences'
 
 export default function App() {
   return (
@@ -153,6 +155,8 @@ function Shell() {
             <Route path="/wiki" element={<WikiPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/costs" element={<CostsPage />} />
+            <Route path="/sequences" element={<SequencesPage />} />
           </Routes>
         </Main>
       </div>
@@ -180,6 +184,8 @@ function RouteTitle() {
   else if (pathname.startsWith('/wiki')) title = 'Wiki'
   else if (pathname.startsWith('/discover')) title = 'Discover (CRM)'
   else if (pathname.startsWith('/activity')) title = 'Activity Log'
+  else if (pathname.startsWith('/costs')) title = 'Costs'
+  else if (pathname.startsWith('/sequences')) title = 'Sequences'
   return <span className="text-xs text-muted-foreground hidden sm:inline">{title}</span>
 }
 

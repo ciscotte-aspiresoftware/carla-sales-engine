@@ -41,8 +41,10 @@ shadcn-admin). Socket.IO is used for live sweep progress.
 
 ## Quick start (local dev)
 
-You'll need: Node 20+, npm 10+, a Supabase project (or skip for JSON-fallback
-mode), and API keys for at least Scrapingdog + Firecrawl + OpenAI.
+You'll need: Node 20+ (Node 18 works but Vite 7 prefers 20), npm 10+, a
+Supabase project (or skip for JSON-fallback mode), and API keys for at least
+Scrapingdog + Firecrawl + OpenAI. Apollo + Apify are needed once you reach
+the email-generation step but not for first-pass classify-only runs.
 
 ```bash
 # 1. Clone
@@ -69,8 +71,14 @@ npm run dev
 # Vite serves http://localhost:5174
 ```
 
-Open http://localhost:5174 and head to **Coverage** to seed cells, then
-**Resume sweeping** to start a session.
+Open http://localhost:5174. The sweep cron boots **paused** (so it never
+spends credits without your say-so). Head to **Coverage**, pick an ICP, click
+**Seed cells**, then **Resume sweeping** to start a session. The cron runs the
+per-session budget worth of cells, then auto-pauses for you to inspect spend
+before another Resume.
+
+Read [`/wiki`](http://localhost:5174/wiki) inside the app for the full
+operator's guide (sweep lifecycle, ICP editor, sequences, etc).
 
 The Vite dev server proxies `/api/*` and `/socket.io/*` to
 `http://localhost:3001`, so the two pieces talk without CORS config.
@@ -103,7 +111,9 @@ across instances. For real use, point it at Supabase:
 
 1. Create a Supabase project at https://supabase.com/.
 2. Run every SQL file in [`api/db/migrations/`](api/db/migrations/) in order
-   (`0001_*.sql` through `0008_*.sql`) via the Supabase SQL editor.
+   (`0001_*.sql` through `0015_*.sql`) via the Supabase SQL editor. Always run
+   the full range when you pull a fresh clone, even if the file count grows
+   later, the migrations are idempotent-safe and assume strict ordering.
 3. Grab the project URL + service-role key from Project Settings → API.
    **Service-role key is server-only - never ship it to the browser.**
 4. Set in `bluebird/.env`:

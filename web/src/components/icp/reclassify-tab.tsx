@@ -97,6 +97,48 @@ interface ScrapePreview {
   totalChars?: number
 }
 
+// Shape returned by GET /api/icps/jobs/reclassify and the per-job GET.
+// Mirrors api/db/migrations/0014_reclassify_jobs.sql column-for-column so
+// the frontend can render any persisted job without a parser shim.
+interface ReclassifyJobRow {
+  id: string
+  icp_id: string
+  status: 'pending' | 'running' | 'paused' | 'cancelled' | 'completed' | 'crashed'
+  force: boolean
+  cancel_requested: boolean
+  total: number
+  processed: number
+  qualified: number
+  rejected: number
+  skipped: number
+  flipped: number
+  errors: number
+  current_domain: string | null
+  last_error: string | null
+  created_at: string
+  started_at: string | null
+  finished_at: string | null
+}
+
+// Per-domain row returned alongside a job by GET /api/icps/jobs/reclassify/:id.
+interface ReclassifyResultRow {
+  id: string
+  job_id: string
+  order_idx: number
+  domain: string
+  company_name: string | null
+  city: string | null
+  status: 'pending' | 'in_flight' | 'classified' | 'skipped' | 'errored' | 'cancelled'
+  old_is_match: boolean | null
+  old_reason: string | null
+  new_is_match: boolean | null
+  new_reason: string | null
+  flipped: boolean
+  skip_reason: string | null
+  error_message: string | null
+  completed_at: string | null
+}
+
 export function ReclassifyTab({
   icpId,
   vertical,
@@ -334,6 +376,111 @@ export function ReclassifyTab({
   // run - the preview list shows the persisted classification (from targets)
   // rather than RowState.
   const [rowState, setRowState] = useState<Record<string, RowState>>({})
+  // Backend job id once a reclassify is enqueued. While set, the polling
+  // effect below tracks the worker's progress and flips `running` off when
+  // the job hits a terminal status. Cleared on completion or component
+  // unmount. The matching ref is used inside startRun's `finally` to read
+  // the value synchronously without a stale-closure capture.
+  const [activeJobId, setActiveJobId] = useState<string | null>(null)
+  const activeJobIdRef = useRef<string | null>(null)
+  useEffect(() => { activeJobIdRef.current = activeJobId }, [activeJobId])
+  // Snapshot of recent jobs for this ICP. Refreshed on enqueue + poll so
+  // the small "Recent reclassify jobs" strip below the run button shows
+  // historical runs (each with status + counters) without a manual reload.
+  const [recentJobs, setRecentJobs] = useState<ReclassifyJobRow[]>([])
+  const [activeJob, setActiveJob] = useState<ReclassifyJobRow | null>(null)
+
+  // Initial + periodic load of recent jobs for this ICP. Cheap (one
+  // indexed query) so we just fetch on mount; the polling effect below
+  // refreshes during an active run.
+  useEffect(() => {
+    let cancelled = false
+    safeFetchJson(`${API}/api/icps/jobs/reclassify?icp=${encodeURIComponent(icpId)}&limit=10`)
+      .then((d: any) => { if (!cancelled && d?.success) setRecentJobs(d.jobs || []) })
+      .catch(() => { /* non-fatal */ })
+    return () => { cancelled = true }
+  }, [icpId])
+
+  // Poll the active job until it reaches a terminal status. The 1500ms
+  // cadence is a comfortable middle ground: tight enough that the UI
+  // doesn't feel laggy when the worker just finished, loose enough that
+  // we don't pound the DB during a long-running job. Live row updates
+  // come through Socket.IO (see effect below) - this poll is the safety
+  // net for missed events + the authoritative source of the job status.
+  useEffect(() => {
+    if (!activeJobId) return
+    let cancelled = false
+    const POLL_MS = 1500
+    const pollOnce = async () => {
+      try {
+        const d: any = await safeFetchJson(`${API}/api/icps/jobs/reclassify/${encodeURIComponent(activeJobId)}`)
+        if (cancelled || !d?.success) return
+        const job: ReclassifyJobRow = d.job
+        const results: ReclassifyResultRow[] = d.results || []
+        setActiveJob(job)
+        // Reconcile rowState from the authoritative result list. We don't
+        // wipe what's already there - just patch terminal rows. The Socket
+        // events handle in-flight transitions visually.
+        setRowState((prev) => {
+          const next = { ...prev }
+          for (const r of results) {
+            const cur = next[r.domain] || {
+              status: 'pending' as RowStatus,
+              oldVerdict: r.old_is_match === null ? null : { is_match: !!r.old_is_match, reason: r.old_reason || '' },
+              newVerdict: null,
+              flipped: false,
+            }
+            if (r.status === 'classified' && r.new_is_match !== null) {
+              next[r.domain] = {
+                ...cur,
+                status: r.new_is_match ? 'qualified' : 'rejected',
+                oldVerdict: r.old_is_match === null ? cur.oldVerdict : { is_match: !!r.old_is_match, reason: r.old_reason || '' },
+                newVerdict: { is_match: !!r.new_is_match, reason: r.new_reason || '' },
+                flipped: !!r.flipped,
+              }
+            } else if (r.status === 'skipped') {
+              next[r.domain] = { ...cur, status: 'skipped', skipReason: r.skip_reason || 'skipped' }
+            } else if (r.status === 'errored') {
+              next[r.domain] = { ...cur, status: 'error', skipReason: r.error_message || 'errored' }
+            }
+          }
+          return next
+        })
+        const terminal = job.status === 'completed' || job.status === 'cancelled' || job.status === 'crashed'
+        if (terminal) {
+          setRunning(false)
+          setActiveJobId(null)
+          // Refresh the recent-jobs strip + refresh persisted targets so
+          // re-opening the editor shows the new classifications.
+          safeFetchJson(`${API}/api/icps/jobs/reclassify?icp=${encodeURIComponent(icpId)}&limit=10`)
+            .then((dd: any) => { if (!cancelled && dd?.success) setRecentJobs(dd.jobs || []) })
+            .catch(() => {})
+          refreshTargets()
+        }
+      } catch {
+        /* transient errors: just try again on the next tick */
+      }
+    }
+    pollOnce()
+    const t = setInterval(pollOnce, POLL_MS)
+    return () => { cancelled = true; clearInterval(t) }
+    // refreshTargets is intentionally omitted - including it would re-run
+    // the polling effect whenever the parent re-rendered, which kills the
+    // 1.5s cadence we just dialed in.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeJobId, icpId])
+
+  // Cancel an in-flight job. Tells the backend to flag cancel_requested;
+  // the worker stops on the next tick boundary, the poll above sees the
+  // 'cancelled' status, and the UI flips back to idle.
+  const cancelActiveJob = async () => {
+    if (!activeJobId) return
+    try {
+      await safeFetchJson(`${API}/api/icps/jobs/reclassify/${encodeURIComponent(activeJobId)}/cancel`, { method: 'POST' })
+    } catch (e: any) {
+      setRunError(e?.message || 'cancel failed')
+    }
+  }
 
   // Subscribe to the realtime socket scoped to this ICP. The hook joins the
   // ICP room and surfaces every event whose icpId matches. We filter to
@@ -401,6 +548,14 @@ export function ReclassifyTab({
     setRowState(seed)
     processedEventIdRef.current = 0
     try {
+      // POST now enqueues a background job and returns immediately with a
+      // jobId. The actual classification happens in utils/reclassify-worker.js
+      // - we drive the UI via Socket.IO `sweep_event` (already wired below)
+      // for live row updates AND poll GET /jobs/reclassify/:id for the
+      // authoritative final state + a job-done signal. The live events get
+      // there first for individual rows; polling is the safety net so we
+      // never miss the final "complete" transition when a tab regains focus
+      // mid-run.
       const data = await safeFetchJson(`${API}/api/icps/${encodeURIComponent(icpId)}/reclassify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -412,30 +567,23 @@ export function ReclassifyTab({
           force: true,
         }),
       })
-      if (!data?.success) throw new Error(data?.error || 'reclassify failed')
-      // Reconcile with the response.results in case any events were dropped.
-      const final: Record<string, RowState> = { ...seed }
-      for (const r of data.results || []) {
-        const cur = final[r.domain] || { status: 'pending', oldVerdict: null, newVerdict: null, flipped: false }
-        if (r.skipped) final[r.domain] = { ...cur, status: 'skipped', skipReason: r.reason, oldVerdict: r.oldVerdict || cur.oldVerdict }
-        else if (r.error) final[r.domain] = { ...cur, status: 'error', skipReason: r.error, oldVerdict: r.oldVerdict || cur.oldVerdict }
-        else if (r.newVerdict) {
-          final[r.domain] = {
-            status: r.newVerdict.is_match ? 'qualified' : 'rejected',
-            oldVerdict: r.oldVerdict || cur.oldVerdict,
-            newVerdict: r.newVerdict,
-            flipped: !!r.flipped,
-          }
-        }
+      if (!data?.success) throw new Error(data?.error || 'reclassify enqueue failed')
+      if (data.jobId) {
+        setActiveJobId(data.jobId)
+        // Don't flip `running` off here - the polling effect handles it
+        // when the job reaches a terminal status. Returning early leaves
+        // the UI in "running" until the worker finishes.
+        return
       }
-      setRowState(final)
-      // Refresh persisted targets so the next preview round shows the new
-      // classifications without re-opening the editor.
+      // jobId can be null when targets resolved to zero rows (edge case).
+      // Fall through to the no-op happy path.
       refreshTargets()
     } catch (e: any) {
-      setRunError(e?.message || 'reclassify failed')
+      setRunError(e?.message || 'reclassify enqueue failed')
     } finally {
-      setRunning(false)
+      // Only flip off on the empty-targets / error path. The polling
+      // effect handles the running case.
+      if (!activeJobIdRef.current) setRunning(false)
     }
   }
 
@@ -604,6 +752,92 @@ export function ReclassifyTab({
               : <Play className="h-3 w-3 mr-1" />}
             {running ? 'Running…' : `Start (${selectedCount})`}
           </Button>
+          {/* Cancel button - only shows while a job is in flight. Sets
+              cancel_requested on the backend; the worker stops on the next
+              tick boundary, the poll picks up the 'cancelled' status, and
+              the UI flips back to idle. */}
+          {activeJobId && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={cancelActiveJob}
+              className="h-7 text-xs"
+              title="Stop the in-flight reclassify after the next batch finishes"
+            >
+              <XIcon className="h-3 w-3 mr-1" /> Cancel
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Live progress strip - visible while a job is in flight. Mirrors
+          the persisted job row so the rep sees authoritative counters
+          (not just whatever the Socket.IO stream caught). */}
+      {activeJob && (activeJob.status === 'running' || activeJob.status === 'pending') && (
+        <div className={cn(GLASS, 'rounded-md p-2.5 text-xs flex items-center justify-between gap-3 border border-sky-500/30 bg-sky-500/5')}>
+          <div className="flex items-center gap-2 min-w-0">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500 shrink-0" />
+            <span className="font-medium tabular-nums">{activeJob.processed} / {activeJob.total}</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-emerald-700 dark:text-emerald-400">{activeJob.qualified} qualified</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-red-700 dark:text-red-400">{activeJob.rejected} rejected</span>
+            {activeJob.flipped > 0 && <>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-amber-700 dark:text-amber-400 font-semibold">{activeJob.flipped} flipped</span>
+            </>}
+            {activeJob.errors > 0 && <>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-red-700 dark:text-red-400">{activeJob.errors} errors</span>
+            </>}
+            {activeJob.current_domain && (
+              <span className="text-muted-foreground truncate">
+                · current: <span className="font-mono">{activeJob.current_domain}</span>
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Recent reclassify jobs strip - persisted history for this ICP.
+          Each pill shows status + counters; clicking a non-terminal pill
+          re-attaches the polling effect so refreshing the page in the
+          middle of a job doesn't lose visibility. */}
+      {recentJobs.length > 0 && (
+        <div className="space-y-1">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Recent reclassify jobs</div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {recentJobs.map((j) => {
+              const tone =
+                j.status === 'completed' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                : j.status === 'running' || j.status === 'pending' ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+                : j.status === 'cancelled' ? 'border-muted-foreground/30 bg-muted/30 text-muted-foreground'
+                : 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300'
+              const active = activeJobId === j.id
+              const inflight = j.status === 'running' || j.status === 'pending'
+              return (
+                <button
+                  key={j.id}
+                  type="button"
+                  onClick={() => { if (inflight && !active) { setActiveJobId(j.id); setRunning(true) } }}
+                  disabled={!inflight || active}
+                  title={`${j.status} · ${j.processed}/${j.total} processed${j.last_error ? ` · last error: ${j.last_error}` : ''}`}
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] tabular-nums',
+                    tone,
+                    inflight && !active && 'hover:opacity-80 cursor-pointer',
+                    !inflight && 'cursor-default',
+                  )}
+                >
+                  {inflight && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                  <span className="font-semibold">{j.status}</span>
+                  <span>{j.processed}/{j.total}</span>
+                  {j.flipped > 0 && <span className="text-amber-700 dark:text-amber-400">· {j.flipped} flipped</span>}
+                  {j.errors > 0 && <span>· {j.errors} err</span>}
+                </button>
+              )
+            })}
+          </div>
         </div>
       )}
 

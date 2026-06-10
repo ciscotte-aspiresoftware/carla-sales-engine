@@ -33,7 +33,11 @@ const emailTemplatesRoute = require('./routes/email-templates');
 const adminRoute = require('./routes/admin');
 const discoverRoute = require('./routes/discover');
 const activityRoute = require('./routes/activity');
+const costsRoute = require('./routes/costs');
+const sequencesRoute = require('./routes/sequences');
 const { startCron: startSweepCron } = require('./utils/grid-cron');
+const reclassifyWorker = require('./utils/reclassify-worker');
+const reclassifyJobs = require('./utils/reclassify-jobs');
 const realtime = require('./utils/realtime');
 
 const app = express();
@@ -97,6 +101,8 @@ app.use('/api/discover', discoverRoute);
 // Writes come from middleware/activity.js attached to specific POSTs/PUTs;
 // this surface is read-only.
 app.use('/api/activity', activityRoute);
+app.use('/api/costs', costsRoute);
+app.use('/api/sequences', sequencesRoute);
 
 // 404 fallback that returns JSON instead of Express's default HTML so
 // the frontend's fetch handlers always parse cleanly.
@@ -111,7 +117,7 @@ app.use((req, res) => {
 const server = http.createServer(app);
 realtime.attach(server);
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log(`[Atlas API] Listening on port ${PORT}`);
     console.log(`[Atlas API] Env loaded: firecrawl=${!!process.env.FIRECRAWL_API_KEY} openai=${!!process.env.OPENAI_API_KEY} apollo=${!!process.env.APOLLO_API_KEY} scrapingdog=${!!process.env.SCRAPINGDOG_API_KEY}`);
     // Start the grid sweep cron - picks pending cells from grid.json and
@@ -119,4 +125,18 @@ server.listen(PORT, () => {
     // until the per-session budget is hit. Set BLUEBIRD_SWEEP_TICK_MS=0 in
     // .env to keep the route handlers but skip the auto-loop.
     if (process.env.BLUEBIRD_SWEEP_TICK_MS !== '0') startSweepCron();
+    // Reclassify worker - processes the reclassify_jobs queue (migrations
+    // 0014/0015). Reconcile first so any 'running' rows left by a prior
+    // crash flip back to 'pending' and the worker picks up where it left
+    // off; then start the tick loop. Set BLUEBIRD_RECLASSIFY_TICK_MS=0 in
+    // .env to skip the auto-loop (jobs still enqueue but stay pending).
+    try {
+        const reconciled = await reclassifyJobs.reconcileOnBoot();
+        if (reconciled > 0) {
+            console.log(`[Reclassify Worker] Reconciled ${reconciled} crashed job(s) back to pending on boot`);
+        }
+    } catch (err) {
+        console.warn(`[Reclassify Worker] boot reconcile failed: ${err.message}`);
+    }
+    if (process.env.BLUEBIRD_RECLASSIFY_TICK_MS !== '0') reclassifyWorker.start();
 });

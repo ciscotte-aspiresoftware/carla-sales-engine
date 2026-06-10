@@ -56,7 +56,14 @@ Hard rules:
 // string as a read-only "Always applied" hint so editors can see what
 // they're adding on top of. KEEP IN SYNC with the LINKEDIN_UNIVERSAL_RULES
 // constant in web/src/pages/templates.tsx - if you edit one, edit both.
-const LINKEDIN_UNIVERSAL_RULES = `use ONLY where they fit the email's angle - don't force a reference that feels disconnected; prefer fresh signals over stale ones; don't describe the recipient's own product to them, that's not news`;
+//
+// Re-written 2026-06-08: the prior framing ("use ONLY where they fit") was
+// too cautious - the model interpreted it as "skip LinkedIn unless you must"
+// and generic emails were the default even when rich LI data was present.
+// Modeled on valsource's pattern (be-vms-checker/utils/linkedin-helpers.js
+// generatePersonalizedEmail): LI signals are PRIMARY personalization,
+// referenced explicitly in the opener.
+const LINKEDIN_UNIVERSAL_RULES = `When LinkedIn data is provided below, treat it as PRIMARY personalization. Your opener MUST reference ONE specific LinkedIn-derived detail from this person's profile or posts - prefer a fresh post (last 3 months), then current role, then a past tenure at a recognizable employer in the same vertical. Override any template-level instruction to "open from the website" when LI data is available. Rules: paraphrase, never paste post text verbatim; include the year for anything older than 12 months ("back in 2023") - never say "recently" or "last month" for stale signals; don't describe the recipient's own product back to them; one detail max - don't stuff multiple LI references into a single email; don't quote hiring posts or congratulatory reshares as if they were thought leadership.`;
 
 // Parser invariant - the email-gen route does JSON.parse on the LLM output
 // and reads `subject` + `body` off the result. If the template's systemPrompt
@@ -99,7 +106,7 @@ function buildLinkedInBlock(liSummary, liPosts, extraGuidance) {
     if (Array.isArray(liPosts) && liPosts.length > 0) {
         const { postsText, hiringSignal } = formatPostsForPrompt(liPosts);
         if (hiringSignal) lines.push('- Hiring signal: yes (recent posts mention hiring/team growth)');
-        if (postsText) postsBlock = `\n\nRecent LinkedIn posts (newest first, posts within the last 3 months are tagged "prefer this" - those are the strongest hooks):\n${postsText}`;
+        if (postsText) postsBlock = `\n\nRECENT LINKEDIN POSTS (newest first; posts within the last 3 months are tagged "prefer this" - those are the strongest hooks):\n${postsText}`;
     }
 
     if (lines.length === 0 && !postsBlock) return '';
@@ -110,19 +117,33 @@ function buildLinkedInBlock(liSummary, liPosts, extraGuidance) {
     const trimmed = typeof extraGuidance === 'string' ? extraGuidance.trim().slice(0, 1000) : '';
     const extraLine = trimmed ? `\n\nPortfolio-specific guidance: ${trimmed}` : '';
 
-    return `\n\nLinkedIn signals for the recipient (${LINKEDIN_UNIVERSAL_RULES}):\n${lines.join('\n')}${postsBlock}${extraLine}`;
+    // Block structure modeled on valsource's PRIMARY-personalization layout:
+    // a labeled "RECIPIENT LINKEDIN PROFILE" section comes first (where the
+    // model anchors its opener), THEN the rules ("how to use it"), THEN
+    // posts. The all-caps labels + the explicit "USE THIS DATA" instruction
+    // overcome any template-level structure rule that says "open from
+    // their site" - LI takes priority when present.
+    return `\n\n===== RECIPIENT LINKEDIN PROFILE (primary personalization source) =====\n${lines.join('\n')}${postsBlock}${extraLine}\n\nHOW TO USE THIS DATA:\n${LINKEDIN_UNIVERSAL_RULES}\n=====`;
 }
 
-function buildEmailPrompt({ classification, lead, sender, template }) {
+function buildEmailPrompt({ classification, lead, sender, template, customInstruction }) {
+    const { buildCustomInstructionBlock } = require('../utils/custom-instruction');
     // Keep the company snapshot tight - too much context dilutes the prompt.
     const cls = classification || {};
     const signalsList = (cls.signals || []).slice(0, 5).map(s => `  - ${s}`).join('\n') || '  (none extracted)';
     const fleetTypes = (cls.fleetVehicleTypes || []).join(', ') || 'unknown';
     const languages = (cls.languages || []).join(', ') || 'unknown';
 
-    const leadFirstName = lead.firstName || 'there';
+    // No-contact path: when Apollo returned zero decision-makers, the
+    // frontend fires this route with an empty Lead object. We don't want
+    // to force "Hi there," (looks like a botched merge field). Instead we
+    // signal the no-contact case explicitly and let the system prompt's
+    // greeting rule pick a clean professional opener (typically "Hello,"
+    // or omit the greeting line entirely depending on the template's voice).
+    const isNoContact = !lead.firstName && !lead.lastName;
+    const leadFirstName = lead.firstName || '';
     const leadFullName = `${lead.firstName || ''} ${lead.lastName || ''}`.trim();
-    const leadTitle = lead.title || 'leadership';
+    const leadTitle = lead.title || (isNoContact ? '(unknown - addressing the company directly)' : 'leadership');
 
     // LinkedIn signals - appended to the user message only when the lead
     // has a scraped profile and/or recent posts. Empty string otherwise so
@@ -176,12 +197,14 @@ ${signalsList}
 
 Recipient lead:
 - Name: ${leadFullName || '(unknown)'}
-- First name to use in greeting: ${leadFirstName}
-- Title: ${leadTitle}${liBlock}
+- First name to use in greeting: ${leadFirstName || '(none - no contact identified)'}
+- Title: ${leadTitle}${isNoContact ? `
+
+NO-CONTACT MODE: No specific decision-maker was identified for this company. Address the email to the business itself, not a named person. Open with "Hello," (no name) - DO NOT write "Hi there,", "Dear Sir/Madam,", "To whom it may concern,", or guess a name. Keep everything else about the email identical (specific opener referencing their site, the value sentence, the soft ask). The rep will forward this to whichever inbox they identify (info@, sales@, the owner if they find one later).` : ''}${liBlock}${buildCustomInstructionBlock(customInstruction)}
 
 Write the outreach email now. Return JSON only.`,
         },
     ];
 }
 
-module.exports = { buildEmailPrompt };
+module.exports = { buildEmailPrompt, LINKEDIN_UNIVERSAL_RULES };

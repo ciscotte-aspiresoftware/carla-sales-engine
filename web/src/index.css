@@ -268,6 +268,24 @@ html.bg-plain.dark .dark\:border-white\/\[0\.08\] {
   .cm-cell-pulse { animation: none; }
 }
 
+/* ─── Mode-toggle hint pulse ─────────────────────────────────────────────
+   A slow, soft sky-blue glow ring on segmented-control buttons that are
+   NOT currently active. Goal: tell the rep "this is a real button I can
+   switch to" without being obnoxious. Cycle is intentionally long (2.4s)
+   and amplitude small so it reads as a gentle heartbeat, not an alert.
+   Used on the LI Message Pick lead / Paste URL toggle - the prior styling
+   read as decoration, not as an interactive switch. */
+.mode-hint-pulse {
+  animation: mode-hint-pulse 2.4s ease-in-out infinite;
+}
+@keyframes mode-hint-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+  50%      { box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mode-hint-pulse { animation: none; }
+}
+
 /* Leaflet's default panes have a white background - clashes with our dark
    glass card. Turn the wrapper transparent so the card frame shows through
    between tile fetches and around the map edges. */

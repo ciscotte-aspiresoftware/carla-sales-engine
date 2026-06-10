@@ -26,6 +26,8 @@ import {
   IconCloud,
   IconAlertTriangle,
   IconActivity,
+  IconLayoutDashboard,
+  IconSend,
 } from '@tabler/icons-react'
 
 interface Section {
@@ -62,6 +64,33 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: 'dashboard',
+    title: 'Dashboard',
+    icon: IconLayoutDashboard,
+    blurb: 'At-a-glance home page: recent sweeps, recent reclassify jobs, totals.',
+    body: (
+      <>
+        <p>
+          The Dashboard is the landing surface. Top row: counters for total companies / qualified
+          accounts / pending review / leads with verified email - each scoped by the active workspace.
+        </p>
+        <p className='mt-2'>
+          <b>Recent sweep sessions</b> - last few <code>sweep_sessions</code> rows with ICP, scope
+          (city/country), state (running / paused / done), cells scanned, qualified count, credit
+          spend. Click a row to jump to Coverage filtered to that ICP + scope so you can resume or
+          inspect the trail. Lets you see what's still in flight at a glance without opening
+          Coverage.
+        </p>
+        <p className='mt-2'>
+          <b>Recent reclassify jobs</b> - last few queued reclassify runs from the ICP editor's
+          Reclassify tab. Each card shows ICP name, total rows / processed / new verdicts,
+          state, and an inline progress bar that updates over Socket.IO while the worker chews
+          through the queue. Click for the full job detail.
+        </p>
+      </>
+    ),
+  },
+  {
     id: 'sweep',
     title: 'The sweep lifecycle',
     icon: IconMapPin,
@@ -84,14 +113,29 @@ const SECTIONS: Section[] = [
         </p>
         <p className='mt-2'>
           <b>Pause mid-cell.</b> Clicking <b>Pause</b> during an active sweep sets a{' '}
-          <code>pauseRequested</code> flag the pipeline reads at each company boundary inside the
-          cell. The in-flight cell finishes its current company, writes a{' '}
-          <code>pause_checkpoint</code> JSON blob to the cell row (next survivor index, cumulative
-          counters, surviving domain list), and bails with <code>state='pending'</code>. The next
-          Resume re-hydrates from the checkpoint and skips straight to the saved index - no
-          Scrapingdog re-spend, no re-classifying companies already done. The Coverage page shows
-          a "Pausing..." indicator until the checkpoint lands, and a "Paused session" banner with
-          Resume CTA appears any time a cell has an unfinished checkpoint.
+          <code>pauseRequested</code> flag the pipeline reads at three checkpoints inside the cell:
+        </p>
+        <ol className='list-decimal pl-6 mt-1 space-y-1'>
+          <li><b>Inside the Scrapingdog search loop</b> - between search terms and between pages. A partially-fetched page does NOT get logged to <code>search_log</code> (so Resume re-runs that term cheaply), a fully-completed term does (so Resume skips it). When the search loop bails, <code>allRaw</code> is discarded and the cell exits without spending Firecrawl on the partial harvest.</li>
+          <li><b>At the top of the scrape IIFE</b> - between companies, before kicking off the next Firecrawl call. Stops the scrape pipe cleanly so classification of in-flight pages can drain.</li>
+          <li><b>At the top of the classify IIFE</b> - between companies, before the next GPT call.</li>
+        </ol>
+        <p className='mt-2'>
+          When the pipeline bails, it writes a <code>pause_checkpoint</code> JSON blob to the cell
+          row (next survivor index, cumulative counters, surviving domain list) and the cell exits
+          back to <code>state='pending'</code>. The next Resume rehydrates from the checkpoint and
+          skips straight to the saved index - no Scrapingdog re-spend, no re-classifying companies
+          already done. The Coverage page shows a "Pausing..." indicator until the checkpoint lands,
+          and a "Paused session" banner with Resume CTA appears any time a cell has an unfinished
+          checkpoint.
+        </p>
+        <p className='mt-2'>
+          <b>Pause reasons.</b> The cron tracks <i>why</i> it stopped - <code>'manual'</code>{' '}
+          (operator hit Pause), <code>'budget'</code> (per-session cell cap hit),{' '}
+          <code>'no_work'</code> (no pending cells in scope), or <code>'boot'</code> (cron has just
+          started and is waiting for first Resume). The blue "Paused session" banner ONLY renders
+          for <code>'manual'</code> pauses - budget/no-work auto-pauses surface as quieter status
+          chips instead of nagging-for-Resume banners.
         </p>
         <p className='mt-2'>
           <b>Scope-aware Resume.</b> Resume Sweeping always carries the view you're currently looking
@@ -175,11 +219,43 @@ const SECTIONS: Section[] = [
           strip - city / phone / Google rating - and expands to the full address + website link.
         </p>
         <p className='mt-2'>
+          <b>Reclassify is a persistent queue, not a foreground run.</b> Hitting "Rerun" enqueues a{' '}
+          <code>reclassify_jobs</code> row + one <code>reclassify_results</code> child per company,
+          and a background worker chews through them serially (so a long reclassify doesn't block
+          the sweep cron or HTTP requests). The job survives a server restart - on boot the worker
+          picks up any <code>state='queued'</code> or <code>state='running'</code> jobs and resumes.
+          Progress streams over Socket.IO so the ICP editor's progress bar and the Dashboard's
+          recent-jobs card update live. Cancel a job from the ICP editor to flip remaining rows to{' '}
+          <code>state='cancelled'</code>.
+        </p>
+        <p className='mt-2'>
           <b>Search-term staleness.</b> Adding a new term to an ICP marks every completed cell whose{' '}
           <code>search_terms[]</code> doesn't include it as stale. A "Rescan stale terms" button on
           Coverage runs ONLY the new terms against the first 10 stale cells (cheapest possible
           partial-recover sweep). Removing a term doesn't trigger anything - removals can't surface
           new companies.
+        </p>
+        <p className='mt-2'>
+          <b>AI Autofill (Generate / Improve).</b> The ICP editor has a "Generate from description"
+          and "Improve" pair that GPT-fills the structured fields from a one-sentence pitch. Two
+          context sources are baked into the prompt so the output isn't generic:
+        </p>
+        <ul className='list-disc pl-6 mt-1 space-y-1'>
+          <li><b>Portfolio company briefs.</b> Picking <i>Bluebird</i>, <i>Thermeon</i>, or <i>NedFox</i> injects a hand-written brief covering the product, the actual target customers, and what to exclude (so e.g. NedFox-Garden autofill knows the seven verticals NedFox sells into and produces language-correct local terms - "tuincentrum" in NL, "garden centre" in UK, "jardinería" in ES).</li>
+          <li><b>Google Maps semantics + TYPE-A vs TYPE-B detection.</b> The system prompt teaches the model that Scrapingdog Maps queries act as a <i>category filter</i> on the place graph - so an ICP for "POS resellers that support garden centres" must produce terms like <code>"POS reseller"</code> / <code>"EPOS supplier"</code> / <code>"retail IT consultant"</code>, NOT <code>"garden centre support"</code> (which returns garden centres). Trigger words like <i>support / partner / reseller / consultant / installer / vendor / supplier / integrator / VAR</i> flip the prompt into TYPE-B (B2B service-provider) mode where the search terms target the providers, not their end-customers.</li>
+        </ul>
+        <p className='mt-2'>
+          <b>Custom prompt + REP OVERRIDE.</b> Toggling "Use custom prompt" lets you write the
+          classifier system prompt by hand. Any block prefixed with <code>{`{{REP OVERRIDE}}`}</code>{' '}
+          is hard-pinned at the top of the final prompt - useful for one-off corrections ("treat
+          companies in the BENELUX as in-scope even if their stated region says EU only"). The
+          override block survives prompt regeneration; the rest of the structured fields don't.
+        </p>
+        <p className='mt-2'>
+          <b>AI Fill for report templates.</b> If the ICP has a report template, the editor exposes
+          a sparkles button that GPT-fills the markdown skeleton from a one-paragraph hint (target
+          headings, what each section should answer, which signals matter). Faster than writing the
+          skeleton by hand and easier to iterate on.
         </p>
       </>
     ),
@@ -222,9 +298,12 @@ const SECTIONS: Section[] = [
         </p>
         <ul className='list-disc pl-6 mt-1 space-y-1'>
           <li><b>Pending-cells badge on each ICP</b> in the dropdown - a small number showing how many cells are still <code>pending</code> for that ICP across all scopes. Useful for picking the ICP with actual work left.</li>
-          <li><b>Paused-session banner</b> - shown when any cell has an unfinished <code>pause_checkpoint</code>. One-click Resume rehydrates the saved state and continues that exact cell.</li>
+          <li><b>Paused-session banner</b> - shown when any cell has an unfinished <code>pause_checkpoint</code> AND the pause reason was <code>'manual'</code>. The banner's scope label (city / country) is rendered HUGE so you know exactly which view will be resumed. One-click Resume rehydrates the saved state and continues that exact cell.</li>
+          <li><b>Last-paused session chip</b> - a row above the action row that shows the most recent <i>manually-paused</i> session for the active ICP. Click the chip to switch the picker to that session's scope (workspace + ICP + city/country). Auto-hides when the chip's scope already matches the current picker, so it never duplicates state you can see.</li>
+          <li><b>"Resume sweeping" vs "Sweep" label.</b> The primary action button reads <i>Resume sweeping</i> when the currently-picked scope has been touched before (any cell with a <code>pause_checkpoint</code>, <code>placesFound &gt; 0</code>, or a non-null <code>lastScannedAt</code>) and <i>Sweep</i> when it's a fresh scope. Both invoke the same endpoint; the label is purely a hint to the operator about whether they're continuing or starting clean.</li>
           <li><b>Stale-sweep banner</b> - shown when the active ICP has cells whose <code>search_terms[]</code> are behind the ICP's current term list. One-click "Rescan stale terms" runs only the new terms on the first 10 affected cells.</li>
           <li><b>Pause button</b> - appears while a sweep is running. Once clicked, the in-flight cell finishes its current company, writes its checkpoint, and the cron parks itself. Shows "Pausing..." until the checkpoint lands.</li>
+          <li><b>Seed + sweep</b> - one-shot for fresh scopes: native <code>window.confirm()</code> dialog (no popover - bulletproof against stuck-button states), then seeds the cells and unparks the cron in a single round trip.</li>
           <li><b>Cell drawer</b> - click any cell on the globe / list to see its lat/lng, density tier, <i>last swept N ago</i> timestamp, last-swept search terms, and any pause checkpoint (cumulative counters + saved index) for resume preview.</li>
         </ul>
       </>
@@ -282,6 +361,21 @@ const SECTIONS: Section[] = [
           company's classification so you skip the URL paste step). Reviews are per-ICP - the same
           company can be Confirmed by ICP A and Rejected by ICP B if they share a vertical but have
           different criteria. Undo any decision to put the card back in its prior lane.
+        </p>
+        <p className='mt-2'>
+          <b>Recover details (Needs check).</b> A row in Needs check whose Google Maps card came
+          back as a stub (no title, missing phone or address - the Scrapingdog search result was
+          thin) shows a <b>Recover details (5 credits)</b> button. It re-runs the place lookup
+          using the saved <code>dataId</code> → <code>placeId</code> → lat/lng fallback chain, calls
+          Scrapingdog Places (5 credits), and merges title / phone / address / rating / review-count
+          back into the classification. If the lat/lng fallback also fires it costs 10 credits
+          (one search + one Places). Lets a stale stub become a fully reviewable row without
+          re-running a whole cell.
+        </p>
+        <p className='mt-2'>
+          GPS fallback links: when phone <i>and</i> address are both missing but the company has
+          stored lat/lng, the row still renders a Google Maps button via a lat/lng deep link, so
+          you can still eyeball the location.
         </p>
       </>
     ),
@@ -357,10 +451,79 @@ const SECTIONS: Section[] = [
           <li><b>Outreach email</b> - pick a lead → enrich that one lead (1 Apollo credit) → GPT drafts the email using the selected template's system prompt and sender persona.</li>
         </ol>
         <p className='mt-2'>
+          <b>Reveal → Selected → Generate workflow.</b> Step 2 (Decision-makers) splits the per-row
+          action into two states: a <b>Reveal</b> button to spend the Apollo credit and unmask the
+          contact's email, and a <b>Selected</b> badge (green) on the chosen lead. The only{' '}
+          <b>Generate email</b> button lives in Step 3 - so there's exactly one "draft now" click
+          per session and no confusion about which row's about to be drafted. The page also
+          remembers the selected model from the dropdown across re-classifies.
+        </p>
+        <p className='mt-2'>
+          <b>No-leads path.</b> If Apollo returns zero decision-makers (or the company has no
+          contacts at all), Step 3 still lets you generate a <i>general</i> outreach email
+          addressed to the company - the GPT prompt switches to a "no specific contact" mode that
+          leans on company-level signals (classification, scraped about-page snippets) instead of
+          per-lead context. Useful for small shops where Apollo has nothing.
+        </p>
+        <p className='mt-2'>
+          <b>Layout.</b> The header keeps the "Sales Agent" title + description on one line; the
+          tab toggle between <b>Agent</b> (Steps 1-3) and <b>Email</b> (the drafted message + copy
+          button) sits on its own row below the picker so it stays out of the way until an email
+          exists. The Email tab is intentionally generous on vertical space so the body and the
+          "Copy to clipboard" button are both visible without scrolling.
+        </p>
+        <p className='mt-2'>
           If you arrived from My Accounts, a <b>Confirm / Reject bar</b> shows at the bottom so you
           can record your review without leaving the page. Template auto-selection: arriving with an
           ICP context auto-picks the template bound to that ICP via <code>defaultForIcps</code>;
-          otherwise pick from the dropdown.
+          otherwise pick from the dropdown. <b>Custom instructions</b> entered here are wrapped in
+          a <code>{`{{REP OVERRIDE}}`}</code> block that gets hard-pinned at the top of the email
+          system prompt - the model is told to follow it even if it contradicts the template's
+          baseline tone.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: 'sequences',
+    title: 'Sequences',
+    icon: IconSend,
+    blurb: 'Multi-step outreach runs that draft + send a sequence of touchpoints per lead.',
+    body: (
+      <>
+        <p>
+          Sequences strings several outreach steps (initial email → follow-up → LinkedIn DM, in any
+          order and any count) into one persisted run against a lead snapshot. Each step has its
+          own template + delay + channel, drafted ahead of time so you can review the whole
+          sequence before any of it goes out.
+        </p>
+        <p className='mt-2'>
+          The page has two surfaces. The <b>runs list</b> is the index of every sequence: lead
+          name + company in the same row, step count, current state (drafted / sending / done /
+          cancelled), created-at. Click a row to open the <b>run detail</b> with one card per step:
+          channel, template, scheduled-for, generated body, and per-step Copy / Edit / Skip.
+        </p>
+        <p className='mt-2'>
+          <b>Lead snapshot is live, not frozen.</b> When a sequence is regenerated, the run
+          re-reads the lead from Supabase (not the stale <code>run.contextSnapshot.lead</code>) -
+          so a freshly-cached LinkedIn profile or a newly-enriched email shows up immediately
+          without manually editing the run. Same logic protects against the "[object Object]" bug
+          that used to happen when the posts formatter's structured return was string-coerced into
+          the prompt.
+        </p>
+        <p className='mt-2'>
+          <b>LI signal handling.</b> When the cached LinkedIn profile passes the{' '}
+          <code>isUsefulLiSummary</code> validator (any of headline / about / posts has real
+          content - empty shells from <code>summarizeProfile</code>'s defensive defaults DON'T
+          count), the prompt switches to LI-PRIMARY mode: open with a specific LI signal (recent
+          post, role change, headline phrase) rather than the company classification. If the cache
+          is empty or shell-only, the prompt falls back to classification-only.
+        </p>
+        <p className='mt-2'>
+          <b>Channel filter on the template picker</b> - the Email step picker queries{' '}
+          <code>channel='email'</code> and the LinkedIn step picker queries{' '}
+          <code>channel='linkedin'</code>, so LI templates never appear in the email dropdown and
+          vice versa. The first visible template auto-selects so you never sit on a blank picker.
         </p>
       </>
     ),
@@ -444,9 +607,10 @@ const SECTIONS: Section[] = [
           Currently tracked actions:
         </p>
         <ul className='list-disc pl-6 mt-1 space-y-1'>
-          <li><b>ICPs</b> - <code>icp_created</code>, <code>icp_updated</code>, <code>icp_deleted</code>, <code>reclassify_run</code>, <code>rescan_stale_terms</code></li>
-          <li><b>Coverage / sweeps</b> - <code>sweep_resumed</code> (clicking Resume sweeping), <code>sweep_paused</code> (clicking Pause)</li>
-          <li><b>Outreach</b> - <code>email_generated</code>, <code>li_message_generated</code></li>
+          <li><b>ICPs</b> - <code>icp_created</code>, <code>icp_updated</code>, <code>icp_deleted</code>, <code>reclassify_run</code> (now enqueues a persistent job - see Reclassify queue below), <code>reclassify_job_cancelled</code>, <code>rescan_stale_terms</code>, <code>icp_autofill</code></li>
+          <li><b>Coverage / sweeps</b> - <code>sweep_resumed</code> (clicking Resume sweeping), <code>sweep_paused</code> (clicking Pause), <code>seed_cells</code></li>
+          <li><b>Companies</b> - <code>recover_place_details</code> (the Needs-check stub rescue)</li>
+          <li><b>Outreach</b> - <code>email_generated</code>, <code>li_message_generated</code>, <code>sequence_generated</code></li>
           <li><b>Templates</b> - <code>template_created</code>, <code>template_updated</code>, <code>template_deleted</code> (covers both Email + LinkedIn channels - they're one table)</li>
         </ul>
         <p className='mt-2'>
@@ -480,6 +644,25 @@ const SECTIONS: Section[] = [
           scrape-vs-crawl, per-task OpenAI model, LinkedIn scrape settings, conflict-prune. Each row
           is Default vs Custom; changes apply without a restart (radii on the next seed, the rest on
           the next call).
+        </p>
+        <p className='mt-2'>
+          <b>Per-task model dropdowns.</b> There are four independent OpenAI model picks:
+        </p>
+        <ul className='list-disc pl-6 mt-1 space-y-1'>
+          <li><b>Classifier</b> - the per-page classify call (default <code>gpt-4o-mini</code>; the hot path, default kept cheap).</li>
+          <li><b>Email / sequence generation</b> - per-step outreach draft.</li>
+          <li><b>Report template fill</b> - the per-qualified-company markdown report (default bumped to <code>gpt-4o</code> for narrative quality).</li>
+          <li><b>ICP autofill</b> (<code>icpAutomationModel</code>) - the model used by the ICP editor's "Generate from description" / "Improve" / "AI fill report template" actions. Defaults to the smartest available since the structured output drives weeks of sweep spend.</li>
+        </ul>
+        <p className='mt-2'>
+          All four pickers expose the same model list (<code>gpt-4o-mini</code>,{' '}
+          <code>gpt-4o</code>, <code>gpt-5</code>) and persist to <code>app_settings</code>; the
+          autofill calls re-read on every request so a swap takes effect immediately.
+        </p>
+        <p className='mt-2'>
+          <b>Per-session cell budget</b> (<code>BLUEBIRD_SWEEP_BUDGET</code>) is an env knob, not
+          an Admin knob - bump it on the host if you want longer Resume cycles. Cron tick interval
+          (<code>BLUEBIRD_SWEEP_TICK_MS</code>) is the same shape.
         </p>
       </>
     ),

@@ -636,6 +636,14 @@ function Editor({
   const [improveLoading, setImproveLoading] = useState(false)
   const [improveCritique, setImproveCritique] = useState<string | null>(null)
   const [improvedDraft, setImprovedDraft] = useState<Partial<Icp> | null>(null)
+  // Report-template autofill: separate loading/error state so it doesn't
+  // collide with the form-level AI fill spinner. The button next to the
+  // template textarea calls POST /api/icps/generate-report-template with
+  // the current description/vertical/customerTypes/extraNotes; the
+  // returned markdown replaces the textarea content (still editable
+  // before Save).
+  const [reportTplLoading, setReportTplLoading] = useState(false)
+  const [reportTplErr, setReportTplErr] = useState<string | null>(null)
 
   // Per-city country lookup. Populated lazily via the batch /cities-info
   // endpoint - any city we haven't seen yet gets resolved on the next render.
@@ -940,6 +948,40 @@ function Editor({
       AI: {label}
     </button>
   )
+  // Pulls the rep's existing description / vertical / customer types from
+  // the form state, asks GPT to design a report-template tailored to that
+  // ICP, then drops the markdown into the textarea. Doesn't auto-save -
+  // the rep can edit before hitting Save. Disabled when there's no
+  // description AND no vertical (GPT has nothing to anchor to). Uses
+  // icpAutomationModel via the backend route.
+  const handleGenerateReportTemplate = async () => {
+    if (reportTplLoading) return
+    if (!(icp.targetDescription || '').trim() && !(icp.vertical || '').trim()) {
+      setReportTplErr('Fill in the target description or vertical first - the AI needs something to tailor the template to.')
+      return
+    }
+    setReportTplLoading(true); setReportTplErr(null)
+    try {
+      const data = await safeFetchJson(`${API}/api/icps/generate-report-template`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: icp.targetDescription || '',
+          vertical: icp.vertical || '',
+          portfolioCompany: icp.portfolioCompany || '',
+          customerTypes: icp.customerTypes || [],
+          extraNotes: icp.extraNotes || '',
+        }),
+      })
+      if (!data?.success || !data?.reportTemplate) throw new Error(data?.error || 'Request failed')
+      onChange({ ...icp, reportTemplate: data.reportTemplate })
+    } catch (e: any) {
+      setReportTplErr(e?.message || 'Report template fill failed')
+    } finally {
+      setReportTplLoading(false)
+    }
+  }
+
   const handleAiFill = async () => {
     if (!aiDesc.trim() || aiLoading) return
     setAiLoading(true); setAiErr(null)
@@ -1788,13 +1830,30 @@ function Editor({
               className={`${GLASS_SUBTLE} w-full px-3 py-2 text-xs leading-relaxed font-mono resize-y min-h-[16rem] max-h-[50vh] overflow-y-auto`}
               placeholder={DEFAULT_REPORT_TEMPLATE}
             />
-            <button
-              type="button"
-              onClick={() => onChange({ ...icp, reportTemplate: DEFAULT_REPORT_TEMPLATE })}
-              className="mt-1.5 text-[11px] text-sky-600 dark:text-sky-400 hover:underline"
-            >
-              Reset to example template
-            </button>
+            <div className="mt-1.5 flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                onClick={handleGenerateReportTemplate}
+                disabled={reportTplLoading}
+                title="Tailor the section list to this ICP's description / vertical / customer types. Replaces the textarea content - you can still edit before saving."
+                className="inline-flex items-center gap-1.5 rounded-md border border-sky-500/40 bg-sky-500/10 px-2 py-1 text-[11px] font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-500/15 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {reportTplLoading
+                  ? <Loader2 className="h-3 w-3 animate-spin" />
+                  : <Sparkles className="h-3 w-3" />}
+                {reportTplLoading ? 'Generating…' : 'AI fill from description'}
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ ...icp, reportTemplate: DEFAULT_REPORT_TEMPLATE })}
+                className="text-[11px] text-sky-600 dark:text-sky-400 hover:underline"
+              >
+                Reset to example template
+              </button>
+              {reportTplErr && (
+                <span className="text-[11px] text-red-600 dark:text-red-400">{reportTplErr}</span>
+              )}
+            </div>
           </Field>
         )}
       </div>

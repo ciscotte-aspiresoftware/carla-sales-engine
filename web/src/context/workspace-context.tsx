@@ -32,12 +32,6 @@ const Ctx = createContext<WorkspaceCtx | null>(null)
 
 const STORAGE_KEY = 'bluebird:workspace'
 
-// Special sentinel workspace for the Aspire CRM demo. Not a real portfolio
-// company - selecting it collapses the sidebar to just Discover + Admin (see
-// app-sidebar.tsx). Exempted from the "unknown workspace → reset" guard below
-// so it survives reloads even though it isn't in availableWorkspaces.
-export const CRM_DEMO_WORKSPACE = 'CRM DEMO'
-
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Read initial value synchronously so first paint already has the right
   // workspace selected (avoids a one-frame "All Companies" flash on reload).
@@ -79,11 +73,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // If the persisted workspace isn't in the live availableWorkspaces list
-  // anymore (e.g. the ICP got deleted), drop it back to "" so the user
-  // doesn't see ghost data on reload.
+  // anymore (e.g. the ICP got deleted, OR a stale "CRM DEMO" sentinel
+  // from the removed demo mode is still in localStorage), drop it back
+  // to "" so the user doesn't see ghost data on reload.
   useEffect(() => {
     if (!workspace) return
-    if (workspace === CRM_DEMO_WORKSPACE) return // sentinel, not a real company
     if (loading) return
     if (availableWorkspaces.length === 0) return
     if (!availableWorkspaces.includes(workspace)) {

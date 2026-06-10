@@ -17,23 +17,25 @@
 const express = require('express');
 const { chat } = require('../utils/openai');
 const { enrichPerson } = require('../utils/apollo');
-const { scrapeLinkedInProfile, scrapeRecentPosts } = require('../utils/linkedin');
+const { scrapeLinkedInProfile, scrapeRecentPosts, isUsefulLiSummary, hasUsefulPosts, describeLiSummary } = require('../utils/linkedin');
 const { buildEmailPrompt } = require('../prompts/email');
 const { getSender } = require('../senders');
 const { upsertLeadInCompany } = require('./companies');
 const { getTemplate, listTemplates, suggestTemplate } = require('../utils/email-templates');
 const { getAi } = require('../utils/settings');
 const { trackActivity } = require('../middleware/activity');
+const { detectInstructionLeak } = require('../utils/custom-instruction');
 
 // Re-scrape LinkedIn for a given lead at most this often. Profiles + posts
 // don't change minute-by-minute, so a 30-day cache cuts repeat Apify cost
 // on the same lead when reps re-generate emails. Tune up/down here only.
 const LINKEDIN_CACHE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
+
 const router = express.Router();
 
 router.post('/', trackActivity('email_generated'), async (req, res) => {
-    const { classification, lead, companyId, templateId, senderId, icpId } = req.body || {};
+    const { classification, lead, companyId, templateId, senderId, icpId, customInstruction } = req.body || {};
     if (!classification || !lead) {
         return res.status(400).json({ success: false, error: 'classification and lead are required' });
     }
@@ -149,28 +151,48 @@ router.post('/', trackActivity('email_generated'), async (req, res) => {
     // Step 2.5: LinkedIn scrape (profile + recent posts) - free signal that
     // sharpens email personalization. Only runs when:
     //   (a) we have a LinkedIn URL (either from existing lead or Apollo enrich)
-    //   (b) we don't already have a fresh cached scrape (< 30 days old)
+    //   (b) we don't already have a fresh cached scrape (< 30 days old) that
+    //       actually contains usable fields. summarizeProfile returns an
+    //       object with mostly empty-string defaults when Apify hits a
+    //       partial-response / anti-bot wall, and a previous bug let that
+    //       truthy-but-empty object satisfy the cache check, so generic
+    //       emails got cached as "LI personalization done." isUsefulLiSummary
+    //       below requires at least one field with real text.
     //   (c) we're not in demo mode (handled above by early-return stub)
     // Failures are non-fatal - email gen still works with the original
     // Apollo data if Apify is down / out of credits.
     const hasFreshLiCache = workingLead.liScrapedAt
         && (Date.now() - workingLead.liScrapedAt) < LINKEDIN_CACHE_MAX_AGE_MS
-        && (workingLead.liSummary || (Array.isArray(workingLead.liPosts) && workingLead.liPosts.length > 0));
+        && (isUsefulLiSummary(workingLead.liSummary) || hasUsefulPosts(workingLead.liPosts));
 
     if (workingLead.linkedinUrl && !hasFreshLiCache) {
-        console.log(`[Email]   ├─ scraping LinkedIn: ${workingLead.linkedinUrl}`);
+        // Log whether this is a first-time scrape or a re-scrape forced by
+        // a previously-empty cache, so it's obvious in the logs when an
+        // upstream Apify issue is causing repeated re-scrapes.
+        const reason = !workingLead.liScrapedAt
+            ? 'no cache'
+            : isUsefulLiSummary(workingLead.liSummary) || hasUsefulPosts(workingLead.liPosts)
+                ? 'cache stale'
+                : 'cached scrape was empty (likely Apify partial response - re-scraping)';
+        console.log(`[Email]   ├─ scraping LinkedIn: ${workingLead.linkedinUrl} (${reason})`);
         const liStart = Date.now();
         try {
             const [liSummary, liPosts] = await Promise.all([
                 scrapeLinkedInProfile(workingLead.linkedinUrl),
                 scrapeRecentPosts(workingLead.linkedinUrl),
             ]);
-            console.log(`[Email]   ├─ LinkedIn scrape done in ${Date.now() - liStart}ms | profile=${liSummary ? 'ok' : 'none'} | posts=${liPosts.length}`);
+            // Only treat the result as cacheable if it actually has content.
+            // An empty summary or zero-post return gets persisted as null/[]
+            // so the next regenerate forces a re-scrape rather than
+            // permanently anchoring to a useless result.
+            const usefulSummary = isUsefulLiSummary(liSummary) ? liSummary : null;
+            const usefulPosts = hasUsefulPosts(liPosts) ? liPosts : [];
+            console.log(`[Email]   ├─ LinkedIn scrape done in ${Date.now() - liStart}ms | profile=${usefulSummary ? `ok (${describeLiSummary(usefulSummary)})` : 'empty'} | posts=${usefulPosts.length}`);
 
             workingLead = {
                 ...workingLead,
-                liSummary: liSummary || null,
-                liPosts: liPosts || [],
+                liSummary: usefulSummary,
+                liPosts: usefulPosts,
                 liScrapedAt: Date.now(),
             };
 
@@ -194,14 +216,16 @@ router.post('/', trackActivity('email_generated'), async (req, res) => {
         }
     } else if (workingLead.linkedinUrl && hasFreshLiCache) {
         const ageDays = Math.round((Date.now() - workingLead.liScrapedAt) / (24 * 60 * 60 * 1000));
-        console.log(`[Email]   ├─ LinkedIn cache hit (${ageDays}d old) - skipping re-scrape`);
+        console.log(`[Email]   ├─ LinkedIn cache hit (${ageDays}d old) - skipping re-scrape | ${describeLiSummary(workingLead.liSummary)} + ${(workingLead.liPosts || []).length} post(s)`);
+    } else if (!workingLead.linkedinUrl) {
+        console.log(`[Email]   ├─ no LinkedIn URL on lead - skipping LI personalization`);
     }
 
     // Step 3: generate email.
     try {
         console.log(`[Email]   ├─ generating via GPT…`);
         const genStarted = Date.now();
-        const messages = buildEmailPrompt({ classification, lead: workingLead, sender, template });
+        const messages = buildEmailPrompt({ classification, lead: workingLead, sender, template, customInstruction });
         const raw = await chat(messages, {
             model: getAi().emailModel,
             temperature: 0.6,
@@ -225,6 +249,17 @@ router.post('/', trackActivity('email_generated'), async (req, res) => {
         // want them in outbound copy. Hyphen is the in-house substitute.
         parsed.subject = parsed.subject.replace(/—/g, '-');
         parsed.body = parsed.body.replace(/—/g, '-');
+
+        // Belt-and-suspenders leak check: did the model paste the rep's
+        // instruction verbatim instead of translating its intent? Only
+        // fires when 100% of the instruction (>= 6 words) appears
+        // contiguously in the body - shorter style instructions don't
+        // trigger. Surfaced as a warning so the rep can re-run.
+        const leak = detectInstructionLeak(parsed.body, customInstruction);
+        if (leak) {
+            console.warn(`[Email]   ├─ ⚠ instruction leak detected: "${leak.fragment.slice(0, 80)}"`);
+            enrichmentWarnings.push(`Custom instruction appears to have been pasted verbatim into the body ("${leak.fragment.slice(0, 60)}…"). Consider regenerating.`);
+        }
 
         console.log(`[Email] ✓ END ${Date.now() - startedAt}ms total | subject="${parsed.subject.slice(0, 60)}${parsed.subject.length > 60 ? '…' : ''}" | body ${parsed.body.length} chars`);
         return res.json({

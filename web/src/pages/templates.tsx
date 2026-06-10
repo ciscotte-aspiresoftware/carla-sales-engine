@@ -89,7 +89,7 @@ const EMPTY_TEMPLATE: EmailTemplate = {
 // template editors can see the baked-in rules and write guidance that
 // stacks on top instead of duplicating them. KEEP IN SYNC - if you edit
 // one, edit both.
-const LINKEDIN_UNIVERSAL_RULES = `use ONLY where they fit the email's angle - don't force a reference that feels disconnected; prefer fresh signals over stale ones; don't describe the recipient's own product to them, that's not news`
+const LINKEDIN_UNIVERSAL_RULES = `When LinkedIn data is provided below, treat it as PRIMARY personalization. Your opener MUST reference ONE specific LinkedIn-derived detail from this person's profile or posts - prefer a fresh post (last 3 months), then current role, then a past tenure at a recognizable employer in the same vertical. Override any template-level instruction to "open from the website" when LI data is available. Rules: paraphrase, never paste post text verbatim; include the year for anything older than 12 months ("back in 2023") - never say "recently" or "last month" for stale signals; don't describe the recipient's own product back to them; one detail max - don't stuff multiple LI references into a single email; don't quote hiring posts or congratulatory reshares as if they were thought leadership.`
 
 // Mirror of EMAIL_OUTPUT_CONTRACT in api/prompts/email.js. The output schema
 // is a parser invariant - the /api/email route does JSON.parse on the LLM

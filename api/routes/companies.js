@@ -22,6 +22,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { getIcp } = require('../utils/icps');
 const { isEnabled, getClient } = require('../db');
+const { trackActivity } = require('../middleware/activity');
 
 // ─── Supabase persistence layer ────────────────────────────────────────────
 // When USE_SUPABASE is on, reads/writes go to Postgres instead of the JSON
@@ -624,6 +625,21 @@ async function clearReviewForIcp(id, icpId) {
 // Merge incoming (search-only) leads over prior records, preserving any
 // enrichment + LI cache already saved. Shared by both the JSON and Supabase
 // paths so the dedupe/preserve behaviour is identical.
+// Apollo search-only mode returns last names with asterisks ("Di***s") - the
+// real name only comes back when an enrich credit is spent. When we re-run
+// Sales Agent on a company that already has an enriched lead, the fresh
+// search-only result would otherwise clobber the unmasked name we paid to
+// reveal. This helper picks whichever name is NOT masked; with ties (both
+// or neither contain asterisks) it prefers `fresh` since it's the newer
+// record. Used by both merge paths below for firstName + lastName.
+function pickUnmasked(prior, fresh) {
+    const priorMasked = typeof prior === 'string' && /\*/.test(prior);
+    const freshMasked = typeof fresh === 'string' && /\*/.test(fresh);
+    if (priorMasked && !freshMasked) return fresh || prior || '';
+    if (!priorMasked && freshMasked) return prior || fresh || '';
+    return fresh || prior || '';
+}
+
 function mergeLeads(priorLeads, incoming, now) {
     const prevByKey = new Map();
     for (const l of Array.isArray(priorLeads) ? priorLeads : []) {
@@ -636,6 +652,12 @@ function mergeLeads(priorLeads, incoming, now) {
         if (!prior) return { ...l, addedAt: l.addedAt || now };
         return {
             ...l,
+            // Names: prefer the unmasked version. Apollo search returns
+            // "Di***s" for unenriched contacts; the unmasked version only
+            // arrives after an enrich credit is spent and gets persisted.
+            // A re-search must not clobber that.
+            firstName: pickUnmasked(prior.firstName, l.firstName),
+            lastName: pickUnmasked(prior.lastName, l.lastName),
             email: l.email || prior.email || null,
             emailStatus: l.emailStatus || prior.emailStatus || null,
             linkedinUrl: l.linkedinUrl || prior.linkedinUrl || null,
@@ -699,6 +721,11 @@ async function attachLeads(companyId, leads) {
         if (!prior) return { ...l, addedAt: l.addedAt || now };
         return {
             ...l,
+            // Names: prefer the unmasked version. See pickUnmasked() above
+            // for why - Apollo masks last names in search-only mode and we
+            // already paid to reveal them on the first enrich.
+            firstName:      pickUnmasked(prior.firstName, l.firstName),
+            lastName:       pickUnmasked(prior.lastName, l.lastName),
             email:          l.email || prior.email || null,
             emailStatus:    l.emailStatus || prior.emailStatus || null,
             linkedinUrl:    l.linkedinUrl || prior.linkedinUrl || null,
@@ -874,6 +901,143 @@ router.get('/', async (req, res) => {
 
         res.json({ success: true, companies });
     } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// POST /api/companies/:id/recover-place-details/:icpId
+//
+// On-demand recovery for "Needs check" rows where Scrapingdog's initial
+// /google_maps search returned a stub - only lat/lng + a dedup id, no
+// title/phone/address. The sweep wrote the row anyway (the Needs Check
+// lane is the right home for it) but it's not actionable as-is.
+//
+// This endpoint hits Scrapingdog's full-detail endpoint to fill in the
+// missing fields, costing the operator credits ON DEMAND. Two paths:
+//
+//   1. Direct lookup (5 credits) - row has a `dataId` or `placeId` stored
+//      in classification.details. /google_maps/places returns the full
+//      record in one call.
+//   2. Lat/lng re-search (10 credits) - older rows pre-dating dataId
+//      persistence (or rows where Scrapingdog returned NO identifier
+//      either). We re-search Maps at the stored coordinates and take the
+//      first result, then call /google_maps/places on its dataId.
+//
+// On success, the classification row is updated with title/phone/address/
+// rating/reviews while `is_match` and `reason` are preserved - the rep
+// still has to confirm/reject. The updated company record is returned so
+// the frontend can re-render the card without a separate refetch.
+router.post('/:id/recover-place-details/:icpId', trackActivity('place_recover'), async (req, res) => {
+    const { id, icpId } = req.params;
+    const { searchMaps, getPlaceDetails } = require('../utils/scrapingdog');
+    const startedAt = Date.now();
+    try {
+        // Pull current state via the existing reader. Returns the full
+        // company shape including classification for every ICP.
+        const data = await readAll();
+        const company = (data.companies || []).find((c) => c.id === id);
+        if (!company) return res.status(404).json({ success: false, error: 'company not found' });
+        const cls = company.classifications?.[icpId];
+        if (!cls) return res.status(404).json({ success: false, error: 'no classification for this ICP' });
+
+        // Pick the cheapest path. dataId is the canonical input to
+        // /google_maps/places; placeId can also be passed (Scrapingdog
+        // accepts both formats interchangeably for the same endpoint).
+        let dataId = cls.dataId || cls.placeId || null;
+        let extraCredits = 0; // tracked for the response so the UI can show "spent N credits"
+
+        if (!dataId) {
+            // Fallback path - older row without an identifier. Re-search
+            // Maps at the company's stored coordinates with the verticality
+            // term we already used to find it; take the first result.
+            const lat = company.location?.lat;
+            const lng = company.location?.lng;
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                return res.status(400).json({ success: false, error: 'No identifier and no coordinates - cannot recover. Re-run a sweep for this cell.' });
+            }
+            const icp = getIcp(icpId);
+            const fallbackTerm = icp?.searchTerms?.[0] || icp?.vertical || 'business';
+            console.log(`[Recover] ▶ lat/lng fallback id=${id} icp=${icpId} term="${fallbackTerm}" ll=@${lat},${lng}`);
+            const { results } = await searchMaps({
+                query: fallbackTerm,
+                ll: `@${lat},${lng},15z`,
+                country: 'us',  // language/country irrelevant for a lat/lng-targeted search
+                language: 'en',
+                page: 0,
+            });
+            extraCredits += 5;
+            // Take the result whose coordinates are nearest the stored lat/lng.
+            // First result is usually right but defensive in case a chain landed
+            // closer to the same pin.
+            let best = null;
+            let bestD = Infinity;
+            for (const r of results || []) {
+                const rLat = Number(r.gps_coordinates?.latitude);
+                const rLng = Number(r.gps_coordinates?.longitude);
+                if (!Number.isFinite(rLat) || !Number.isFinite(rLng)) continue;
+                const d = Math.hypot(rLat - lat, rLng - lng);
+                if (d < bestD) { bestD = d; best = r; }
+            }
+            dataId = best?.data_id || best?.place_id || null;
+            if (!dataId) {
+                return res.status(502).json({ success: false, error: 'Re-search found no matching place at this location' });
+            }
+        }
+
+        const { place } = await getPlaceDetails(dataId);
+        extraCredits += 5;
+        if (!place) {
+            return res.status(502).json({ success: false, error: 'Scrapingdog returned no place details' });
+        }
+
+        // Merge - preserve is_match/reason/definitionHash/classifiedAt and
+        // any fields the sweep already stored (so a recover doesn't blow
+        // away signals the classifier would have used had it run). Only
+        // overwrite the slots we just fetched.
+        const merged = {
+            ...cls,
+            title: place.title || place.name || cls.title || null,
+            phone: place.phone || cls.phone || null,
+            address: place.address || cls.address || null,
+            rating: place.rating != null ? Number(place.rating) : (cls.rating ?? null),
+            reviews: place.reviews != null ? Number(place.reviews) : (cls.reviews ?? null),
+            placeId: place.place_id || cls.placeId || null,
+            dataId: dataId,           // persist whichever id we used so a re-recovery is one-call cheap
+            recoveredAt: Date.now(),
+        };
+
+        // Also bump the company-level url/domain when the place details
+        // surfaced a website. Some "no website" stubs do have a URL when
+        // queried directly - if so, the row stops being "needs check"-
+        // worthy on its own merits and the rep can scrape it next sweep.
+        const websitePatch = {};
+        if (place.website && !company.url) websitePatch.url = place.website;
+
+        if (isEnabled()) {
+            const sb = getClient();
+            const entry = { ...merged, classifiedAt: merged.classifiedAt || Date.now() };
+            await upsertClassificationRow(sb, id, icpId, entry);
+            if (Object.keys(websitePatch).length > 0) {
+                await sb.from('companies').update(websitePatch).eq('id', id);
+            }
+            await touchCompany(sb, id);
+        } else {
+            const target = data.companies.find((c) => c.id === id);
+            if (target) {
+                target.classifications = target.classifications || {};
+                target.classifications[icpId] = merged;
+                target.classification = merged;
+                if (websitePatch.url) target.url = websitePatch.url;
+                target.updatedAt = Date.now();
+                await writeAll(data);
+            }
+        }
+
+        const updated = isEnabled() ? await getCompanyByIdSupabase(id) : (data.companies.find((c) => c.id === id));
+        console.log(`[Recover] ✓ END ${Date.now() - startedAt}ms id=${id} icp=${icpId} title="${merged.title || '(still empty)'}" credits=${extraCredits}`);
+        res.json({ success: true, company: updated, creditsSpent: extraCredits });
+    } catch (err) {
+        console.error(`[Recover] ✗ END error after ${Date.now() - startedAt}ms id=${id} icp=${icpId}:`, err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });

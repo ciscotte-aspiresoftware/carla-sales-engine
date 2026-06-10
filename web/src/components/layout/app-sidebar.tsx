@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import {
   IconRobot,
   IconCompass,
@@ -19,10 +19,12 @@ import {
   IconSettings,
   IconWorldSearch,
   IconActivity,
+  IconCoin,
+  IconMailForward,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/context/sidebar-context'
-import { useWorkspace, CRM_DEMO_WORKSPACE } from '@/context/workspace-context'
+import { useWorkspace } from '@/context/workspace-context'
 import { useAccountsCount } from '@/context/accounts-count-context'
 
 // Sidebar that supports collapsed (icon-only, 3.5rem) and expanded (15rem)
@@ -111,18 +113,19 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/email', label: 'Email Generation', icon: IconMail, end: false },
       { to: '/li-message', label: 'LI Message', icon: IconBrandLinkedin, end: false },
+      { to: '/sequences', label: 'Sequences', icon: IconMailForward, end: false },
     ],
   },
-  {
-    // Global, workspace-agnostic tools. Discover is the standalone
-    // find+enrich+contacts pipeline built for the Aspire CRM integration -
-    // it doesn't read or write any portfolio company's data, so it sits in
-    // its own group rather than under Pipeline.
-    label: 'CRM',
-    items: [
-      { to: '/discover', label: 'Discover (CRM)', icon: IconWorldSearch, end: false },
-    ],
-  },
+  // CRM group hidden from the sidebar. The /discover route is still live
+  // (App.tsx still mounts <DiscoverPage />) so any direct bookmarks survive
+  // - we just don't surface it in the nav anymore. Re-add this block to
+  // bring it back; matches the same "kept-but-hidden" pattern as /sourcing.
+  // {
+  //   label: 'CRM',
+  //   items: [
+  //     { to: '/discover', label: 'Discover (CRM)', icon: IconWorldSearch, end: false },
+  //   ],
+  // },
   {
     label: 'Help',
     items: [
@@ -133,6 +136,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Settings',
     items: [
       { to: '/activity', label: 'Activity Log', icon: IconActivity, end: false },
+      { to: '/costs', label: 'Costs', icon: IconCoin, end: false },
       { to: '/admin', label: 'Admin', icon: IconSettings, end: false },
     ],
   },
@@ -142,6 +146,10 @@ const NAV_GROUPS: NavGroup[] = [
 // Kept imported above to avoid unused-import noise from icon libs that
 // tree-shake oddly; remove if/when no nav item references it.
 void IconRobot
+// IconWorldSearch sits in the same bucket - currently referenced only by
+// the commented-out CRM/Discover nav group. Keep the import so flipping
+// that group back on is a one-line change.
+void IconWorldSearch
 
 // Pull the first letter of the workspace name for the badge. In "All
 // Companies" mode we show an asterisk to signal cross-portfolio scope -
@@ -167,21 +175,10 @@ function workspaceTitle(workspace: string): string {
 export function AppSidebar() {
   const { collapsed } = useSidebar()
   const { workspace, setWorkspace, availableWorkspaces } = useWorkspace()
-  const navigate = useNavigate()
   const [pickerOpen, setPickerOpen] = useState(false)
   const popoverRef = useRef<HTMLDivElement | null>(null)
 
-  // CRM demo mode collapses the sidebar to just the two workspace-agnostic
-  // surfaces: Discover (the lead pipeline the CRM consumes) and Admin. The
-  // portfolio-company pages are hidden because they have no meaning in the
-  // CRM-integration demo.
-  const crmDemo = workspace === CRM_DEMO_WORKSPACE
-  const CRM_DEMO_ALLOWED = ['/discover', '/admin']
-  const visibleGroups = crmDemo
-    ? NAV_GROUPS
-        .map((g) => ({ ...g, items: g.items.filter((it) => CRM_DEMO_ALLOWED.includes(it.to)) }))
-        .filter((g) => g.items.length > 0)
-    : NAV_GROUPS
+  const visibleGroups = NAV_GROUPS
 
   // Close the popover on outside click - standard popover behavior.
   // useEffect clean-up removes the listener so we don't leak when the
@@ -265,15 +262,6 @@ export function AppSidebar() {
             sub="Cross-view across every portfolio company"
             selected={!workspace}
             onPick={() => { setWorkspace(''); setPickerOpen(false) }}
-          />
-          {/* CRM demo mode - collapses the sidebar to Discover + Admin only.
-              Navigates straight to Discover so the user never lands on a
-              now-hidden page. */}
-          <WorkspaceOption
-            label="CRM DEMO"
-            sub="Demo mode - only Discover + Admin"
-            selected={crmDemo}
-            onPick={() => { setWorkspace(CRM_DEMO_WORKSPACE); setPickerOpen(false); navigate('/discover') }}
           />
           {availableWorkspaces.length > 0 && (
             <div className="my-1 border-t border-border/40" />

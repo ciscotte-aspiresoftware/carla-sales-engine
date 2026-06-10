@@ -16,6 +16,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import type { ReactNode } from 'react'
 import { fetchCompanies } from '@/lib/api'
 import { useWorkspace } from './workspace-context'
+import { API_BASE } from '@/lib/api-base'
 
 interface AccountsCountCtx {
   pendingCount: number
@@ -42,19 +43,31 @@ export function AccountsCountProvider({ children }: { children: ReactNode }) {
     const reqId = ++reqIdRef.current
     setLoading(true)
     try {
-      // Server-side filtering by portfolioCompany when a workspace is
-      // picked keeps the response small even as the DB grows. Without a
-      // workspace ("All Companies") we pull every company and count
-      // pending across them all.
-      const res = await fetchCompanies(workspace ? { portfolioCompany: workspace } : {})
+      // Workspace-scoped count needs TWO things:
+      //   1. The companies in the workspace (portfolioCompany filter on
+      //      the backend - keeps companies with ANY classification under a
+      //      workspace ICP).
+      //   2. The set of ICP ids the workspace owns - so when we then count
+      //      pending (company, icp) PAIRS, we only count pairs under the
+      //      workspace's own ICPs. Without (2) the loop was double-counting:
+      //      a company classified under both bluebird AND nedfox-thrift
+      //      would contribute its nedfox-thrift pending pair to the Bluebird
+      //      sidebar pill, inflating it by every cross-portfolio classify.
+      const [companiesRes, ownedIds] = await Promise.all([
+        fetchCompanies(workspace ? { portfolioCompany: workspace } : {}),
+        workspace ? fetchWorkspaceIcpIds(workspace) : Promise.resolve(null),
+      ])
       if (reqId !== reqIdRef.current) return  // a newer fetch superseded us
       // Pending across every (company, icp) pair: classifier said is_match
       // AND no review yet. Same definition the Accounts page uses for the
-      // Pending lane.
+      // Pending lane. When `ownedIds` is non-null (workspace picked) we
+      // also gate by ICP membership so foreign-portfolio classifications
+      // on the same company don't double-count.
       let pending = 0
-      for (const c of res.companies) {
+      for (const c of companiesRes.companies) {
         if (!c.classifications) continue
         for (const [icpId, cls] of Object.entries(c.classifications)) {
+          if (ownedIds && !ownedIds.has(icpId)) continue
           if (cls.is_match !== true) continue
           if (c.reviews?.[icpId]) continue
           pending++
@@ -105,4 +118,20 @@ export function useAccountsCount(): AccountsCountCtx {
   const ctx = useContext(Ctx)
   if (!ctx) throw new Error('useAccountsCount must be used inside AccountsCountProvider')
   return ctx
+}
+
+// Returns the set of ICP ids that belong to a portfolio company. Used to
+// gate pending-pair counting so we never credit (company × foreign-ICP)
+// classifications to a workspace. Soft-fails to null on network errors so
+// the caller falls back to counting every classification (i.e. the old,
+// less-accurate behavior) rather than blanking the pill entirely.
+async function fetchWorkspaceIcpIds(portfolioCompany: string): Promise<Set<string> | null> {
+  try {
+    const r = await fetch(`${API_BASE}/api/icps?portfolioCompany=${encodeURIComponent(portfolioCompany)}`)
+    if (!r.ok) return null
+    const data = await r.json() as { icps?: Array<{ id: string }> }
+    return new Set((data.icps || []).map((i) => i.id))
+  } catch {
+    return null
+  }
 }

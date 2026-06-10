@@ -5,6 +5,7 @@
 // same so the frontend can render leads identically.
 
 const axios = require('axios');
+const { recordUsage, priceService } = require('./api-cost');
 
 const APOLLO_API_KEY = process.env.APOLLO_API_KEY;
 
@@ -58,6 +59,7 @@ function extractPhone(person) {
 }
 
 async function enrichPerson(apolloId) {
+    const startedAt = Date.now();
     try {
         const response = await axios.post(
             'https://api.apollo.io/api/v1/people/match',
@@ -70,8 +72,19 @@ async function enrichPerson(apolloId) {
                 },
             }
         );
+        const durationMs = Date.now() - startedAt;
 
         const person = response.data?.person;
+        // Record the enrichment regardless of whether person was found - the
+        // credit gets burned by Apollo either way.
+        recordUsage({
+            service: 'apollo',
+            operation: 'enrich',
+            units: 1,
+            usdCost: priceService('apollo', 1, 'enrich'),
+            durationMs,
+            metadata: { apolloId, found: !!person },
+        });
         if (!person) return null;
 
         return {
@@ -134,6 +147,13 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
         'X-Api-Key': APOLLO_API_KEY,
     };
 
+    // Counts the Apollo search-API requests this call makes (one per
+    // strategy that runs). enrich calls are tracked separately inside
+    // enrichPerson(). Recorded once at the end as a single search_session
+    // row so the Costs page shows one logical Apollo search per company.
+    const startedAt = Date.now();
+    let searchCalls = 0;
+
     const seenIds = new Set();
     function mergeUnique(existing, incoming) {
         const out = [...existing];
@@ -158,6 +178,7 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
                 { q_organization_domains_list: [cleanDomain], person_titles: ALL_TITLES, per_page: 25, page: 1 },
                 { headers }
             );
+            searchCalls++;
             people = mergeUnique(people, r1.data?.people || []);
             console.log(`[Apollo] Strategy 1: ${r1.data?.people?.length || 0} people`);
         }
@@ -169,6 +190,7 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
                 { q_organization_domains_list: [cleanDomain], person_seniorities: SENIORITIES, per_page: 25, page: 1 },
                 { headers }
             );
+            searchCalls++;
             people = mergeUnique(people, r2.data?.people || []);
             console.log(`[Apollo] Strategy 2: ${r2.data?.people?.length || 0} people (${people.length} unique)`);
         }
@@ -180,6 +202,7 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
                 { q_organization_domains_list: [cleanDomain], per_page: 25, page: 1 },
                 { headers }
             );
+            searchCalls++;
             people = mergeUnique(people, r3.data?.people || []);
             console.log(`[Apollo] Strategy 3 (domain only): ${people.length} people`);
         }
@@ -192,6 +215,7 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
                 { q_organization_name: companyName, person_seniorities: SENIORITIES, per_page: 25, page: 1 },
                 { headers }
             );
+            searchCalls++;
             people = mergeUnique(people, r4.data?.people || []);
             console.log(`[Apollo] Strategy 4 (org name): ${people.length} people`);
         }
@@ -295,11 +319,27 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
         // exactly `limit`). `_tier` is stripped on the way out.
         const sliceTo = (skipEnrich && effectiveLimit == null) ? enriched.length : effectiveLimit;
         const results = enriched.slice(0, sliceTo).map(({ _tier, ...rest }) => rest);
+        recordUsage({
+            service: 'apollo',
+            operation: 'search_session',
+            units: searchCalls,
+            usdCost: priceService('apollo', searchCalls, 'search'),
+            durationMs: Date.now() - startedAt,
+            metadata: { companyName, domain: cleanDomain, peopleFound: people.length, returned: results.length },
+        });
         return { people: results, warnings };
     } catch (error) {
         const errMsg = JSON.stringify(error.response?.data || error.message || '');
         const status = error.response?.status;
         console.error('[Apollo] search error:', error.response?.data || error.message);
+        recordUsage({
+            service: 'apollo',
+            operation: 'search_session',
+            units: searchCalls,
+            usdCost: priceService('apollo', searchCalls, 'search'),
+            durationMs: Date.now() - startedAt,
+            metadata: { companyName, domain: cleanDomain, error: status || 'unknown' },
+        });
         if (status === 402 || status === 429 || /insufficient.credits|no credits|credits.exhausted|billing|quota/i.test(errMsg)) {
             return { people: [], warnings: ['Apollo credits exhausted - check billing'] };
         }
