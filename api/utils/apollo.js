@@ -363,6 +363,15 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
                 || !!candidate.contact?.sanitized_phone
                 || !!orgPhone;
 
+            // Extract phone from the search result (not just from enrichment).
+            // Apollo's /mixed_people/api_search already returns phone hints —
+            // use them instead of waiting for enrichment (which costs extra credits).
+            // If Apollo didn't return a phone in the search, this stays null and
+            // the operator can later click "Reveal phone" to trigger async waterfall.
+            if (!phone && hasPhone) {
+                phone = extractPhone(candidate);
+            }
+
             if (skipEnrich) {
                 console.log(`[Apollo] ${firstName} ${lastName} (${title}): search-only, no enrich`);
             } else if (apolloId) {

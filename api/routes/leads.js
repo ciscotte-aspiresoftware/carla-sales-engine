@@ -223,89 +223,59 @@ router.post('/:companyId/:apolloId/enrich', async (req, res) => {
     }
 });
 
-// POST /api/leads/:companyId/:apolloId/enrich-phone[?waterfall=true]
-// Dedicated phone-only enrichment. By default, calls Apollo's /people/match
-// (costs 1 credit, returns synchronously). If no phone is found AND
-// ?waterfall=true, initiates async waterfall enrichment (Apollo enriches
-// phone in background and POSTs to /api/apollo/webhook).
+// POST /api/leads/:companyId/:apolloId/enrich-phone
+// Async phone enrichment via Apollo's waterfall API. Sales Agent search
+// already extracted cached phone from Apollo's results — this endpoint is
+// for exhaustive phone reveal when the search came up empty.
 //
-// Returns 200 with:
-//   - { lead, phoneFound: true } if sync call found phone
-//   - { lead, phoneFound: false } if sync call found no phone
-//   - { waterfall_pending: true, request_id } if waterfall initiated (lead not updated yet)
-// 402 if credits ran out. 5xx if webhook URL not configured (required for waterfall).
+// Initiates an async request: Apollo enriches the phone in the background
+// and POSTs the result to /api/apollo/webhook, which updates the lead.
+// Returns immediately with { waterfall_pending: true, request_id }.
+//
+// Requires CARLA_APOLLO_WEBHOOK_URL to be set (the endpoint Apollo posts to).
 router.post('/:companyId/:apolloId/enrich-phone', async (req, res) => {
     const { companyId, apolloId } = req.params;
-    const { waterfall } = req.query;
 
     if (!companyId || !apolloId) {
         return res.status(400).json({ success: false, error: 'companyId and apolloId are required' });
     }
 
     try {
-        // First try sync enrichment (cheap, immediate).
-        const result = await enrichPerson(apolloId);
-        if (!result) {
-            return res.status(502).json({ success: false, error: 'Apollo returned no data for this person' });
-        }
-        if (result.warning) {
-            return res.status(402).json({ success: false, error: result.warning });
-        }
-
-        // If sync found a phone, return it.
-        if (result.phone) {
-            const patch = { phoneCheckedAt: Date.now(), phone: result.phone };
-            const updated = await upsertLeadInCompany(companyId, apolloId, patch);
-            if (!updated) return res.status(404).json({ success: false, error: 'Lead not found in company' });
-            console.log(`[Leads] ✓ phone-enrich ${apolloId}: ${result.phone}`);
-            return res.json({ success: true, lead: updated, phoneFound: true });
-        }
-
-        // Sync returned no phone. If waterfall requested, initiate async enrichment.
-        if (waterfall === 'true') {
-            const webhookUrl = process.env.CARLA_APOLLO_WEBHOOK_URL;
-            if (!webhookUrl) {
-                return res.status(500).json({
-                    success: false,
-                    error: 'Waterfall enrichment not configured (CARLA_APOLLO_WEBHOOK_URL missing)',
-                });
-            }
-
-            const waterfallResult = await enrichPersonWithWaterfall(apolloId, {
-                companyId,
-                leadKey: apolloId,
-                webhookUrl,
-            });
-
-            if (!waterfallResult) {
-                return res.status(502).json({ success: false, error: 'Waterfall initiation failed' });
-            }
-            if (waterfallResult.warning) {
-                return res.status(402).json({ success: false, error: waterfallResult.warning });
-            }
-
-            // Mark the lead as phoneCheckedAt so UI knows we tried (even though result is pending).
-            const patch = { phoneCheckedAt: Date.now() };
-            await upsertLeadInCompany(companyId, apolloId, patch);
-
-            console.log(`[Leads] ✓ waterfall initiated ${apolloId}: request_id=${waterfallResult.request_id}`);
-            return res.json({
-                success: true,
-                waterfall_pending: true,
-                request_id: waterfallResult.request_id,
-                message: 'Phone enrichment in progress - Apollo will POST the result to the webhook',
+        const webhookUrl = process.env.CARLA_APOLLO_WEBHOOK_URL;
+        if (!webhookUrl) {
+            return res.status(500).json({
+                success: false,
+                error: 'Phone reveal not configured (set CARLA_APOLLO_WEBHOOK_URL)',
             });
         }
 
-        // Sync found no phone and waterfall not requested — return that fact to UI.
+        const waterfallResult = await enrichPersonWithWaterfall(apolloId, {
+            companyId,
+            leadKey: apolloId,
+            webhookUrl,
+        });
+
+        if (!waterfallResult) {
+            return res.status(502).json({ success: false, error: 'Waterfall initiation failed' });
+        }
+        if (waterfallResult.warning) {
+            return res.status(402).json({ success: false, error: waterfallResult.warning });
+        }
+
+        // Mark the lead as phoneCheckedAt so the UI knows we initiated enrichment.
         const patch = { phoneCheckedAt: Date.now() };
-        const updated = await upsertLeadInCompany(companyId, apolloId, patch);
-        if (!updated) return res.status(404).json({ success: false, error: 'Lead not found in company' });
-        console.log(`[Leads] ✓ phone-enrich ${apolloId}: (no phone on file)`);
-        return res.json({ success: true, lead: updated, phoneFound: false });
+        await upsertLeadInCompany(companyId, apolloId, patch);
+
+        console.log(`[Leads] ✓ waterfall phone reveal initiated ${apolloId}: request_id=${waterfallResult.request_id}`);
+        return res.json({
+            success: true,
+            waterfall_pending: true,
+            request_id: waterfallResult.request_id,
+            message: 'Phone reveal in progress - check back in a few minutes',
+        });
     } catch (err) {
-        console.error(`[Leads] phone enrich failed for ${apolloId}:`, err.message);
-        return res.status(500).json({ success: false, error: err.message || 'Phone enrichment failed' });
+        console.error(`[Leads] phone reveal failed for ${apolloId}:`, err.message);
+        return res.status(500).json({ success: false, error: err.message || 'Phone reveal failed' });
     }
 });
 
