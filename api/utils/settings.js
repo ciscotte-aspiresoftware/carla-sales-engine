@@ -113,10 +113,10 @@ const DEFAULTS = {
         //                  default since reports are human-read.
         // ICP automation = ICP wizard (generate from description, regen
         //                  section, rewrite classify prompt, terms-for-city).
-        classify:       { provider: 'anthropic', model: 'claude-haiku-4-5' },
-        email:          { provider: 'anthropic', model: 'claude-sonnet-4-6' },
-        report:         { provider: 'anthropic', model: 'claude-opus-4-8' },
-        icpAutomation:  { provider: 'anthropic', model: 'claude-sonnet-4-6' },
+        classify:       { provider: 'openai', model: 'gpt-4o-mini' },
+        email:          { provider: 'openai', model: 'gpt-4o-mini' },
+        report:         { provider: 'openai', model: 'gpt-4o' },
+        icpAutomation:  { provider: 'openai', model: 'gpt-4o-mini' },
     },
     linkedin: {
         // How many recent posts to pull per LinkedIn profile via Apify's
