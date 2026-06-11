@@ -36,6 +36,7 @@ const activityRoute = require('./routes/activity');
 const costsRoute = require('./routes/costs');
 const sequencesRoute = require('./routes/sequences');
 const hubspotRoute = require('./routes/hubspot');
+const apolloRoute = require('./routes/apollo');
 const { startCron: startSweepCron } = require('./utils/grid-cron');
 const reclassifyWorker = require('./utils/reclassify-worker');
 const reclassifyJobs = require('./utils/reclassify-jobs');
@@ -112,6 +113,10 @@ app.use('/api/sequences', sequencesRoute);
 // domain (company) / email (contact) and writes the HubSpot ids back onto the
 // Atlas records. Companion UI: per-company button on Accounts/Database pages.
 app.use('/api/hubspot', hubspotRoute);
+// Apollo webhooks - receives waterfall enrichment results (phone numbers) from
+// Apollo asynchronously. Routed at /api/apollo/webhook; endpoint accepts POST
+// from Apollo after they enrich phone data in the background.
+app.use('/api/apollo', apolloRoute);
 
 // 404 fallback that returns JSON instead of Express's default HTML so
 // the frontend's fetch handlers always parse cleanly.

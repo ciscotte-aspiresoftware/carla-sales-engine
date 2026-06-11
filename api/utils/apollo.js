@@ -9,6 +9,25 @@ const { recordUsage, priceService } = require('./api-cost');
 
 const APOLLO_API_KEY = process.env.APOLLO_API_KEY;
 
+// Waterfall enrichment request tracking: request_id → {apolloId, companyId, leadKey, createdAt}
+// When Apollo's webhook fires with phone data, we look up the original lead here.
+const pendingEnrichments = new Map();
+
+function registerPendingEnrichment(requestId, { apolloId, companyId, leadKey }) {
+    pendingEnrichments.set(requestId, { apolloId, companyId, leadKey, createdAt: Date.now() });
+    // Clean up old requests (>1h) to prevent memory leaks.
+    const oneHourAgo = Date.now() - 3600000;
+    for (const [id, data] of pendingEnrichments.entries()) {
+        if (data.createdAt < oneHourAgo) pendingEnrichments.delete(id);
+    }
+}
+
+function consumePendingEnrichment(requestId) {
+    const data = pendingEnrichments.get(requestId);
+    if (data) pendingEnrichments.delete(requestId);
+    return data;
+}
+
 // Title tiers - lower number = higher seniority. Same as valsource.
 const TITLE_TIERS = [
     { tier: 1, keywords: ['founder', 'co-founder', 'cofounder', 'owner', 'co-owner'] },
@@ -106,6 +125,73 @@ async function enrichPerson(apolloId) {
             return { warning: 'Apollo credits exhausted - leads returned without verified emails' };
         }
         console.error('[Apollo] enrichPerson error:', error.response?.data || error.message);
+        return null;
+    }
+}
+
+// Waterfall enrichment: async phone reveal via webhook.
+// Initiates an Apollo waterfall request for phone numbers. Apollo will POST the
+// results back to webhookUrl (must be publicly accessible, e.g.
+// https://carla-sales-engine.onrender.com/api/apollo/webhook). This function
+// returns immediately with {phone: null, waterfall_pending: true, request_id};
+// the actual phone will arrive asynchronously and update the lead.
+//
+// Only used when synchronous enrichPerson can't find a phone and the operator
+// clicks "reveal phone" — this initiates the async flow.
+async function enrichPersonWithWaterfall(apolloId, { companyId, leadKey, webhookUrl }) {
+    const startedAt = Date.now();
+    if (!webhookUrl) throw new Error('webhookUrl required for waterfall enrichment');
+
+    try {
+        const response = await axios.post(
+            'https://api.apollo.io/api/v1/people/match',
+            {
+                id: apolloId,
+                run_waterfall_phone: true,
+                webhook_url: webhookUrl,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache',
+                    'X-Api-Key': APOLLO_API_KEY,
+                },
+            }
+        );
+
+        const requestId = response.data?.request_id;
+        if (!requestId) {
+            console.warn('[Apollo] waterfall /people/match returned no request_id', response.data);
+            return null;
+        }
+
+        // Register this request so when Apollo's webhook fires we know which lead to update.
+        registerPendingEnrichment(requestId, { apolloId, companyId, leadKey });
+
+        recordUsage({
+            service: 'apollo',
+            operation: 'waterfall_enrich',
+            units: 1,
+            usdCost: priceService('apollo', 1, 'waterfall_enrich'),
+            durationMs: Date.now() - startedAt,
+            metadata: { apolloId, requestId },
+        });
+
+        console.log(`[Apollo] waterfall initiated for ${apolloId}: request_id=${requestId}`);
+
+        // Return a marker that phone enrichment is pending — the webhook will update it.
+        return {
+            phone: null,
+            waterfall_pending: true,
+            request_id: requestId,
+        };
+    } catch (error) {
+        const errMsg = JSON.stringify(error.response?.data || error.message || '');
+        const status = error.response?.status;
+        if (status === 402 || status === 429 || /insufficient.credits|no credits|credits.exhausted|billing|quota/i.test(errMsg)) {
+            return { warning: 'Apollo credits exhausted' };
+        }
+        console.error('[Apollo] waterfall enrichment error:', error.response?.data || error.message);
         return null;
     }
 }
@@ -348,4 +434,10 @@ async function searchTopPeople(companyName, domain, limit, { skipEnrich = false 
     }
 }
 
-module.exports = { searchTopPeople, enrichPerson };
+module.exports = {
+    searchTopPeople,
+    enrichPerson,
+    enrichPersonWithWaterfall,
+    consumePendingEnrichment,
+    registerPendingEnrichment,
+};
