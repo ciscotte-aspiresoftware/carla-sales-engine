@@ -4,7 +4,7 @@
 // We extract the phone and update the lead record.
 
 const express = require('express');
-const companiesStore = require('./companies');
+const { upsertLeadInCompany } = require('./companies');
 const { consumePendingEnrichment } = require('../utils/apollo');
 
 const router = express.Router();
@@ -46,7 +46,7 @@ router.post('/webhook', async (req, res) => {
         return res.status(200).json({ success: true, message: 'request not in pending map' });
     }
 
-    const { apolloId, companyId, leadKey } = pending;
+    const { apolloId, companyId } = pending;
     const phone = extractWaterfallPhone(payload);
 
     try {
@@ -54,26 +54,12 @@ router.post('/webhook', async (req, res) => {
         const patch = { phoneCheckedAt: Date.now() };
         if (phone) patch.phone = phone;
 
-        // Import upsertLeadInCompany at the top if needed, or use a helper here.
-        // For now, access the store directly via companiesStore.
-        const allData = await companiesStore.readAll();
-        const companies = allData.companies || [];
-        const company = companies.find(c => c.id === companyId);
-
-        if (!company) {
-            console.warn(`[Apollo] webhook: company ${companyId} not found`);
-            return res.status(404).json({ success: false, error: 'Company not found' });
-        }
-
-        // Find and update the lead.
-        const leadIndex = (company.leads || []).findIndex(l => l.apolloId === apolloId || l.email === leadKey);
-        if (leadIndex === -1) {
-            console.warn(`[Apollo] webhook: lead not found in company ${companyId}`);
+        // Use the existing upsertLeadInCompany which handles both JSON and Supabase.
+        const updated = await upsertLeadInCompany(companyId, apolloId, patch);
+        if (!updated) {
+            console.warn(`[Apollo] webhook: lead ${apolloId} not found in company ${companyId}`);
             return res.status(404).json({ success: false, error: 'Lead not found' });
         }
-
-        company.leads[leadIndex] = { ...company.leads[leadIndex], ...patch };
-        await companiesStore.writeAll({ companies });
 
         console.log(`[Apollo] ✓ webhook processed for ${apolloId}: phone=${phone || '(none)'}`);
         return res.json({ success: true, phone });
