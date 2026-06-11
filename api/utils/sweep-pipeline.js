@@ -85,7 +85,7 @@ async function classify(markdown, pageTitle, classifyPrompt) {
     ];
     try {
         const raw = await chat(messages, {
-            model: getAi().classifyModel,
+            task: 'classify',
             temperature: 0.2,
             response_format: { type: 'json_object' },
         });

@@ -60,6 +60,8 @@ app.get('/api/health', (req, res) => {
         env: {
             firecrawl: !!process.env.FIRECRAWL_API_KEY,
             openai: !!process.env.OPENAI_API_KEY,
+            anthropic: !!process.env.ANTHROPIC_API_KEY,
+            gemini: !!process.env.GEMINI_API_KEY,
             apollo: !!process.env.APOLLO_API_KEY,
             scrapingdog: !!process.env.SCRAPINGDOG_API_KEY,
         },

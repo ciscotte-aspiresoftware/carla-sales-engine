@@ -224,7 +224,7 @@ router.post('/generate', async (req, res) => {
                 { role: 'system', content: ICP_GENERATE_SYSTEM + taskInstruction },
                 { role: 'user', content: `Portfolio company: ${portfolioCompany || '(none)'}${portfolioBrief}\n\nDescription:\n${String(description).trim()}${contextBlock}` },
             ],
-            { model: getAi().icpAutomationModel, temperature: 0.3, response_format: { type: 'json_object' } },
+            { task: 'icpAutomation', temperature: 0.3, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -296,7 +296,7 @@ router.post('/improve', async (req, res) => {
                 { role: 'system', content: ICP_IMPROVE_SYSTEM },
                 { role: 'user', content: `Portfolio company: ${improvePortfolioName || '(none)'}${improveBrief}\n\nCurrent ICP:\n${JSON.stringify(snapshot, null, 2)}` },
             ],
-            { model: getAi().icpAutomationModel, temperature: 0.3, response_format: { type: 'json_object' } },
+            { task: 'icpAutomation', temperature: 0.3, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -380,7 +380,7 @@ router.post('/generate-report-template', async (req, res) => {
                 { role: 'system', content: REPORT_TEMPLATE_SYSTEM },
                 { role: 'user', content: userPayload },
             ],
-            { model: getAi().icpAutomationModel, temperature: 0.3 },
+            { task: 'icpAutomation', temperature: 0.3 },
         );
         // Defensive cleanup - strip any code fences the model might emit
         // despite the rule, trim whitespace. Doesn't validate structure
@@ -460,7 +460,7 @@ router.post('/distribute-search-terms', async (req, res) => {
                 { role: 'system', content: DISTRIBUTE_SYSTEM },
                 { role: 'user', content: `Terms: ${JSON.stringify(cleanTerms)}\nCountries: ${JSON.stringify(cleanCountries)}` },
             ],
-            { model: getAi().icpAutomationModel, temperature: 0.1, response_format: { type: 'json_object' } },
+            { task: 'icpAutomation', temperature: 0.1, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -565,7 +565,7 @@ router.post('/terms-for-city', async (req, res) => {
                 { role: 'system', content: TERMS_FOR_CITY_SYSTEM },
                 { role: 'user', content: JSON.stringify(userPayload, null, 2) },
             ],
-            { model: getAi().icpAutomationModel, temperature: 0.2, response_format: { type: 'json_object' } },
+            { task: 'icpAutomation', temperature: 0.2, response_format: { type: 'json_object' } },
         );
         let parsed;
         try { parsed = JSON.parse(raw); }
@@ -1134,7 +1134,7 @@ async function _legacyInlineReclassify(icp, targets, force, startedAt, res) {
                     { role: 'user', content: `Page title: ${cached.pageTitle || '(none)'}\n\nPage content:\n${(cached.markdown || '').slice(0, 12000)}` },
                 ];
                 const raw = await chat(messages, {
-                    model: getAi().classifyModel,
+                    task: 'classify',
                     temperature: 0.2,
                     response_format: { type: 'json_object' },
                 });

@@ -95,28 +95,28 @@ const DEFAULTS = {
         crawlMaxPages: 10,
     },
     ai: {
-        // Two independent model choices so the team can pay for a stronger
-        // classifier without paying for a stronger email writer, or vice
-        // versa. Both default to mini for cost; gpt-4o is ~10× more per
-        // token; gpt-5 is the highest quality / highest cost option.
-        // Classify       = used by Email Gen URL-classify, Coverage sweep
-        //                  classify, the ICP Reclassify flow (verdict only).
-        // Email          = used by Email Gen email-draft + LI Message + sequences.
-        // Report         = used by the per-ICP markdown company report. Defaults
-        //                  to gpt-4o (not mini) because reports are read by humans
-        //                  and benefit from the stronger model; the binary
-        //                  classify stays on mini for cost.
-        // ICP automation = used by the ICP wizard's editorial calls (generate
-        //                  from description, regen section, rewrite classify
-        //                  prompt, terms-for-city). Low-volume one-time setup
-        //                  work where a stronger model would pay off, but kept
-        //                  on mini by default so existing setups don't change
-        //                  cost. Bump it independently if your ICP wizard
-        //                  output feels weak.
-        classifyModel: 'gpt-4o-mini',
-        emailModel: 'gpt-4o-mini',
-        reportModel: 'gpt-4o',
-        icpAutomationModel: 'gpt-4o-mini',
+        // Per-task { provider, model } pairs. Each task is independent so you
+        // can use a cheap Haiku for the high-volume classify step while using
+        // a stronger model for the once-per-day report, or mix providers.
+        //
+        // Providers: 'anthropic' | 'openai' | 'gemini'
+        // The key for the provider must be set in the environment
+        // (ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY); the app
+        // defaults to 'anthropic' since that's the key available at launch.
+        //
+        // Classify       = URL-classify, Coverage sweep classify, Reclassify.
+        //                  Recommend claude-haiku-4-5 for cost ($1/Mtok vs
+        //                  $5/Mtok for Opus); quality is comparable for the
+        //                  binary qualified/rejected verdict.
+        // Email          = Email gen, LI message, sequences.
+        // Report         = Per-ICP markdown company report. Slightly stronger
+        //                  default since reports are human-read.
+        // ICP automation = ICP wizard (generate from description, regen
+        //                  section, rewrite classify prompt, terms-for-city).
+        classify:       { provider: 'anthropic', model: 'claude-haiku-4-5' },
+        email:          { provider: 'anthropic', model: 'claude-sonnet-4-6' },
+        report:         { provider: 'anthropic', model: 'claude-opus-4-8' },
+        icpAutomation:  { provider: 'anthropic', model: 'claude-sonnet-4-6' },
     },
     linkedin: {
         // How many recent posts to pull per LinkedIn profile via Apify's
@@ -127,29 +127,53 @@ const DEFAULTS = {
     },
 };
 
-// Allowed OpenAI model identifiers. Adding a new model: append here, ship
-// to the frontend dropdown in admin.tsx. Anything not in this list gets
-// rejected on save so a typo can't accidentally land in settings.json and
-// silently break every OpenAI call. Pricing for each lives in
-// api/utils/api-cost.js so the Costs page can render an accurate $/Mtok
-// card.
-const ALLOWED_MODELS = [
-    // gpt-5 family - newest, recommended for most tasks. mini and nano
-    // are the big cost wins (nano is ~50× cheaper than gpt-4o for
-    // input tokens) if classify quality holds.
-    'gpt-5',
-    'gpt-5-mini',
-    'gpt-5-nano',
-    'gpt-5.1',
-    'gpt-5.2',
-    // gpt-4.1 family - middle ground if you've benchmarked against it.
-    'gpt-4.1',
-    'gpt-4.1-mini',
-    'gpt-4.1-nano',
-    // gpt-4o family - prior generation, still solid + battle-tested.
-    'gpt-4o',
-    'gpt-4o-mini',
-];
+// Multi-provider catalog. Used by the admin UI to populate the Provider and
+// Model dropdowns; also used to validate that a provider id is known. The
+// model list per provider is a curated set of suggestions — the admin UI
+// ALSO accepts free-text custom model ids, so a new release never requires
+// a code change. The envKey drives the hasKey flag sent to the UI so it can
+// warn when a provider's key isn't configured.
+const PROVIDERS = {
+    anthropic: {
+        label: 'Claude (Anthropic)',
+        envKey: 'ANTHROPIC_API_KEY',
+        models: [
+            'claude-haiku-4-5',    // Fastest, cheapest — recommended for classify
+            'claude-sonnet-4-6',   // Balanced speed / quality
+            'claude-opus-4-8',     // Most capable
+            'claude-opus-4-7',
+            'claude-opus-4-6',
+            'claude-sonnet-4-5',
+        ],
+    },
+    openai: {
+        label: 'OpenAI',
+        envKey: 'OPENAI_API_KEY',
+        models: [
+            'gpt-4o-mini',    // Proven baseline
+            'gpt-4o',
+            'gpt-5-mini',
+            'gpt-5',
+            'gpt-5-nano',
+            'gpt-4.1-mini',
+            'gpt-4.1',
+        ],
+    },
+    gemini: {
+        label: 'Gemini (Google)',
+        envKey: 'GEMINI_API_KEY',
+        models: [
+            'gemini-2.5-flash',   // Fast + cheap
+            'gemini-2.5-pro',     // Strongest
+            'gemini-2.0-flash',
+        ],
+    },
+};
+
+// Back-compat: flat list of all models across all providers.
+// No longer used for validation (model accepts custom ids) but kept so any
+// callers of settings.allowedModels get a non-empty list.
+const ALLOWED_MODELS = Object.values(PROVIDERS).flatMap((p) => p.models);
 
 // Default file state: every group flagged useDefault: true, with `custom`
 // pre-filled from DEFAULTS so the UI can show editable inputs at the
@@ -289,11 +313,22 @@ function getLinkedin() {
 // effective values. UI can show "currently effective" + "what default
 // would be" side by side.
 function getState() {
+    // Build the catalog with a runtime hasKey flag per provider so the UI
+    // can warn when a key isn't configured without exposing the key value.
+    const aiCatalog = {};
+    for (const [id, p] of Object.entries(PROVIDERS)) {
+        aiCatalog[id] = {
+            label: p.label,
+            models: p.models,
+            hasKey: !!process.env[p.envKey],
+        };
+    }
     return {
         state: load(),
         defaults: structuredClone(DEFAULTS),
         effective: getEffective(),
-        allowedModels: [...ALLOWED_MODELS],
+        aiCatalog,
+        allowedModels: [...ALLOWED_MODELS], // back-compat
     };
 }
 
@@ -385,6 +420,39 @@ function validateFirecrawlGroup(g) {
     return out;
 }
 
+// Migrate a legacy flat ai custom block (old shape: { classifyModel: 'gpt-4o-mini', ... })
+// to the new per-task {provider, model} shape. Infers provider from the model id.
+function migrateAiCustom(c) {
+    function inferProvider(model) {
+        const m = String(model || '').toLowerCase();
+        if (m.startsWith('claude')) return 'anthropic';
+        if (m.startsWith('gemini')) return 'gemini';
+        return 'openai';
+    }
+    function taskEntry(modelKey, def) {
+        if (c[modelKey] && typeof c[modelKey] === 'string') {
+            const model = c[modelKey];
+            return { provider: inferProvider(model), model };
+        }
+        return def;
+    }
+    return {
+        classify:      taskEntry('classifyModel',      DEFAULTS.ai.classify),
+        email:         taskEntry('emailModel',         DEFAULTS.ai.email),
+        report:        taskEntry('reportModel',        DEFAULTS.ai.report),
+        icpAutomation: taskEntry('icpAutomationModel', DEFAULTS.ai.icpAutomation),
+    };
+}
+
+function validateTaskEntry(entry, def) {
+    if (!entry || typeof entry !== 'object') return def;
+    const provider = String(entry.provider || '').toLowerCase();
+    const model = String(entry.model || '').trim();
+    if (!PROVIDERS[provider]) return def;
+    if (!model) return def;
+    return { provider, model };
+}
+
 function validateAiGroup(g) {
     const useDefault = g.useDefault !== false;
     if (useDefault) {
@@ -393,12 +461,16 @@ function validateAiGroup(g) {
             custom: structuredClone(load().ai.custom),
         };
     }
-    const c = g.custom || {};
-    const out = { useDefault: false, custom: { ...DEFAULTS.ai } };
-    out.custom.classifyModel       = ALLOWED_MODELS.includes(c.classifyModel)       ? c.classifyModel       : DEFAULTS.ai.classifyModel;
-    out.custom.emailModel          = ALLOWED_MODELS.includes(c.emailModel)          ? c.emailModel          : DEFAULTS.ai.emailModel;
-    out.custom.reportModel         = ALLOWED_MODELS.includes(c.reportModel)         ? c.reportModel         : DEFAULTS.ai.reportModel;
-    out.custom.icpAutomationModel  = ALLOWED_MODELS.includes(c.icpAutomationModel)  ? c.icpAutomationModel  : DEFAULTS.ai.icpAutomationModel;
+    const raw = g.custom || {};
+    // Detect and migrate old flat shape (classifyModel, emailModel, ...).
+    const isOldShape = raw.classifyModel || raw.emailModel || raw.reportModel || raw.icpAutomationModel;
+    const c = isOldShape ? migrateAiCustom(raw) : raw;
+
+    const out = { useDefault: false, custom: structuredClone(DEFAULTS.ai) };
+    out.custom.classify      = validateTaskEntry(c.classify,      DEFAULTS.ai.classify);
+    out.custom.email         = validateTaskEntry(c.email,         DEFAULTS.ai.email);
+    out.custom.report        = validateTaskEntry(c.report,        DEFAULTS.ai.report);
+    out.custom.icpAutomation = validateTaskEntry(c.icpAutomation, DEFAULTS.ai.icpAutomation);
     return out;
 }
 
@@ -437,6 +509,7 @@ function clampFloat(v, min, max, fallback) {
 
 module.exports = {
     DEFAULTS,
+    PROVIDERS,
     ALLOWED_MODELS,
     getEffective,
     getCellGeneration,

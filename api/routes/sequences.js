@@ -184,7 +184,6 @@ async function generateAllStepsForRun(runId) {
     console.log(`[Sequences] ▶ RUN GENERATE id=${runId} steps=${template.steps.length} recipient="${lead.firstName || ''} ${lead.lastName || ''}" ${liTag}`);
 
     const priorSteps = [];
-    const model = getAi().emailModel;
     for (let i = 0; i < template.steps.length; i++) {
         const stepCfg = {
             orderIdx: i,
@@ -205,7 +204,7 @@ async function generateAllStepsForRun(runId) {
             customInstruction: run.customInstruction,
         });
         const raw = await chat(messages, {
-            model,
+            task: 'email',
             temperature: 0.6,
             response_format: { type: 'json_object' },
             operation: `sequence_step_${stepCfg.purpose}`,
@@ -352,9 +351,8 @@ router.post('/runs/:id/regenerate/:idx', trackActivity('sequence_step_regenerate
             priorSteps,
             customInstruction: overrideInstruction,
         });
-        const model = getAi().emailModel;
         const raw = await chat(messages, {
-            model,
+            task: 'email',
             temperature: 0.6,
             response_format: { type: 'json_object' },
             operation: `sequence_step_${stepCfg.purpose}_regen`,

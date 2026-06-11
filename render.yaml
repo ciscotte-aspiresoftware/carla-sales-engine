@@ -30,6 +30,10 @@ services:
       # ─── External API keys (user-supplied; demo stubs run until set) ───────
       - key: OPENAI_API_KEY
         sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
       - key: SCRAPINGDOG_API_KEY
         sync: false
       - key: FIRECRAWL_API_KEY

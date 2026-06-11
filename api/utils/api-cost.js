@@ -52,6 +52,35 @@ const OPENAI_PRICING = {
 // obscure spend) or some absurd number.
 const UNKNOWN_MODEL_PRICING = { in: 2.500e-6, out: 10.00e-6 };
 
+// ─── Anthropic (Claude) pricing ─────────────────────────────────────────
+// USD per token. Source: https://platform.claude.com/docs/en/pricing
+const ANTHROPIC_PRICING = {
+    'claude-opus-4-8':   { in:  5.00e-6, out: 25.00e-6 },
+    'claude-opus-4-7':   { in:  5.00e-6, out: 25.00e-6 },
+    'claude-opus-4-6':   { in:  5.00e-6, out: 25.00e-6 },
+    'claude-opus-4-5':   { in:  5.00e-6, out: 25.00e-6 },
+    'claude-sonnet-4-6': { in:  3.00e-6, out: 15.00e-6 },
+    'claude-sonnet-4-5': { in:  3.00e-6, out: 15.00e-6 },
+    'claude-haiku-4-5':  { in:  1.00e-6, out:  5.00e-6 },
+};
+
+// ─── Google Gemini pricing ──────────────────────────────────────────────
+// USD per token. APPROXIMATE — Gemini prices tier by context length and the
+// catalog model ids move fast. Verify against https://ai.google.dev/pricing
+// when a Gemini key is added. Unpriced ids fall through to UNKNOWN_MODEL_PRICING.
+const GEMINI_PRICING = {
+    'gemini-2.5-pro':   { in: 1.250e-6, out: 10.00e-6 },
+    'gemini-2.5-flash': { in: 0.300e-6, out:  2.50e-6 },
+    'gemini-2.0-flash': { in: 0.100e-6, out:  0.40e-6 },
+};
+
+// Provider → pricing table. Drives priceLLM() / recordLLM().
+const PRICING_BY_PROVIDER = {
+    openai: OPENAI_PRICING,
+    anthropic: ANTHROPIC_PRICING,
+    gemini: GEMINI_PRICING,
+};
+
 // ─── FX rates ──────────────────────────────────────────────────────────
 // All ledger rows are stored in USD. The Costs page lets the operator
 // view in USD / EUR / GBP via simple multiplication. Updated periodically
@@ -163,6 +192,39 @@ function recordUsage({
 }
 
 /**
+ * Price an LLM call for any provider. Falls back to the conservative
+ * UNKNOWN_MODEL_PRICING when the model id isn't in the provider's table
+ * (e.g. a freshly-released model entered as a custom id in Admin).
+ */
+function priceLLM(provider, model, tokensIn, tokensOut) {
+    const table = PRICING_BY_PROVIDER[provider] || {};
+    const rate = table[model] || UNKNOWN_MODEL_PRICING;
+    return (tokensIn || 0) * rate.in + (tokensOut || 0) * rate.out;
+}
+
+/**
+ * Provider-agnostic LLM usage recorder. The LLM router (utils/llm/index.js)
+ * calls this for every completion. `usage` is the normalized adapter shape
+ * { inputTokens, outputTokens }. service = the provider name so the Costs
+ * page breaks spend down by provider as well as model.
+ */
+function recordLLM({ provider, model, usage = {}, operation = null, durationMs = null, metadata = {} } = {}) {
+    const inT = usage.inputTokens || 0;
+    const outT = usage.outputTokens || 0;
+    recordUsage({
+        service: provider || 'unknown',
+        operation,
+        model,
+        unitsIn: inT,
+        unitsOut: outT,
+        units: inT + outT,
+        usdCost: priceLLM(provider, model, inT, outT),
+        durationMs,
+        metadata,
+    });
+}
+
+/**
  * Convenience for OpenAI: pass the completion's `usage` field straight in.
  * Handles missing usage gracefully (some streaming paths don't populate it).
  */
@@ -186,9 +248,14 @@ function recordOpenAI({ model, usage, operation = null, durationMs = null, metad
 module.exports = {
     recordUsage,
     recordOpenAI,
+    recordLLM,
     priceOpenAI,
+    priceLLM,
     priceService,
     OPENAI_PRICING,
+    ANTHROPIC_PRICING,
+    GEMINI_PRICING,
+    PRICING_BY_PROVIDER,
     SERVICE_UNIT_USD,
     MONTHLY_SUBSCRIPTIONS_USD,
     FX_RATES,

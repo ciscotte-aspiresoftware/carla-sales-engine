@@ -17,7 +17,7 @@
 
 const express = require('express');
 const { isEnabled, getClient } = require('../db');
-const { OPENAI_PRICING, SERVICE_UNIT_USD, MONTHLY_SUBSCRIPTIONS_USD, FX_RATES, FX_AS_OF } = require('../utils/api-cost');
+const { OPENAI_PRICING, ANTHROPIC_PRICING, GEMINI_PRICING, SERVICE_UNIT_USD, MONTHLY_SUBSCRIPTIONS_USD, FX_RATES, FX_AS_OF } = require('../utils/api-cost');
 
 const router = express.Router();
 
@@ -193,6 +193,8 @@ router.get('/pricing', (req, res) => {
     res.json({
         success: true,
         openai: OPENAI_PRICING,
+        anthropic: ANTHROPIC_PRICING,
+        gemini: GEMINI_PRICING,
         services: SERVICE_UNIT_USD,
         monthlySubscriptions: MONTHLY_SUBSCRIPTIONS_USD,
         fx: {

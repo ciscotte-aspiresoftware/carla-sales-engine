@@ -25,7 +25,6 @@ const REPORT_MARKDOWN_CAP = 16000;
 
 async function generateCompanyReport({ markdown, pageTitle, icp, isMatch, reason }) {
     if (!markdown || !icp) return null;
-    const model = getAi().reportModel;
     const content = markdown.length > REPORT_MARKDOWN_CAP ? markdown.slice(0, REPORT_MARKDOWN_CAP) : markdown;
 
     let system;
@@ -64,7 +63,7 @@ async function generateCompanyReport({ markdown, pageTitle, icp, isMatch, reason
     try {
         const raw = await chat(
             [{ role: 'system', content: system }, { role: 'user', content: user }],
-            { model, temperature: 0.3 },
+            { task: 'report', temperature: 0.3 },
         );
         const text = (raw || '').trim();
         return text || null;

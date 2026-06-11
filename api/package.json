@@ -12,6 +12,8 @@
     "db:import": "node db/import-json.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
+    "@google/genai": "^2.8.0",
     "@mendable/firecrawl-js": "^1.10.0",
     "@supabase/supabase-js": "^2.45.0",
     "@turf/boolean-point-in-polygon": "^7.3.5",

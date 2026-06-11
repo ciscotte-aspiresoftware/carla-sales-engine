@@ -60,7 +60,7 @@ async function classifyAgainstIcp(markdown, pageTitle, classifyPrompt) {
         { role: 'user', content: `Page title: ${pageTitle || '(none)'}\n\nPage content:\n${trimmed}` },
     ];
     const raw = await chat(messages, {
-        model: getAi().classifyModel,
+        task: 'classify',
         temperature: 0.2, // low - deterministic structured output
         response_format: { type: 'json_object' },
     });
@@ -175,7 +175,7 @@ router.post('/', async (req, res) => {
         }
 
         // Step 2: classify against the chosen ICP's prompt.
-        console.log(`[Classify]   ├─ classifying via GPT (${getAi().classifyModel})…`);
+        console.log(`[Classify]   ├─ classifying…`);
         const classifyStarted = Date.now();
         const verdict = await classifyAgainstIcp(markdown, pageTitle, icp.classifyPrompt);
         console.log(`[Classify]   ├─ classified in ${Date.now() - classifyStarted}ms | verdict: ${verdict.is_match ? '✓ MATCH' : '✗ no-match'} - ${verdict.reason}`);

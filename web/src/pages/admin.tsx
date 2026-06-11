@@ -60,12 +60,25 @@ interface FirecrawlCustom {
   crawlMaxPages: number
 }
 
-interface AiCustom {
-  classifyModel: string
-  emailModel: string
-  reportModel: string
-  icpAutomationModel: string
+interface AiTaskEntry {
+  provider: string
+  model: string
 }
+
+interface AiCustom {
+  classify: AiTaskEntry
+  email: AiTaskEntry
+  report: AiTaskEntry
+  icpAutomation: AiTaskEntry
+}
+
+interface AiCatalogEntry {
+  label: string
+  models: string[]
+  hasKey: boolean
+}
+
+type AiCatalog = Record<string, AiCatalogEntry>
 
 interface LinkedinCustom {
   postsPerProfile: number
@@ -91,6 +104,7 @@ interface SettingsPayload {
     linkedin: LinkedinCustom
   }
   allowedModels: string[]
+  aiCatalog: AiCatalog
 }
 
 const TIER_ORDER: ZoomTier[] = ['urban', 'suburban', 'rural', 'sparse', 'airport']
@@ -830,9 +844,7 @@ function FirecrawlCard({ settings, onSaved }: { settings: SettingsPayload; onSav
 function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () => Promise<void> }) {
   const initial = settings.state.ai
   const defaults = settings.defaults.ai
-  const allowedModels = settings.allowedModels && settings.allowedModels.length > 0
-    ? settings.allowedModels
-    : ['gpt-4o-mini', 'gpt-4o', 'gpt-5']
+  const catalog = settings.aiCatalog ?? {}
   const [useDefault, setUseDefault] = useState<boolean>(initial.useDefault)
   const [custom, setCustom] = useState<AiCustom>(initial.custom)
   const [saving, setSaving] = useState(false)
@@ -882,20 +894,20 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
                 {useDefault ? 'Default' : 'Custom'}
               </Badge>
               <Badge variant="secondary" className="uppercase tracking-wide text-[10px] bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30">
-                Classify · {effective.classifyModel}
+                Classify · {effective.classify.model}
               </Badge>
               <Badge variant="secondary" className="uppercase tracking-wide text-[10px] bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30">
-                Email · {effective.emailModel}
+                Email · {effective.email.model}
               </Badge>
               <Badge variant="secondary" className="uppercase tracking-wide text-[10px] bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30">
-                Report · {effective.reportModel}
+                Report · {effective.report.model}
               </Badge>
               <Badge variant="secondary" className="uppercase tracking-wide text-[10px] bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30">
-                ICP automation · {effective.icpAutomationModel}
+                ICP automation · {effective.icpAutomation.model}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Pick the OpenAI model for each job independently: <b>classify</b> (the qualified/rejected verdict), <b>email, LI message & sequences</b>, the <b>markdown report</b>, and <b>ICP automation</b> (wizard auto-fill / regen-section / terms-for-city). Applies on the next call - no restart.
+              Pick the AI provider and model for each job independently: <b>classify</b> (the qualified/rejected verdict), <b>email, LI message & sequences</b>, the <b>markdown report</b>, and <b>ICP automation</b> (wizard auto-fill / regen-section / terms-for-city). Applies on the next call - no restart.
             </p>
           </div>
         </div>
@@ -905,8 +917,8 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
             active={useDefault}
             onClick={() => setUseDefault(true)}
             title="Default"
-            line1={`Classify ${defaults.classifyModel} · Report ${defaults.reportModel}`}
-            line2="Mini for verdicts, gpt-4o for reports"
+            line1={`Classify ${defaults.classify.model} · Report ${defaults.report.model}`}
+            line2={`${defaults.classify.provider} / ${defaults.report.provider}`}
             accent="sky"
           />
           <ModeOption
@@ -914,7 +926,7 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
             onClick={() => setUseDefault(false)}
             title="Custom"
             line1="Pick each independently"
-            line2="Upgrade one without paying for the others"
+            line2="Mix providers and models per task"
             accent="amber"
           />
         </div>
@@ -922,41 +934,37 @@ function AiCard({ settings, onSaved }: { settings: SettingsPayload; onSaved: () 
         {!useDefault && (
           <div className="space-y-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <ModelPicker
+              <TaskPicker
                 label="Classify (verdict)"
-                value={custom.classifyModel}
-                options={allowedModels}
-                onChange={(v) => setCustom((c) => ({ ...c, classifyModel: v }))}
-                hint={`Default ${defaults.classifyModel}`}
+                task={custom.classify}
+                catalog={catalog}
+                onChange={(entry) => setCustom((c) => ({ ...c, classify: entry }))}
+                defaultEntry={defaults.classify}
               />
-              <ModelPicker
+              <TaskPicker
                 label="Email, LI & sequences"
-                value={custom.emailModel}
-                options={allowedModels}
-                onChange={(v) => setCustom((c) => ({ ...c, emailModel: v }))}
-                hint={`Default ${defaults.emailModel}`}
+                task={custom.email}
+                catalog={catalog}
+                onChange={(entry) => setCustom((c) => ({ ...c, email: entry }))}
+                defaultEntry={defaults.email}
               />
-              <ModelPicker
+              <TaskPicker
                 label="Markdown report"
-                value={custom.reportModel}
-                options={allowedModels}
-                onChange={(v) => setCustom((c) => ({ ...c, reportModel: v }))}
-                hint={`Default ${defaults.reportModel}`}
+                task={custom.report}
+                catalog={catalog}
+                onChange={(entry) => setCustom((c) => ({ ...c, report: entry }))}
+                defaultEntry={defaults.report}
               />
-              <ModelPicker
+              <TaskPicker
                 label="ICP automation"
-                value={custom.icpAutomationModel}
-                options={allowedModels}
-                onChange={(v) => setCustom((c) => ({ ...c, icpAutomationModel: v }))}
-                hint={`Default ${defaults.icpAutomationModel}`}
+                task={custom.icpAutomation}
+                catalog={catalog}
+                onChange={(entry) => setCustom((c) => ({ ...c, icpAutomation: entry }))}
+                defaultEntry={defaults.icpAutomation}
               />
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Cost: <code>gpt-5-nano</code> ($0.05/Mtok in) is the cheapest. <code>gpt-4o-mini</code>{' '}
-              ($0.15/Mtok) is the proven baseline. <code>gpt-5</code> and <code>gpt-4o</code> are
-              mid-tier at $1.25 and $2.50/Mtok respectively. <code>gpt-5.2-pro</code> ($21/Mtok) is
-              the strongest model and 140× the price of nano - reserve for jobs where accuracy
-              genuinely beats cost. See live $/Mtok + spend by model on the{' '}
+              Cheapest: <code>claude-haiku-4-5</code> (~$0.08/Mtok in). Mid-tier: <code>claude-sonnet-4-6</code> ($3/Mtok), <code>gpt-4o-mini</code> ($0.15/Mtok), <code>gemini-2.5-flash</code> (~$0.15/Mtok). Strongest: <code>claude-opus-4-8</code> ($15/Mtok), <code>gpt-4o</code> ($2.50/Mtok). See live spend by model on the{' '}
               <a href="/costs" className="underline">Costs</a> page.
             </p>
           </div>
@@ -1094,6 +1102,49 @@ function LinkedinCard({ settings, onSaved }: { settings: SettingsPayload; onSave
 }
 
 // ─── Shared widgets ───────────────────────────────────────────────────
+
+function TaskPicker({
+  label, task, catalog, onChange, defaultEntry,
+}: {
+  label: string
+  task: AiTaskEntry
+  catalog: AiCatalog
+  onChange: (entry: AiTaskEntry) => void
+  defaultEntry: AiTaskEntry
+}) {
+  const providerIds = Object.keys(catalog)
+  const models = catalog[task.provider]?.models ?? [task.model]
+  return (
+    <div className="space-y-1.5">
+      <div className="text-[11px] font-medium text-muted-foreground">{label}</div>
+      <select
+        value={task.provider}
+        onChange={(e) => {
+          const p = e.target.value
+          const firstModel = catalog[p]?.models?.[0] ?? task.model
+          onChange({ provider: p, model: firstModel })
+        }}
+        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        {providerIds.map((id) => (
+          <option key={id} value={id}>{catalog[id].label ?? id}</option>
+        ))}
+      </select>
+      <select
+        value={task.model}
+        onChange={(e) => onChange({ ...task, model: e.target.value })}
+        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        {models.map((m) => (
+          <option key={m} value={m}>{m}</option>
+        ))}
+      </select>
+      <div className="text-[10px] text-muted-foreground/80 mt-0.5">
+        Default: {defaultEntry.provider} / {defaultEntry.model}
+      </div>
+    </div>
+  )
+}
 
 function ModelPicker({
   label, value, options, onChange, hint,

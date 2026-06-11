@@ -90,7 +90,7 @@ async function analyze(markdown, pageTitle, name, url, criteria, wantReport = fa
         { role: 'user', content: `Company: ${name || '(unknown)'}\nWebsite: ${url || '(none)'}\nPage title: ${pageTitle || '(none)'}\n\nPage content:\n${trimmed}` },
     ];
     const raw = await chat(messages, {
-        model: getAi().classifyModel,
+        task: 'classify',
         temperature: 0.2,
         response_format: { type: 'json_object' },
     });

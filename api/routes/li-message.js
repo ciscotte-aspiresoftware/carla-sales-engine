@@ -328,7 +328,7 @@ router.post('/email', trackActivity('li_message_generated'), async (req, res) =>
             messages[messages.length - 1].content += `\n\nReminder before you write: apply the operator instruction as a hard requirement - "${trimmed}".`;
         }
 
-        const raw = await chat(messages, { model: getAi().emailModel, temperature: 0.6, response_format: { type: 'json_object' } });
+        const raw = await chat(messages, { task: 'email', temperature: 0.6, response_format: { type: 'json_object' } });
         let parsed;
         try { parsed = JSON.parse(raw); }
         catch {

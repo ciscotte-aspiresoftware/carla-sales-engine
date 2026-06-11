@@ -128,8 +128,7 @@ async function tick() {
 
         // Run the batch concurrently. Promise.allSettled so one error
         // doesn't poison the rest of the batch.
-        const model = getAi().classifyModel;
-        await Promise.allSettled(batch.map((row) => processOne(icp, model, row)));
+        await Promise.allSettled(batch.map((row) => processOne(icp, row)));
     } catch (err) {
         console.error(`[Reclassify Worker] tick error: ${err.message}`);
     } finally {
@@ -140,7 +139,7 @@ async function tick() {
 // Process exactly one result row. Reads the cache, runs GPT, writes the
 // verdict back via setClassificationForIcp (the same writer the legacy
 // route used, so company state ends up identical), finalizes the row.
-async function processOne(icp, model, row) {
+async function processOne(icp, row) {
     try {
         const cached = await scrapeCache.get(row.domain);
         if (!cached || !cached.markdown) {
@@ -162,7 +161,7 @@ async function processOne(icp, model, row) {
             { role: 'user', content: `Page title: ${cached.pageTitle || '(none)'}\n\nPage content:\n${(cached.markdown || '').slice(0, 12000)}` },
         ];
         const raw = await chat(messages, {
-            model,
+            task: 'classify',
             temperature: 0.2,
             response_format: { type: 'json_object' },
         });
@@ -182,7 +181,7 @@ async function processOne(icp, model, row) {
         await jobs.finalizeResult(row, 'classified', {
             newIsMatch: verdict.is_match,
             newReason: verdict.reason,
-            modelUsed: model,
+            modelUsed: null, // resolved by the LLM router per-task
             flipped,
         });
 

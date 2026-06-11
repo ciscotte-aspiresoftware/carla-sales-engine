@@ -227,7 +227,7 @@ router.post('/', trackActivity('email_generated'), async (req, res) => {
         const genStarted = Date.now();
         const messages = buildEmailPrompt({ classification, lead: workingLead, sender, template, customInstruction });
         const raw = await chat(messages, {
-            model: getAi().emailModel,
+            task: 'email',
             temperature: 0.6,
             response_format: { type: 'json_object' },
         });
