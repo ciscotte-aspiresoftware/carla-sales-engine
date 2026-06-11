@@ -9,60 +9,66 @@ const { consumePendingEnrichment } = require('../utils/apollo');
 
 const router = express.Router();
 
-// Pull the first usable number out of a phone_numbers array.
-function pickFromPhoneArray(arr) {
-    if (!Array.isArray(arr)) return null;
-    for (const p of arr) {
-        if (typeof p === 'string' && p.trim()) return p.trim();
-        const n = p?.sanitized_number || p?.raw_number || p?.number;
-        if (n) return String(n);
-    }
-    return null;
+// Rank an Apollo phone entry's type so we prefer the person's CELL/mobile over
+// a work/HQ/business line. Lower score = more preferred. Apollo's type_cd values
+// include "mobile", "work_hq", "work", "home", "other", "direct"/"direct_dial".
+function phoneTypeRank(entry) {
+    const t = String(entry?.type_cd || entry?.type || '').toLowerCase();
+    if (t.includes('mobile') || t.includes('cell')) return 0;          // the cell — what we want
+    if (t.includes('direct')) return 1;                                // direct dial to the person
+    if (t === '' || t === 'other' || t == null) return 2;              // unknown — could be a cell
+    if (t.includes('home')) return 3;
+    return 4;                                                          // work_hq / work / business line
 }
 
-// Extract the primary phone from Apollo's webhook payload. Apollo's actual
-// shape nests phone_numbers inside people[] (verified against the docs:
-// { status, people: [ { phone_numbers: [ { sanitized_number, raw_number } ] } ] }),
-// but the native vs waterfall formats differ and aren't fully documented, so we
-// check every known location and fall back to a recursive scan for ANY
-// phone_numbers array. This makes the extractor robust to whichever shape
-// Apollo actually sends, instead of silently returning null and hanging.
+function numberOf(entry) {
+    if (typeof entry === 'string') return entry.trim() || null;
+    return entry?.sanitized_number || entry?.raw_number || entry?.number || null;
+}
+
+// Collect every phone entry from a phone_numbers array (skips empties).
+function collectFromArray(arr, out) {
+    if (!Array.isArray(arr)) return;
+    for (const p of arr) {
+        if (numberOf(p)) out.push(p);
+    }
+}
+
+// Extract the best phone from Apollo's webhook payload, preferring the person's
+// mobile/cell. Apollo's actual shape nests phone_numbers inside people[]
+// (verified against the docs: { status, people: [ { phone_numbers: [...] } ] }),
+// but native vs waterfall formats differ and aren't fully documented, so we
+// gather candidates from every known location plus a recursive fallback, then
+// rank by type so the cell wins over a business/HQ line.
 function extractWaterfallPhone(payload) {
     if (!payload || typeof payload !== 'object') return null;
 
-    // 1. people[] array (the documented shape) — first person with a number wins.
+    const candidates = [];
     if (Array.isArray(payload.people)) {
-        for (const person of payload.people) {
-            const n = pickFromPhoneArray(person?.phone_numbers);
-            if (n) return n;
-        }
+        for (const person of payload.people) collectFromArray(person?.phone_numbers, candidates);
     }
-    // 2. single person object.
-    const fromPerson = pickFromPhoneArray(payload.person?.phone_numbers);
-    if (fromPerson) return fromPerson;
-    // 3. top-level phone_numbers (older assumption).
-    const fromTop = pickFromPhoneArray(payload.phone_numbers);
-    if (fromTop) return fromTop;
-    // 4. contact subobject.
-    const fromContact = pickFromPhoneArray(payload.contact?.phone_numbers);
-    if (fromContact) return fromContact;
+    collectFromArray(payload.person?.phone_numbers, candidates);
+    collectFromArray(payload.phone_numbers, candidates);
+    collectFromArray(payload.contact?.phone_numbers, candidates);
 
-    // 5. Last resort: recursively scan for any phone_numbers array anywhere in
-    // the payload (covers waterfall vendor-nested shapes we haven't seen).
-    let found = null;
-    const seen = new Set();
-    (function scan(node, depth) {
-        if (found || !node || typeof node !== 'object' || depth > 6 || seen.has(node)) return;
-        seen.add(node);
-        if (Array.isArray(node.phone_numbers)) {
-            const n = pickFromPhoneArray(node.phone_numbers);
-            if (n) { found = n; return; }
-        }
-        for (const v of Array.isArray(node) ? node : Object.values(node)) {
-            if (v && typeof v === 'object') scan(v, depth + 1);
-        }
-    })(payload, 0);
-    return found;
+    // Recursive fallback: gather any phone_numbers array anywhere in the payload
+    // (covers undocumented waterfall vendor-nested shapes).
+    if (candidates.length === 0) {
+        const seen = new Set();
+        (function scan(node, depth) {
+            if (!node || typeof node !== 'object' || depth > 6 || seen.has(node)) return;
+            seen.add(node);
+            if (Array.isArray(node.phone_numbers)) collectFromArray(node.phone_numbers, candidates);
+            for (const v of Array.isArray(node) ? node : Object.values(node)) {
+                if (v && typeof v === 'object') scan(v, depth + 1);
+            }
+        })(payload, 0);
+    }
+
+    if (candidates.length === 0) return null;
+    // Prefer the cell. Stable sort keeps Apollo's own ordering within a tier.
+    candidates.sort((a, b) => phoneTypeRank(a) - phoneTypeRank(b));
+    return numberOf(candidates[0]);
 }
 
 // POST /api/apollo/webhook

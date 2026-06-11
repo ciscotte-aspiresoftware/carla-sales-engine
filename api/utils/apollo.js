@@ -28,6 +28,19 @@ function consumePendingEnrichment(requestId) {
     return data;
 }
 
+// Is there already a waterfall phone reveal in flight for this person? Used to
+// de-dupe rapid double-clicks / concurrent reveals so we never spend two Apollo
+// mobile credits for the same lead while the first request is still pending.
+// Entries are cleared by consumePendingEnrichment when the webhook fires, or by
+// the >1h cleanup in registerPendingEnrichment.
+function hasPendingEnrichmentForApollo(apolloId) {
+    if (!apolloId) return false;
+    for (const data of pendingEnrichments.values()) {
+        if (data.apolloId === apolloId) return true;
+    }
+    return false;
+}
+
 // Title tiers - lower number = higher seniority. Same as valsource.
 const TITLE_TIERS = [
     { tier: 1, keywords: ['founder', 'co-founder', 'cofounder', 'owner', 'co-owner'] },
@@ -476,4 +489,5 @@ module.exports = {
     enrichPersonWithWaterfall,
     consumePendingEnrichment,
     registerPendingEnrichment,
+    hasPendingEnrichmentForApollo,
 };

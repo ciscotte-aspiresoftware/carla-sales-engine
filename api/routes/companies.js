@@ -832,6 +832,24 @@ async function upsertLeadInCompany(companyId, apolloId, fields) {
     return company.leads[idx];
 }
 
+// Read a single lead by (companyId, apolloId). Returns the lead entry or null.
+// Used by the phone-reveal endpoint to check whether we've already revealed a
+// number for this person before spending another Apollo mobile credit.
+async function getLeadInCompany(companyId, apolloId) {
+    if (!companyId || !apolloId) return null;
+    if (isEnabled()) {
+        const sb = getClient();
+        const { data, error } = await sb.from('leads')
+            .select('*').eq('company_id', companyId).eq('apollo_id', apolloId).maybeSingle();
+        if (error || !data) return null;
+        return leadRowToEntry(data);
+    }
+    const data = await readAll();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company || !Array.isArray(company.leads)) return null;
+    return company.leads.find(l => l.apolloId === apolloId) || null;
+}
+
 // Fetch all companies tagged with a given vertical. Case-insensitive match
 // on the vertical string. Used by the reclassify endpoint and by the
 // database-page vertical filter.
@@ -1291,6 +1309,7 @@ module.exports.writeAll = writeAll;
 module.exports.upsertCompany = upsertCompany;
 module.exports.attachLeads = attachLeads;
 module.exports.upsertLeadInCompany = upsertLeadInCompany;
+module.exports.getLeadInCompany = getLeadInCompany;
 module.exports.setClassificationForIcp = setClassificationForIcp;
 module.exports.overrideClassificationForIcp = overrideClassificationForIcp;
 module.exports.setReportForIcp = setReportForIcp;

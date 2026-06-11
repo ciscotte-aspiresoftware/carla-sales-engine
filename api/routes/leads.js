@@ -10,8 +10,8 @@
 // frontend swaps in the verified email/LinkedIn.
 
 const express = require('express');
-const { searchTopPeople, enrichPerson, enrichPersonWithWaterfall } = require('../utils/apollo');
-const { attachLeads, readAll, upsertLeadInCompany } = require('./companies');
+const { searchTopPeople, enrichPerson, enrichPersonWithWaterfall, hasPendingEnrichmentForApollo } = require('../utils/apollo');
+const { attachLeads, readAll, upsertLeadInCompany, getLeadInCompany } = require('./companies');
 
 const router = express.Router();
 
@@ -249,6 +249,34 @@ router.post('/:companyId/:apolloId/enrich-phone', async (req, res) => {
             });
         }
 
+        // ─── Credit guards (Apollo mobile credits are scarce) ───────────────
+        // Guard 1: don't re-reveal a person we already ran the waterfall on. If
+        // we already checked and got a number, just return it — no new credit.
+        // (phoneCheckedAt is only ever set by this waterfall flow, so it's a
+        // reliable "already revealed" marker, distinct from a business number
+        // the search grabbed for free.)
+        const existing = await getLeadInCompany(companyId, apolloId);
+        if (existing?.phoneCheckedAt) {
+            console.log(`[Leads] phone reveal skipped for ${apolloId} — already checked at ${new Date(existing.phoneCheckedAt).toISOString()} (no credit spent)`);
+            return res.json({
+                success: true,
+                waterfall_pending: false,
+                phoneFound: !!existing.phone,
+                lead: existing,
+                message: existing.phone ? 'Phone already revealed' : 'Already checked — Apollo had no mobile on file',
+            });
+        }
+        // Guard 2: a reveal is already in flight for this person (e.g. a
+        // double-click). Don't fire a second Apollo request / spend a 2nd credit.
+        if (hasPendingEnrichmentForApollo(apolloId)) {
+            console.log(`[Leads] phone reveal already in flight for ${apolloId} — de-duped (no credit spent)`);
+            return res.json({
+                success: true,
+                waterfall_pending: true,
+                message: 'Phone reveal already in progress',
+            });
+        }
+
         const waterfallResult = await enrichPersonWithWaterfall(apolloId, {
             companyId,
             leadKey: apolloId,
@@ -262,10 +290,14 @@ router.post('/:companyId/:apolloId/enrich-phone', async (req, res) => {
             return res.status(402).json({ success: false, error: waterfallResult.warning });
         }
 
-        // Mark the lead as phoneCheckedAt so the UI knows we initiated enrichment.
-        const patch = { phoneCheckedAt: Date.now() };
-        await upsertLeadInCompany(companyId, apolloId, patch);
-
+        // NOTE: we deliberately do NOT set phoneCheckedAt here. It's set only
+        // when Apollo's webhook actually answers (with a phone or a definitive
+        // "no mobile"). That keeps the two credit guards correct: while the
+        // reveal is in flight the pending-map de-dupe (Guard 2) prevents a
+        // second credit, and if Apollo never calls back the lead isn't
+        // permanently blocked — the pending entry expires after 1h and a retry
+        // is allowed. Setting it prematurely here would lock a failed reveal
+        // forever.
         console.log(`[Leads] ✓ waterfall phone reveal initiated ${apolloId}: request_id=${waterfallResult.request_id}`);
         return res.json({
             success: true,
