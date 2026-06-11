@@ -1,4 +1,4 @@
-// Bluebird sender list.
+// Carla sender list.
 // Demo only has Fazal - easy to add more reps later by appending to the
 // array. Keeping the same shape as valsource's senders.js so the email
 // generator can read these without conditional code.
@@ -9,11 +9,11 @@ const SENDERS = [
         name: 'Fazal Khaishgi',
         firstName: 'Fazal',
         title: 'Group Managing Director',
-        company: 'Bluebird Auto Rental Software',
+        company: 'Carla Auto Rental Software',
         signoff: 'Fazal',
         // Placeholder - replace with the real email + tone you want for production.
-        email: 'fazal@bluebird-arc.com',
-        intro: "I'm Fazal, the Group Managing Director at Bluebird Auto Rental Software, where we help independent rental operators run their fleets, reservations, and counter operations with one purpose-built platform.",
+        email: 'fazal@carla-arc.com',
+        intro: "I'm Fazal, the Group Managing Director at Carla Auto Rental Software, where we help independent rental operators run their fleets, reservations, and counter operations with one purpose-built platform.",
     },
 ];
 

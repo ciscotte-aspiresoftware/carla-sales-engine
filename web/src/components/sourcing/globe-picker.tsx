@@ -184,7 +184,7 @@ export default function GlobePicker({ cities, selection, onSelect, height = 480,
 
   // Hex polygon color - translucent so the photo backdrop bleeds through.
   // Default = sky (dark) / indigo (light); Netherlands gets a green
-  // override so BlueBird's first EU market visually pops on the globe.
+  // override so Carla's first EU market visually pops on the globe.
   const HIGHLIGHT_COUNTRIES = new Set(['NL', 'Netherlands'])
   const HIGHLIGHT_COLOR_DARK = 'rgba(74, 222, 128, 0.65)'   // emerald-400 @ 0.65
   const HIGHLIGHT_COLOR_LIGHT = 'rgba(16, 185, 129, 0.65)'  // emerald-500 @ 0.65

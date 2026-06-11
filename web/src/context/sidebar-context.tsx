@@ -17,7 +17,7 @@ const SidebarContext = createContext<SidebarState>({
   setCollapsed: () => {},
 })
 
-const STORAGE_KEY = 'bluebird-sidebar-collapsed'
+const STORAGE_KEY = 'carla-sidebar-collapsed'
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [collapsed, _setCollapsed] = useState<boolean>(() => {

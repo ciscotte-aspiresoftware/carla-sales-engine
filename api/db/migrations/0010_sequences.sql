@@ -10,7 +10,7 @@
 -- drafts into their existing sender (Lemlist / Smartlead / Outlook / etc).
 --
 -- Tables:
---   sequence_templates           - reusable plans (e.g. "Bluebird 4-step EN")
+--   sequence_templates           - reusable plans (e.g. "Carla 4-step EN")
 --   sequence_template_steps      - ordered steps for a template
 --   sequence_runs                - one per recipient per kick-off
 --   sequence_run_steps           - generated subject+body per run step
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS sequence_templates (
     id text PRIMARY KEY,
     name text NOT NULL,
     icp_id text,                            -- optional: scope to one ICP for default-suggestion
-    portfolio_company text,                 -- e.g. "Bluebird Auto Rental Systems"
+    portfolio_company text,                 -- e.g. "Carla Auto Rental Systems"
     sender_template_id text,                -- references email_templates.id
     language text NOT NULL DEFAULT 'English',
     description text,                       -- short blurb shown in the picker

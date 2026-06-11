@@ -5,7 +5,7 @@
 // /activity page in the frontend.
 //
 // Pattern ported from valsource's be-vms-checker/utils/activity-tracker.js.
-// Adapted for Bluebird: no user auth, so user_id defaults to 'operator'.
+// Adapted for Carla: no user auth, so user_id defaults to 'operator'.
 // Non-blocking: tracking failures never throw - we'd rather drop a row than
 // break the actual API call the operator made.
 

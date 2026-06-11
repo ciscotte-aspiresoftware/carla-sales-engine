@@ -24,7 +24,7 @@ const NO_OP_SESSION_ID = '00000000-0000-0000-0000-000000000000';
 /**
  * Insert a new session row in 'running' state. Returns the new id (or the
  * no-op id when Supabase is off). Stores the operator's chosen scope so
- * the Coverage panel can display "Manchester · Bluebird" later.
+ * the Coverage panel can display "Manchester · Carla" later.
  */
 async function createSession({ icpId = null, scope = null, metadata = {} } = {}) {
     if (!isEnabled()) return NO_OP_SESSION_ID;

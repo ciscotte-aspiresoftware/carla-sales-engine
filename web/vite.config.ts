@@ -19,7 +19,7 @@ export default defineConfig({
     // 5174 to dodge valsource's default 5173 - both can run side by side.
     port: 5174,
     proxy: {
-      // Forward API calls to the local Bluebird backend so we don't have
+      // Forward API calls to the local Carla backend so we don't have
       // to mess with CORS in the browser. Anything starting with /api
       // hits localhost:3001.
       '/api': {

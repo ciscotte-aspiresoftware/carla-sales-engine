@@ -1,4 +1,4 @@
-// Classifier prompt for Bluebird.
+// Classifier prompt for Carla.
 // Input: scraped markdown from a candidate company's website.
 // Output: structured JSON describing whether this is an independent car
 // rental and, if so, the signals a sales rep cares about (location, fleet
@@ -9,7 +9,7 @@ function buildClassifierPrompt({ url, markdown, pageTitle }) {
     return [
         {
             role: 'system',
-            content: `You are a sales-research analyst for Bluebird Auto Rental Software, a vertical SaaS company that sells fleet/reservation/counter management software ("RentWorks") to INDEPENDENT car rental operators (not big chains like Hertz/Avis/Enterprise/Sixt/Europcar/Budget/Alamo/National).
+            content: `You are a sales-research analyst for Carla Auto Rental Software, a vertical SaaS company that sells fleet/reservation/counter management software ("RentWorks") to INDEPENDENT car rental operators (not big chains like Hertz/Avis/Enterprise/Sixt/Europcar/Budget/Alamo/National).
 
 You will be given the markdown of a company's website. Decide whether this company is an independent car rental business and extract sales-relevant signals from the page.
 

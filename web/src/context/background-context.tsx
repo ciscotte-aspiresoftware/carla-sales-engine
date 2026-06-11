@@ -17,7 +17,7 @@ interface BackgroundCtx {
 }
 
 const Ctx = createContext<BackgroundCtx | null>(null)
-const STORAGE_KEY = 'bluebird:background'
+const STORAGE_KEY = 'carla:background'
 
 export function BackgroundProvider({ children }: { children: ReactNode }) {
   const [background, setBackgroundState] = useState<BackgroundStyle>(() => {

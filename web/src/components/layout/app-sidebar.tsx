@@ -153,8 +153,8 @@ void IconWorldSearch
 
 // Pull the first letter of the workspace name for the badge. In "All
 // Companies" mode we show an asterisk to signal cross-portfolio scope -
-// the badge was previously the "B" of "Bluebird" (the tool brand), which
-// confusingly overlapped with Bluebird Auto Rental Systems (a portfolio
+// the badge was previously the "B" of "Carla" (the tool brand), which
+// confusingly overlapped with Carla Auto Rental Systems (a portfolio
 // company). Using a non-letter glyph for the all-companies state makes
 // the visual unambiguous.
 function workspaceInitial(workspace: string): string {
@@ -165,7 +165,7 @@ function workspaceInitial(workspace: string): string {
 
 // Display label that goes next to the badge. Full workspace name when
 // one is picked; "All Companies" when not. Crucially does NOT fall back
-// to "Bluebird" - that string is the name of a portfolio company, not a
+// to "Carla" - that string is the name of a portfolio company, not a
 // useful label for cross-portfolio scope.
 function workspaceTitle(workspace: string): string {
   if (!workspace) return 'All Companies'

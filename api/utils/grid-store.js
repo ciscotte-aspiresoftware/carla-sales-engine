@@ -8,7 +8,7 @@
 //   }
 //
 // Same async-locking pattern would be needed if multiple processes wrote
-// concurrently, but BlueBird runs a single API process so a simple
+// concurrently, but Carla runs a single API process so a simple
 // read-modify-write is fine. Each cell is a small object (~20 fields);
 // even mapping the whole UK is well under 1MB.
 
@@ -249,7 +249,7 @@ async function updateCell(id, updates) {
 
 // Density-derived priority within a single tier. Lower number = swept
 // sooner. Used to bias the credit budget toward high-yield cells when
-// real-mode sessions are capped (BLUEBIRD_SWEEP_BUDGET=2 by default).
+// real-mode sessions are capped (CARLA_SWEEP_BUDGET=2 by default).
 //
 //   urban     → 1  (highest population density, best ROI per Scrapingdog call)
 //   airport   → 2  (anchor hubs - very relevant for vehicle/fleet ICPs;

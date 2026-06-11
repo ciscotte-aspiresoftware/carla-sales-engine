@@ -1,6 +1,6 @@
 // Major-chain blocklist + target-type allowlist for filtering Scrapingdog
 // search results down to "independent rentals only". Mirrors the lists in
-// BlueBird/find-leads.js so the two sourcing paths (batch script + UI)
+// Carla/find-leads.js so the two sourcing paths (batch script + UI)
 // behave identically.
 //
 // Add a domain here when a new aggregator/chain shows up cluttering scans.
@@ -32,7 +32,7 @@ const CHAIN_DOMAINS = new Set([
 // downstream filters out anything that doesn't actually fit. Multilingual
 // variants included so the same allowlist works across markets.
 const TARGET_TYPES = new Set([
-    // ─── Car Rental (Bluebird Auto Rental) ─────────────────────────────
+    // ─── Car Rental (Carla Auto Rental) ─────────────────────────────
     // English
     'Car rental agency', 'Car rental service', 'Van rental agency', 'Truck rental agency',
     'Vehicle rental agency', 'Vehicle rental',

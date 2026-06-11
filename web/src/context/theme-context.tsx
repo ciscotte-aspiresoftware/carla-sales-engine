@@ -26,7 +26,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>({
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'bluebird-theme',
+  storageKey = 'carla-theme',
   ...props
 }: ThemeProviderProps) {
   const [theme, _setTheme] = useState<Theme>(

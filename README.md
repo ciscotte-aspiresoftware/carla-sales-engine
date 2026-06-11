@@ -1,13 +1,13 @@
 # Atlas
 
 AI-driven lead-discovery + outreach platform for Valsoft portfolio companies
-(internal codename: **Bluebird**, kept as the repo name for backwards
+(internal codename: **Carla**, kept as the repo name for backwards
 compatibility). Atlas crawls Google Maps for real local businesses in your
 ICP, classifies each one with GPT against per-ICP criteria, enriches the
 qualified ones with Apollo + LinkedIn, and drafts outreach emails / LinkedIn
 DMs using your own sender personas and templates.
 
-Live demo: https://bluebird-1lmh.onrender.com (this URL points at the
+Live demo: https://carla-1lmh.onrender.com (this URL points at the
 maintainer's deploy - you'll point at your own after setup).
 
 ---
@@ -15,7 +15,7 @@ maintainer's deploy - you'll point at your own after setup).
 ## What's in this repo
 
 ```
-bluebird/
+carla/
 ├── api/                          Node.js + Express backend
 │   ├── index.js                  Server entry (Express + Socket.IO)
 │   ├── routes/                   REST + Socket.IO event handlers
@@ -48,8 +48,8 @@ the email-generation step but not for first-pass classify-only runs.
 
 ```bash
 # 1. Clone
-git clone <repo-url> bluebird
-cd bluebird
+git clone <repo-url> carla
+cd carla
 
 # 2. Backend env
 cp .env.example .env
@@ -87,7 +87,7 @@ The Vite dev server proxies `/api/*` and `/socket.io/*` to
 
 ## Required keys
 
-All keys go in `bluebird/.env` (backend). See [.env.example](.env.example)
+All keys go in `carla/.env` (backend). See [.env.example](.env.example)
 for the full annotated list. The bare minimum for a real-mode sweep:
 
 | Key | Purpose | Sign up |
@@ -116,7 +116,7 @@ across instances. For real use, point it at Supabase:
    later, the migrations are idempotent-safe and assume strict ordering.
 3. Grab the project URL + service-role key from Project Settings → API.
    **Service-role key is server-only - never ship it to the browser.**
-4. Set in `bluebird/.env`:
+4. Set in `carla/.env`:
    ```
    USE_SUPABASE=true
    SUPABASE_URL=https://<project>.supabase.co
@@ -220,7 +220,7 @@ Postgres.)
 The following config / seed JSON IS tracked and serves as a starting
 template:
 
-- `api/data/icps.json` - example ICPs (Bluebird, Thermeon, NedFox variants)
+- `api/data/icps.json` - example ICPs (Carla, Thermeon, NedFox variants)
 - `api/data/email-templates.json` - example sender personas + templates
 - `api/data/settings.json` - default pipeline tunables
 - `api/data/airports.json` + `populated-places.json` - public reference data

@@ -1,4 +1,4 @@
-# Render blueprint for the Atlas (Bluebird) Express backend.
+# Render blueprint for the Atlas (Carla) Express backend.
 # Import via Render dashboard → New → Blueprint, point at this repo.
 # Secrets (sync:false) are NOT stored here — set them in the Render dashboard.
 #
@@ -54,12 +54,12 @@ services:
       # which silently no-ops real pushes/sweeps. Pin "real" here so the
       # service always boots ready to write. NOTE: "real" also arms the sweep
       # cron + lets Sales Agent spend Apollo/Firecrawl/OpenAI credits; set
-      # BLUEBIRD_SWEEP_TICK_MS=0 below if you want push/leads WITHOUT auto-sweeps.
-      - key: BLUEBIRD_MODE
+      # CARLA_SWEEP_TICK_MS=0 below if you want push/leads WITHOUT auto-sweeps.
+      - key: CARLA_MODE
         value: "real"
       # Sweep cron tick. Default in code is 5s; 10 min is safer for production
       # credit spend. Set to 0 to disable the auto-sweep loop entirely.
-      - key: BLUEBIRD_SWEEP_TICK_MS
+      - key: CARLA_SWEEP_TICK_MS
         value: "600000"
       # Optional: gate POST /api/discover with x-api-key / Bearer. Leave unset
       # to keep the endpoint open. If set, mirror it into the Vercel frontend

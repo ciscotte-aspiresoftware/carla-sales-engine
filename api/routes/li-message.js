@@ -220,10 +220,10 @@ router.post('/email', trackActivity('li_message_generated'), async (req, res) =>
         resolutionSource = `legacy senderId=${senderId}${liByName ? '' : ' (no LI match, fell back to email)'}`;
     }
     if (!template) {
-        // Final fallback - prefer the LI Bluebird-Fazal template; fall through
+        // Final fallback - prefer the LI Carla-Fazal template; fall through
         // to the email twin if the LI seed hasn't been migrated in yet.
-        template = getTemplate('fazal-bluebird-li') || getTemplate('fazal-bluebird') || getTemplate('bluebird-fazal');
-        resolutionSource += ' → fallback Fazal/Bluebird';
+        template = getTemplate('fazal-carla-li') || getTemplate('fazal-carla') || getTemplate('carla-fazal');
+        resolutionSource += ' → fallback Fazal/Carla';
     }
     console.log(`[LI Message] template resolved via ${resolutionSource}: "${template?.name}" channel=${template?.channel || 'email'}`);
 

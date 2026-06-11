@@ -50,8 +50,8 @@ export function AccountsCountProvider({ children }: { children: ReactNode }) {
       //   2. The set of ICP ids the workspace owns - so when we then count
       //      pending (company, icp) PAIRS, we only count pairs under the
       //      workspace's own ICPs. Without (2) the loop was double-counting:
-      //      a company classified under both bluebird AND nedfox-thrift
-      //      would contribute its nedfox-thrift pending pair to the Bluebird
+      //      a company classified under both carla AND nedfox-thrift
+      //      would contribute its nedfox-thrift pending pair to the Carla
       //      sidebar pill, inflating it by every cross-portfolio classify.
       const [companiesRes, ownedIds] = await Promise.all([
         fetchCompanies(workspace ? { portfolioCompany: workspace } : {}),

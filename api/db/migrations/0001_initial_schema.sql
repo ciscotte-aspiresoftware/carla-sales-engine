@@ -1,6 +1,6 @@
--- Bluebird → Supabase (Postgres) schema, v1.
+-- Carla → Supabase (Postgres) schema, v1.
 --
--- This mirrors every JSON-file store Bluebird uses today (api/data/*.json
+-- This mirrors every JSON-file store Carla uses today (api/data/*.json
 -- + scrape-cache/) as proper relational tables. It is NOT yet wired into
 -- the running app - the API still reads/writes the JSON files. This file
 -- is the target schema for the future migration; apply it to a Supabase
@@ -18,7 +18,7 @@
 --   • lat/lng are plain double precision (no PostGIS) to keep Supabase
 --     setup dependency-free. See README for the optional PostGIS upgrade
 --     that would accelerate the disc-conflict prune + coverage queries.
---   • RLS: Bluebird is internal/no-auth today. RLS is left DISABLED here;
+--   • RLS: Carla is internal/no-auth today. RLS is left DISABLED here;
 --     access goes through the service role from the backend. Enable + add
 --     policies if the frontend ever talks to Supabase directly.
 

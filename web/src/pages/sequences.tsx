@@ -825,7 +825,7 @@ function TemplatesTab() {
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplateLite[]>([])
   // Available ICPs for the dropdown. Workspace-filtered so the rep only
   // sees ICPs in their current portfolio company - prevents binding a
-  // Bluebird template to a NedFox ICP by mistake.
+  // Carla template to a NedFox ICP by mistake.
   const [icps, setIcps] = useState<IcpSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -1029,7 +1029,7 @@ function TemplatesTab() {
                        disabled={!!templates.find((t) => t.id === draft.id)} />
               </Field>
               <Field label="Portfolio company">
-                <Input value={draft.portfolioCompany || ''} onChange={(e) => setDraft({ ...draft, portfolioCompany: e.target.value || null })} placeholder="Bluebird Auto Rental Systems" />
+                <Input value={draft.portfolioCompany || ''} onChange={(e) => setDraft({ ...draft, portfolioCompany: e.target.value || null })} placeholder="Carla Auto Rental Systems" />
               </Field>
               <Field label="Language">
                 <Input value={draft.language} onChange={(e) => setDraft({ ...draft, language: e.target.value })} />

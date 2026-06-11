@@ -1,7 +1,7 @@
 // Email templates - per-portfolio-company senders + system prompts that
-// drive outbound email generation. Replaces the old hardcoded Bluebird-
+// drive outbound email generation. Replaces the old hardcoded Carla-
 // only `senders.js` + `prompts/email.js` pair with a data-driven model
-// so each portfolio company (Bluebird, Thermeon, NedFox, etc.) has its
+// so each portfolio company (Carla, Thermeon, NedFox, etc.) has its
 // own voice, sender persona, and tone - and so the rep can save new
 // templates from the UI without a code change.
 //
@@ -14,16 +14,16 @@
 //
 // Shape of a template (one record):
 //   {
-//     id:                 'bluebird-fazal',          // url-safe slug
+//     id:                 'carla-fazal',          // url-safe slug
 //     name:               'Fazal Khaishgi',
-//     portfolioCompany:   'Bluebird Auto Rental Systems',
-//     defaultForIcps:     ['bluebird'],              // which ICPs use this template
+//     portfolioCompany:   'Carla Auto Rental Systems',
+//     defaultForIcps:     ['carla'],              // which ICPs use this template
 //     language:           'en',                       // primary language of the output
 //     sender: {
 //       firstName: 'Fazal', lastName: 'Khaishgi',
 //       title: 'Group Managing Director',
-//       company: 'Bluebird Auto Rental Software',
-//       email: 'fazal@bluebird-arc.com',
+//       company: 'Carla Auto Rental Software',
+//       email: 'fazal@carla-arc.com',
 //       signoff: 'Fazal',
 //     },
 //     // The system message fed to GPT. May reference template tokens
@@ -88,7 +88,7 @@ async function hydrateFromSupabase() {
 
 // ─── Defaults ─────────────────────────────────────────────────────────
 //
-// Only Fazal Khaishgi seeded - the canonical Bluebird sender. New
+// Only Fazal Khaishgi seeded - the canonical Carla sender. New
 // templates are added by the user via the /templates page UI, which
 // supports picking the portfolio company + ICP(s) from dropdowns
 // populated by the live ICP registry. Keeping the seed list to one entry
@@ -183,21 +183,21 @@ ${LI_HARD_RULES}`;
 }
 
 const DEFAULT_TEMPLATES = [
-    // ─── Bluebird (English) ───────────────────────────────────────────
+    // ─── Carla (English) ───────────────────────────────────────────
     {
-        id: 'fazal-bluebird',
-        name: 'Fazal - Bluebird',
-        portfolioCompany: 'Bluebird Auto Rental Systems',
-        defaultForIcps: ['bluebird'],
+        id: 'fazal-carla',
+        name: 'Fazal - Carla',
+        portfolioCompany: 'Carla Auto Rental Systems',
+        defaultForIcps: ['carla'],
         language: 'English',
         sender: FAZAL_SENDER,
         voice: 'Warm but professional. Not bro-y, not over-formal. Plain English.',
         systemPrompt: makeSystemPrompt({
             language: 'English',
             productPitch: {
-                company: 'Bluebird Auto Rental Software',
-                product: 'Bluebird / RentWorks',
-                what: 'Bluebird makes RentWorks, a fleet/reservation/counter management platform built specifically for independent car rental operators (not Hertz/Avis/Enterprise scale).',
+                company: 'Carla Auto Rental Software',
+                product: 'Carla / RentWorks',
+                what: 'Carla makes RentWorks, a fleet/reservation/counter management platform built specifically for independent car rental operators (not Hertz/Avis/Enterprise scale).',
             },
         }),
     },
@@ -330,22 +330,22 @@ const DEFAULT_TEMPLATES = [
     //  / removing entries here is safe at any time.
     // ═════════════════════════════════════════════════════════════════════
 
-    // ─── Bluebird LI (English) ────────────────────────────────────────
+    // ─── Carla LI (English) ────────────────────────────────────────
     {
-        id: 'fazal-bluebird-li',
-        name: 'Fazal - Bluebird (LinkedIn)',
-        portfolioCompany: 'Bluebird Auto Rental Systems',
+        id: 'fazal-carla-li',
+        name: 'Fazal - Carla (LinkedIn)',
+        portfolioCompany: 'Carla Auto Rental Systems',
         channel: 'linkedin',
-        defaultForIcps: ['bluebird'],
+        defaultForIcps: ['carla'],
         language: 'English',
         sender: FAZAL_SENDER,
         voice: 'Warm but professional. Not bro-y, not over-formal. Plain English.',
         systemPrompt: makeLiSystemPrompt({
             language: 'English',
             productPitch: {
-                company: 'Bluebird Auto Rental Software',
-                product: 'Bluebird / RentWorks',
-                what: 'Bluebird makes RentWorks, a fleet/reservation/counter management platform built specifically for independent car rental operators (not Hertz/Avis/Enterprise scale).',
+                company: 'Carla Auto Rental Software',
+                product: 'Carla / RentWorks',
+                what: 'Carla makes RentWorks, a fleet/reservation/counter management platform built specifically for independent car rental operators (not Hertz/Avis/Enterprise scale).',
             },
         }),
     },

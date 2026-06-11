@@ -1,9 +1,9 @@
 [
   {
-    "id": "bluebird",
-    "name": "Bluebird Auto Rental",
+    "id": "carla",
+    "name": "Carla Auto Rental",
     "vertical": "Car Rental",
-    "portfolioCompany": "Bluebird Auto Rental Systems",
+    "portfolioCompany": "Carla Auto Rental Systems",
     "countries": [
       "UK"
     ],

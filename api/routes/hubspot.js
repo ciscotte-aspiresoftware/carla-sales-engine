@@ -191,7 +191,7 @@ async function loadCompany(id) {
 router.get('/health', async (_req, res) => {
     const connected = hubspot.hasToken();
     // mode + modePinnedByEnv are diagnostics: if a push "does nothing" with no
-    // error, it's a demo no-op. modePinnedByEnv:true confirms BLUEBIRD_MODE is
+    // error, it's a demo no-op. modePinnedByEnv:true confirms CARLA_MODE is
     // being read by THIS running build (so you can tell a stale deploy from a
     // wrong env value).
     const out = { success: true, connected, demo: isDemo(), mode: isDemo() ? 'demo' : 'real', modePinnedByEnv: isPinned() };

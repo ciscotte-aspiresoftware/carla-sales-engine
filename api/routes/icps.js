@@ -18,7 +18,7 @@
 //                                      cached in this vertical) vs which still
 //                                      need a real sweep.
 //
-// Local-only, no auth - same as the rest of BlueBird's API.
+// Local-only, no auth - same as the rest of Carla's API.
 // /api/grid/icps remains as the trimmed picker-style listing the
 // Coverage page uses (id/name/vertical/cities only).
 
@@ -210,7 +210,7 @@ router.post('/generate', async (req, res) => {
         const taskInstruction = sectionKey
             ? `\n\nReturn ONLY the JSON fields for the "${sectionKey}" section: ${SECTION_FIELDS[sectionKey].join(', ')}. Omit every other field. Keep the same JSON envelope shape (top-level keys, just only the requested ones populated).`
             : '';
-        // Splice the portfolio-company brief (Bluebird/Thermeon/NedFox →
+        // Splice the portfolio-company brief (Carla/Thermeon/NedFox →
         // factual product + market + excludeCompanies summary) between the
         // company name and the operator's free-text description. The model
         // reads the brief as authoritative configuration for searchTerms /

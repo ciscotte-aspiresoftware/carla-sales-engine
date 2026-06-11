@@ -404,8 +404,8 @@ async function sweepCell(icp, cell) {
         // filter by default so any vertical works - the per-ICP classify
         // prompt is the real qualifier. Proper fix is a per-ICP skipTypeFilter
         // toggle. To restore the old credit-saving pre-filter WITHOUT a code
-        // change, set BLUEBIRD_ENABLE_TYPE_FILTER=true on the backend.
-        const enableTypeFilter = process.env.BLUEBIRD_ENABLE_TYPE_FILTER === 'true';
+        // change, set CARLA_ENABLE_TYPE_FILTER=true on the backend.
+        const enableTypeFilter = process.env.CARLA_ENABLE_TYPE_FILTER === 'true';
         const survivors = [];
         for (const r of rawResults) {
             const types = Array.isArray(r.types) ? r.types : (r.type ? [r.type] : []);

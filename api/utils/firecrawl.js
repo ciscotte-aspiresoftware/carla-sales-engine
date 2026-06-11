@@ -1,4 +1,4 @@
-// Firecrawl wrapper for the Bluebird API.
+// Firecrawl wrapper for the Carla API.
 //
 // Two modes, picked at call time from Admin settings (utils/settings.js):
 //

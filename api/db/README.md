@@ -1,7 +1,7 @@
-# Bluebird → Supabase migration (scaffolded, disabled)
+# Carla → Supabase migration (scaffolded, disabled)
 
 This folder holds the **target Postgres/Supabase schema** + the connection
-and import scaffolding for Bluebird. The app today persists to JSON files
+and import scaffolding for Carla. The app today persists to JSON files
 under `api/data/`; this is the schema to move to when you want Supabase like
 valsource. **Supabase is OFF by default** (`USE_SUPABASE=false`) and nothing
 in the running app imports the client - applying the migration and even
@@ -40,7 +40,7 @@ This is the "make a Supabase account and upload our data" flow:
 
 ### Scoping the import to one portfolio company
 
-To upload **just one portfolio's** data (e.g. NedFox, leaving Bluebird +
+To upload **just one portfolio's** data (e.g. NedFox, leaving Carla +
 Thermeon out) - no files moved or deleted, purely an import-time filter:
 
 ```

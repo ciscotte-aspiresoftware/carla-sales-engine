@@ -11,7 +11,7 @@
 //      lead + classification + sender.
 //
 // `templateId` replaces the old `senderId` as the canonical handle -
-// `senderId` is kept for legacy callers (Bluebird's original Fazal flow)
+// `senderId` is kept for legacy callers (Carla's original Fazal flow)
 // and resolved to the matching template by sender id.
 
 const express = require('express');
@@ -49,7 +49,7 @@ router.post('/', trackActivity('email_generated'), async (req, res) => {
     //   1. Explicit templateId from the request (UI picker / "Save as template" flow)
     //   2. Suggest by ICP context (came from Accounts skip flow)
     //   3. Legacy senderId → look up a template whose sender.firstName matches
-    //   4. Fall back to default Bluebird Fazal template (legacy behaviour)
+    //   4. Fall back to default Carla Fazal template (legacy behaviour)
     let template = null;
     let resolutionSource = 'fallback';
     if (templateId) {
@@ -71,10 +71,10 @@ router.post('/', trackActivity('email_generated'), async (req, res) => {
         if (template) template = getTemplate(template.id); // hydrate to full record
         resolutionSource = `legacy senderId=${senderId}`;
     }
-    // Final fallback - the original Bluebird-Fazal template.
+    // Final fallback - the original Carla-Fazal template.
     if (!template) {
-        template = getTemplate('bluebird-fazal');
-        resolutionSource += ' → fallback Fazal/Bluebird';
+        template = getTemplate('carla-fazal');
+        resolutionSource += ' → fallback Fazal/Carla';
     }
     console.log(`[Email]   ├─ template resolved: "${template?.name || '(legacy)'}" id=${template?.id || 'legacy'} via ${resolutionSource} | language=${template?.language || 'English'}`);
 

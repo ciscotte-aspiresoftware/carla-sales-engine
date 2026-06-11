@@ -1,7 +1,7 @@
 // LinkedIn profile + posts scraper.
 //
 // Ported from valsource (be-vms-checker/utils/linkedin-helpers.js), trimmed
-// to just what BlueBird's email flow needs:
+// to just what Carla's email flow needs:
 //   - Token rotation across APIFY_API_TOKEN[_2/_3/_4] env vars
 //   - scrapeLinkedInProfile()  → flattened profile summary
 //   - scrapeRecentPosts()      → up to 5 recent posts with dates

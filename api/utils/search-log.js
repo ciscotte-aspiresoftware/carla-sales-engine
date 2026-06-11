@@ -2,7 +2,7 @@
 // submitted for a given (vertical, geography, search-term) combination.
 //
 // Why this exists: when two ICPs share a vertical AND a geography, they
-// also tend to share search terms. Bluebird and Thermeon both want
+// also tend to share search terms. Carla and Thermeon both want
 // "car rental" results in London. Without dedup, both ICPs' sweeps pay
 // Scrapingdog credits for the same query at the same coordinates. With
 // dedup, the second ICP's sweep skips the duplicate term and only pays

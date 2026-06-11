@@ -1,4 +1,4 @@
-// /api/sourcing/* - fresh-lead pipeline for Bluebird.
+// /api/sourcing/* - fresh-lead pipeline for Carla.
 //
 // Endpoints:
 //   GET  /api/sourcing/cities          - prefilled city dropdown options

@@ -95,7 +95,7 @@ const FX_RATES = {
 const FX_AS_OF = '2026-06-07';
 
 // ─── Per-service unit pricing (non-LLM) ────────────────────────────────
-// Sourced from the plans Bluebird's current deployment runs on. Tenants
+// Sourced from the plans Carla's current deployment runs on. Tenants
 // on different plans pay different rates; the Admin page will eventually
 // expose these as overrides (not wired yet).
 //

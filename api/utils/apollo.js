@@ -1,4 +1,4 @@
-// Apollo wrapper for the Bluebird demo.
+// Apollo wrapper for the Carla demo.
 // Adapted from valsource's be-vms-checker/utils/apollo.js - same multi-strategy
 // search + tier-based ranking. Stripped of: api-tracker, SF-specific lookup
 // fallbacks, keyword-fallback domain filtering. The shape returned is the

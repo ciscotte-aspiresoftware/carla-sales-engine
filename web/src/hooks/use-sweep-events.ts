@@ -1,6 +1,6 @@
 // useSweepEvents - Socket.IO subscription for live sweep progress.
 //
-// Connects to the BlueBird backend on first mount, joins the room for the
+// Connects to the Carla backend on first mount, joins the room for the
 // supplied icpId, and surfaces a derived progress object the UI can render
 // directly. Auto-resubscribes when icpId changes (e.g. user picks a
 // different ICP) without tearing down the socket itself.

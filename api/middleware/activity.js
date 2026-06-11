@@ -22,7 +22,7 @@ function sanitizeBody(body) {
 
 function trackActivity(action) {
     return (req, _res, next) => {
-        // Bluebird has no auth today - everything is the single local
+        // Carla has no auth today - everything is the single local
         // operator. Future multi-user: read req.session?.user or similar
         // here and fall back to 'operator'.
         const userId = req.session?.userName || DEFAULT_USER;

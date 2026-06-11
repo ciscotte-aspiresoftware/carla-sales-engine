@@ -1203,7 +1203,7 @@ function Editor({
         <Input
           value={icp.id}
           onChange={(e) => onChange({ ...icp, id: e.target.value })}
-          placeholder="e.g. bluebird"
+          placeholder="e.g. carla"
           disabled={!isNew}
         />
       </Field>
@@ -1212,7 +1212,7 @@ function Editor({
         <Input
           value={icp.name}
           onChange={(e) => onChange({ ...icp, name: e.target.value })}
-          placeholder="e.g. Bluebird Auto Rental"
+          placeholder="e.g. Carla Auto Rental"
         />
       </Field>
 
@@ -1230,7 +1230,7 @@ function Editor({
             <Input
               value={icp.portfolioCompany || ''}
               onChange={(e) => onChange({ ...icp, portfolioCompany: e.target.value })}
-              placeholder="e.g. NedFox, Bluebird Auto Rental Systems"
+              placeholder="e.g. NedFox, Carla Auto Rental Systems"
               autoFocus
             />
             <button

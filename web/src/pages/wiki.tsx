@@ -104,9 +104,9 @@ const SECTIONS: Section[] = [
           on whether any non-chain businesses survived the filters.
         </p>
         <p className='mt-2'>
-          The cron ticks every 5 seconds (configurable via <code>BLUEBIRD_SWEEP_TICK_MS</code>). Each
+          The cron ticks every 5 seconds (configurable via <code>CARLA_SWEEP_TICK_MS</code>). Each
           tick processes <b>one cell per ICP</b>, then breaks. Per ICP, the cron stops at the{' '}
-          <b>BLUEBIRD_SWEEP_BUDGET</b> (default <b>2</b>) cells per session. Hitting the cap fires a
+          <b>CARLA_SWEEP_BUDGET</b> (default <b>2</b>) cells per session. Hitting the cap fires a
           "Session paused" event in the activity feed and the cron parks itself. Clicking{' '}
           <b>Resume sweeping</b> POSTs <code>/api/grid/reset-budget</code> which zeros the counter
           and unparks the cron for another N cells.
@@ -241,7 +241,7 @@ const SECTIONS: Section[] = [
           context sources are baked into the prompt so the output isn't generic:
         </p>
         <ul className='list-disc pl-6 mt-1 space-y-1'>
-          <li><b>Portfolio company briefs.</b> Picking <i>Bluebird</i>, <i>Thermeon</i>, or <i>NedFox</i> injects a hand-written brief covering the product, the actual target customers, and what to exclude (so e.g. NedFox-Garden autofill knows the seven verticals NedFox sells into and produces language-correct local terms - "tuincentrum" in NL, "garden centre" in UK, "jardinería" in ES).</li>
+          <li><b>Portfolio company briefs.</b> Picking <i>Carla</i>, <i>Thermeon</i>, or <i>NedFox</i> injects a hand-written brief covering the product, the actual target customers, and what to exclude (so e.g. NedFox-Garden autofill knows the seven verticals NedFox sells into and produces language-correct local terms - "tuincentrum" in NL, "garden centre" in UK, "jardinería" in ES).</li>
           <li><b>Google Maps semantics + TYPE-A vs TYPE-B detection.</b> The system prompt teaches the model that Scrapingdog Maps queries act as a <i>category filter</i> on the place graph - so an ICP for "POS resellers that support garden centres" must produce terms like <code>"POS reseller"</code> / <code>"EPOS supplier"</code> / <code>"retail IT consultant"</code>, NOT <code>"garden centre support"</code> (which returns garden centres). Trigger words like <i>support / partner / reseller / consultant / installer / vendor / supplier / integrator / VAR</i> flip the prompt into TYPE-B (B2B service-provider) mode where the search terms target the providers, not their end-customers.</li>
         </ul>
         <p className='mt-2'>
@@ -567,7 +567,7 @@ const SECTIONS: Section[] = [
       <>
         <p>
           Templates define <i>how</i> we reach out once a company qualifies. Each portfolio
-          company has its own voice (Bluebird = Fazal, Thermeon = Adam, NedFox = Maartje). Each
+          company has its own voice (Carla = Fazal, Thermeon = Adam, NedFox = Maartje). Each
           template lives on either the <b>Email</b> channel (used by{' '}
           <Link to='/email' className='underline'>Email Generation</Link>) or the <b>LinkedIn</b>{' '}
           channel (used by <Link to='/li-message' className='underline'>LI Message</Link>) -
@@ -575,7 +575,7 @@ const SECTIONS: Section[] = [
           editor + sender model. Each template carries:
         </p>
         <ul className='list-disc pl-6 mt-1 space-y-1'>
-          <li><b>Sender persona</b> - first name, last name, title, company, sign-off, email. Drives the "From" line and the body's voice ("I'm Fazal, Group MD at Bluebird…").</li>
+          <li><b>Sender persona</b> - first name, last name, title, company, sign-off, email. Drives the "From" line and the body's voice ("I'm Fazal, Group MD at Carla…").</li>
           <li><b>Language</b> - full names (English, Dutch, French, etc.). GPT writes the whole email in that language.</li>
           <li><b>Voice</b> - short descriptor injectable into the system prompt via <code>{`{{voice}}`}</code>.</li>
           <li><b>System prompt</b> - the rules block fed to GPT. Encodes tone, structure, what to mention, what to skip.</li>
@@ -660,9 +660,9 @@ const SECTIONS: Section[] = [
           autofill calls re-read on every request so a swap takes effect immediately.
         </p>
         <p className='mt-2'>
-          <b>Per-session cell budget</b> (<code>BLUEBIRD_SWEEP_BUDGET</code>) is an env knob, not
+          <b>Per-session cell budget</b> (<code>CARLA_SWEEP_BUDGET</code>) is an env knob, not
           an Admin knob - bump it on the host if you want longer Resume cycles. Cron tick interval
-          (<code>BLUEBIRD_SWEEP_TICK_MS</code>) is the same shape.
+          (<code>CARLA_SWEEP_TICK_MS</code>) is the same shape.
         </p>
       </>
     ),

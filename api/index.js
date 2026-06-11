@@ -45,7 +45,7 @@ const realtime = require('./utils/realtime');
 const app = express();
 // Render (and most hosts) inject the port to bind via process.env.PORT and
 // health-check it - must take precedence. Falls back to the local dev port.
-const PORT = process.env.PORT || process.env.BLUEBIRD_API_PORT || 3001;
+const PORT = process.env.PORT || process.env.CARLA_API_PORT || 3001;
 
 // Permissive CORS for the demo - frontend on Vite dev server can reach us
 // from any localhost port without a custom config.
@@ -92,7 +92,7 @@ app.use('/api/icps', icpsRoute);
 // Email templates - per-portfolio-company sender + system-prompt records
 // that drive outbound email generation. Replaces the old hardcoded
 // senders.js + prompts/email.js pair so each portfolio company has its
-// own voice/tone (Bluebird = Fazal, Thermeon = Adam, NedFox = Maartje).
+// own voice/tone (Carla = Fazal, Thermeon = Adam, NedFox = Maartje).
 app.use('/api/email-templates', emailTemplatesRoute);
 // Operator-tunable settings (search radii, Firecrawl scrape vs crawl, etc).
 // Each group has a Default/Custom toggle; code reads via utils/settings.js
@@ -136,13 +136,13 @@ server.listen(PORT, async () => {
     console.log(`[Atlas API] Env loaded: firecrawl=${!!process.env.FIRECRAWL_API_KEY} openai=${!!process.env.OPENAI_API_KEY} apollo=${!!process.env.APOLLO_API_KEY} scrapingdog=${!!process.env.SCRAPINGDOG_API_KEY}`);
     // Start the grid sweep cron - picks pending cells from grid.json and
     // runs the Scrapingdog → chains → Firecrawl → GPT classify pipeline
-    // until the per-session budget is hit. Set BLUEBIRD_SWEEP_TICK_MS=0 in
+    // until the per-session budget is hit. Set CARLA_SWEEP_TICK_MS=0 in
     // .env to keep the route handlers but skip the auto-loop.
-    if (process.env.BLUEBIRD_SWEEP_TICK_MS !== '0') startSweepCron();
+    if (process.env.CARLA_SWEEP_TICK_MS !== '0') startSweepCron();
     // Reclassify worker - processes the reclassify_jobs queue (migrations
     // 0014/0015). Reconcile first so any 'running' rows left by a prior
     // crash flip back to 'pending' and the worker picks up where it left
-    // off; then start the tick loop. Set BLUEBIRD_RECLASSIFY_TICK_MS=0 in
+    // off; then start the tick loop. Set CARLA_RECLASSIFY_TICK_MS=0 in
     // .env to skip the auto-loop (jobs still enqueue but stay pending).
     try {
         const reconciled = await reclassifyJobs.reconcileOnBoot();
@@ -152,5 +152,5 @@ server.listen(PORT, async () => {
     } catch (err) {
         console.warn(`[Reclassify Worker] boot reconcile failed: ${err.message}`);
     }
-    if (process.env.BLUEBIRD_RECLASSIFY_TICK_MS !== '0') reclassifyWorker.start();
+    if (process.env.CARLA_RECLASSIFY_TICK_MS !== '0') reclassifyWorker.start();
 });

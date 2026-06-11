@@ -263,11 +263,11 @@ router.post('/:companyId/:apolloId/enrich-phone', async (req, res) => {
 
         // Sync returned no phone. If waterfall requested, initiate async enrichment.
         if (waterfall === 'true') {
-            const webhookUrl = process.env.BLUEBIRD_APOLLO_WEBHOOK_URL;
+            const webhookUrl = process.env.CARLA_APOLLO_WEBHOOK_URL;
             if (!webhookUrl) {
                 return res.status(500).json({
                     success: false,
-                    error: 'Waterfall enrichment not configured (BLUEBIRD_APOLLO_WEBHOOK_URL missing)',
+                    error: 'Waterfall enrichment not configured (CARLA_APOLLO_WEBHOOK_URL missing)',
                 });
             }
 

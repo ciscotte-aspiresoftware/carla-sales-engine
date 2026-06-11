@@ -7,7 +7,7 @@
 //
 // Persisted at api/data/icps.json so the new ICP-management UI can create/
 // edit/delete entries that survive backend restarts. The file is bootstrapped
-// with the Bluebird ICP on first read so a fresh checkout still works.
+// with the Carla ICP on first read so a fresh checkout still works.
 //
 // `cities` is the scope. A single-city ICP just lists one city; a multi-
 // city or "country" ICP lists all the cities in that country. Keeps the
@@ -121,10 +121,10 @@ Anything else worth flagging - recent news, expansion, ownership, technology hin
 
 const DEFAULT_ICPS = [
     {
-        id: 'bluebird',
-        name: 'Bluebird Auto Rental',
+        id: 'carla',
+        name: 'Carla Auto Rental',
         vertical: 'Car Rental',
-        portfolioCompany: 'Bluebird Auto Rental Systems',
+        portfolioCompany: 'Carla Auto Rental Systems',
         searchTerms: ['car rental', 'vehicle hire', 'auto rental'],
         cities: ['London'],
         coverage: { urban: true, suburban: false, rural: false, airports: true },
@@ -141,12 +141,12 @@ const DEFAULT_ICPS = [
         classifyPrompt: 'Is this an independent car rental or vehicle-hire business serving consumers and small businesses? Skip national chains, peer-to-peer marketplaces, and listing or comparison sites, and specific companies like Hertz, Enterprise, Avis, Budget, Sixt, Turo, and Getaround. Reply with JSON: {"is_match": true|false, "reason": "<one sentence>"}.',
     },
     {
-        // Thermeon - same vertical + country as Bluebird, slightly different
+        // Thermeon - same vertical + country as Carla, slightly different
         // ICP angle. Thermeon's CARS+ product targets larger-fleet operators
         // and serves an international customer base (40+ years, 50 countries),
         // so the criteria favor mid-market rental companies (10+ vehicles)
-        // over the smallest indies Bluebird also pursues. Sharing the vertical
-        // with Bluebird means both ICPs reuse the same scrape cache + search-
+        // over the smallest indies Carla also pursues. Sharing the vertical
+        // with Carla means both ICPs reuse the same scrape cache + search-
         // term log - adding Thermeon costs nearly $0 in extra API credits.
         id: 'thermeon',
         name: 'Thermeon',

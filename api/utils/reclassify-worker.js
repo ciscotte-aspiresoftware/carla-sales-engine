@@ -30,15 +30,15 @@ const jobs = require('./reclassify-jobs');
 // Configurable via env without code changes. Defaults tuned for
 // gpt-4o-mini-ish latency + a 5s/30s SWEEP_TICK_MS coexistence (the
 // reclassify worker runs on its own timer; same-process but independent).
-const TICK_MS = parseInt(process.env.BLUEBIRD_RECLASSIFY_TICK_MS || '1000', 10);
-const CONCURRENCY = parseInt(process.env.BLUEBIRD_RECLASSIFY_CONCURRENCY || '6', 10);
+const TICK_MS = parseInt(process.env.CARLA_RECLASSIFY_TICK_MS || '1000', 10);
+const CONCURRENCY = parseInt(process.env.CARLA_RECLASSIFY_CONCURRENCY || '6', 10);
 // Hard cap on classifies per second to keep us comfortable under
 // OpenAI's per-minute token budget on gpt-4o-mini. At CONCURRENCY=6 the
 // natural throughput is ~2/s; this cap (default 20/s) is the ceiling
 // before we'd ever need to add a token-bucket. Bumping concurrency in
 // env without also raising this would NOT exceed the cap - the worker
 // just waits between batches.
-const MAX_PER_SECOND = parseInt(process.env.BLUEBIRD_RECLASSIFY_MAX_PER_SECOND || '20', 10);
+const MAX_PER_SECOND = parseInt(process.env.CARLA_RECLASSIFY_MAX_PER_SECOND || '20', 10);
 
 let timer = null;
 let inFlight = false;

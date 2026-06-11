@@ -182,7 +182,7 @@ export default function PipelinePage() {
   // also drives the "Pre-loaded from My Accounts" banner in Step 1.
   const [fromAccount, setFromAccount] = useState<{ companyId: string; icpId: string; companyName: string } | null>(null)
   // Email template state. Templates drive sender persona + system prompt
-  // - each portfolio company (Bluebird, Thermeon, NedFox) has its own.
+  // - each portfolio company (Carla, Thermeon, NedFox) has its own.
   // Loaded once on mount; auto-suggested on the from-Accounts skip flow
   // so the rep lands with the right template pre-selected.
   const { workspace } = useWorkspace()
@@ -253,7 +253,7 @@ export default function PipelinePage() {
   }, [])
 
   // ICPs the picker offers, narrowed to the active workspace (so a NedFox
-  // rep doesn't have to scroll past Bluebird ICPs). When no workspace is
+  // rep doesn't have to scroll past Carla ICPs). When no workspace is
   // set ("All Companies"), every ICP shows.
   const visibleIcps = useMemo(() => {
     if (!workspace) return icps
@@ -305,7 +305,7 @@ export default function PipelinePage() {
   }, [icpCompanies, companySearch])
 
   // Templates available in the picker. Filtered by workspace (so a
-  // NedFox rep doesn't see Bluebird templates by default). If the rep
+  // NedFox rep doesn't see Carla templates by default). If the rep
   // wants to use a template from another portfolio company, they can
   // pick "All workspaces" via the workspace switcher - there's no
   // per-page override here to keep the picker uncluttered.
@@ -730,7 +730,7 @@ export default function PipelinePage() {
         lead: workingLead,
         companyId: companyId || undefined,
         // Template takes priority over the legacy senderId field. The
-        // backend falls back to the Bluebird-Fazal template if neither
+        // backend falls back to the Carla-Fazal template if neither
         // is provided, preserving old behaviour for paste-classify flows.
         templateId: activeTemplateId || undefined,
         icpId: fromAccount?.icpId || activeIcpId || undefined,
@@ -1272,13 +1272,13 @@ export default function PipelinePage() {
               <>
 
             {/* Template picker - drives sender persona + system prompt.
-                Filtered by workspace so a NedFox rep doesn't see Bluebird
+                Filtered by workspace so a NedFox rep doesn't see Carla
                 templates by default. */}
             {visibleTemplates.length > 0 && (
               <div className="flex items-center gap-2">
                 <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0 w-20">Template</label>
                 {/* No "Default (X)" placeholder option - it was always the
-                    same as picking the seeded fazal-bluebird template
+                    same as picking the seeded fazal-carla template
                     explicitly (the backend's empty-templateId path resolved
                     to it by ICP), so it showed up twice and confused reps
                     into thinking there were "3 templates" when there were

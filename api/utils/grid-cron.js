@@ -30,12 +30,12 @@ const sweepErrors = require('./sweep-errors');
 // completes, and the moment the cell is done the next tick picks up almost
 // immediately (vs up to 30s of idle time before). Bump via env to 600000 for
 // overnight production-style behaviour.
-const SWEEP_TICK_MS = parseInt(process.env.BLUEBIRD_SWEEP_TICK_MS || '5000', 10);
+const SWEEP_TICK_MS = parseInt(process.env.CARLA_SWEEP_TICK_MS || '5000', 10);
 // Default capped at 2 to keep real-mode credit spend low while the operator
-// validates results. Override via BLUEBIRD_SWEEP_BUDGET when you're ready
+// validates results. Override via CARLA_SWEEP_BUDGET when you're ready
 // to run longer sessions. Hitting the cap pauses that ICP until "Resume
 // sweeping" (which POSTs /api/grid/reset-budget) zeros the counter.
-const SWEEP_NIGHTLY_BUDGET = parseInt(process.env.BLUEBIRD_SWEEP_BUDGET || '2', 10);
+const SWEEP_NIGHTLY_BUDGET = parseInt(process.env.CARLA_SWEEP_BUDGET || '2', 10);
 
 let cronTimer = null;
 let inFlight = false;

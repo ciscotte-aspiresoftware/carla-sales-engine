@@ -472,7 +472,7 @@ export default function CoveragePage() {
   // Verticals available given the current workspace + portfolio scope.
   // When workspace=NedFox, the list narrows to NedFox's verticals (Garden
   // Centre, Thrift Store, Camping & Outdoor, Personal Care Retail,
-  // Bathroom Retail) - Bluebird's "Car Rental" is hidden because it's
+  // Bathroom Retail) - Carla's "Car Rental" is hidden because it's
   // not relevant to the active workspace. The portfolio filter (which
   // mirrors workspace by default) drives this so per-page overrides also
   // narrow the verticals correctly.

@@ -1,5 +1,5 @@
 // Shared glass-morphism class strings - copied verbatim from valsource's
-// dashboard so cards on Bluebird inherit the same translucent-frosted look.
+// dashboard so cards on Carla inherit the same translucent-frosted look.
 // Use via cn(GLASS, 'extra-classes') on any Card or div.
 
 export const GLASS =

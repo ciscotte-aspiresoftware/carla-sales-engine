@@ -1,8 +1,8 @@
 // /api/grid/* - grid-sweep dashboard endpoints.
 //
 //   GET  /api/grid/icps                       - list configured ICPs
-//   GET  /api/grid?icp=bluebird               - list cells for an ICP (optional state filter)
-//   GET  /api/grid/coverage?icp=bluebird      - counts by state + done %
+//   GET  /api/grid?icp=carla               - list cells for an ICP (optional state filter)
+//   GET  /api/grid/coverage?icp=carla      - counts by state + done %
 //   POST /api/grid/seed   body: { icp, cities? }  - seed Tier-1 cells. cities optional override
 //   POST /api/grid/seed-country body: { icp, country } - seed Tier-2 country fill
 //   GET  /api/grid/countries                   - list available country bboxes
@@ -10,7 +10,7 @@
 //   POST /api/grid/reset-budget                - clear the per-session sweep budget
 //   POST /api/grid/reset  body: { icp? }       - wipe cells (one ICP, or all if omitted) + reset budget
 //
-// No auth - same as the rest of BlueBird's local-only API.
+// No auth - same as the rest of Carla's local-only API.
 
 const express = require('express');
 const { listIcps, getIcp } = require('../utils/icps');

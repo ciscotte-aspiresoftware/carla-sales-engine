@@ -5,7 +5,7 @@
 -- trail surfaced on the new /activity page.
 --
 -- Mirrors the shape valsource uses (user_id, action, details jsonb,
--- created_at). Bluebird has no user auth so user_id is always 'operator'
+-- created_at). Carla has no user auth so user_id is always 'operator'
 -- today; keeping the column lets us light up multi-user later without a
 -- schema change.
 

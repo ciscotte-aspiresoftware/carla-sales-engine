@@ -10,8 +10,8 @@
 //     when the first ICP-driven sweep finds it. Future ICPs in the same
 //     vertical re-classify the same company without re-scraping.
 //   • Per-ICP results live under `company.classifications: { [icpId]: {...} }`.
-//     This means "Bluebird UK" can mark a company as a match while
-//     "Bluebird Spain" rejects it, both stored on the same record.
+//     This means "Carla UK" can mark a company as a match while
+//     "Carla Spain" rejects it, both stored on the same record.
 //   • A flat `classification` field is preserved for backwards compatibility
 //     with the existing CompanyDetails frontend - it always points at the
 //     most-recently-written per-ICP classification.
@@ -224,7 +224,7 @@ async function getCompanyByIdSupabase(id) {
 }
 
 // A record counts as "demo data" if its source string is a stub or
-// contains the ":demo" seed marker the seeded fixtures use ("bluebird:
+// contains the ":demo" seed marker the seeded fixtures use ("carla:
 // Cambridge:demo"). Real mode hides these so the operator only sees
 // records produced by genuine sweep pipeline runs.
 function isDemoRecord(c) {
@@ -241,8 +241,8 @@ function ensureFile() {
     if (!fs.existsSync(FILE)) fs.writeFileSync(FILE, JSON.stringify({ companies: [] }, null, 2));
 }
 
-// Pull the icpId off a `source` string. Sources look like "bluebird:London"
-// or "bluebird:London:scrape-error" - the first colon-separated segment is
+// Pull the icpId off a `source` string. Sources look like "carla:London"
+// or "carla:London:scrape-error" - the first colon-separated segment is
 // the icpId every time. Used to migrate legacy single-classification
 // records into the new per-ICP shape on read.
 function icpIdFromSource(source) {
@@ -891,7 +891,7 @@ const router = express.Router();
 
 // GET /api/companies - return everything, newest first. Optional filters:
 //   ?vertical=Car%20Rental    - only companies in that vertical
-//   ?icp=bluebird             - only companies the given ICP has classified
+//   ?icp=carla             - only companies the given ICP has classified
 //   ?match=true|false         - filter by the given ICP's match status
 //                               (requires `icp`)
 //   ?portfolioCompany=NedFox  - companies classified by ANY ICP belonging

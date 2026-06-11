@@ -472,7 +472,7 @@ export interface CompanyRecord {
   // weighed in on this account.
   reviews?: Record<string, Review>
   scrapedAt: number              // 0 means seeded but never classified (e.g. promoted from sourcing)
-  // String form is the canonical sweep-source ("bluebird:London:demo");
+  // String form is the canonical sweep-source ("carla:London:demo");
   // older code used an object shape - kept as union for compat with the
   // sourcing-promotion path until that's migrated to the same string form.
   source:
@@ -656,7 +656,7 @@ export function fetchPortfolioCompanies() {
 // ─── Email templates ──────────────────────────────────────────────────
 // Per-portfolio-company sender + system-prompt records that drive
 // outbound email generation. Replaces the old hardcoded-sender flow so
-// each portfolio company (Bluebird, Thermeon, NedFox) has its own voice.
+// each portfolio company (Carla, Thermeon, NedFox) has its own voice.
 
 export interface EmailTemplateSender {
   firstName: string

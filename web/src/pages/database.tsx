@@ -38,7 +38,7 @@ import { useWorkspace } from '@/context/workspace-context'
 
 // Source on a company record can be either the legacy object shape (used
 // when promoted from Sourcing - has .type, .dataId, etc.) or the newer
-// string form ("bluebird:London:demo" - first colon-separated segment is
+// string form ("carla:London:demo" - first colon-separated segment is
 // the type/icpId). These helpers normalize either into the values the UI
 // wants to render so call sites don't have to type-narrow inline.
 function sourceType(s: CompanyRecord['source']): string | null {
@@ -203,7 +203,7 @@ export default function DatabasePage() {
 
   // ICPs available in the picker. Narrowed by both vertical AND portfolio
   // company when either filter is set, so the user can't pick a mismatch
-  // (e.g. "vertical=Car Rental, ICP=Dental" or "portfolio=NedFox, ICP=Bluebird").
+  // (e.g. "vertical=Car Rental, ICP=Dental" or "portfolio=NedFox, ICP=Carla").
   // Both filters are AND-combined.
   const availableIcps = useMemo(() => {
     let out = icps
@@ -229,7 +229,7 @@ export default function DatabasePage() {
   }, [verticalFilter, portfolioFilter, availableIcps, icpFilter])
 
   // Verticals visible in the dropdown - narrow by portfolio company when
-  // one is set so workspace=NedFox doesn't show Bluebird's "Car Rental"
+  // one is set so workspace=NedFox doesn't show Carla's "Car Rental"
   // as a pickable option. The full list comes from /api/companies/verticals
   // (every vertical present in the company database). When a portfolio
   // filter is active, intersect with the verticals belonging to that

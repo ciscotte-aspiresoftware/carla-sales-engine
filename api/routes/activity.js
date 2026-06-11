@@ -5,7 +5,7 @@
 //   ?days=N       - lookback window, default 7
 //   ?limit=N      - cap returned rows, default 5000
 //   ?action=X     - optional single-action filter (icp_created, sweep_resumed, ...)
-//   ?user=X       - optional per-user lookup. Bluebird is single-operator
+//   ?user=X       - optional per-user lookup. Carla is single-operator
 //                   today, so this is mostly future-proofing.
 //
 // Read-only. The actual write path is the trackActivity middleware attached

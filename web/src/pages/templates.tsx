@@ -409,7 +409,7 @@ function TemplateEditor({
   }
 
   // ICPs available in the multi-select - narrowed to the chosen portfolio
-  // company so the user can't bind a Bluebird template to a NedFox ICP.
+  // company so the user can't bind a Carla template to a NedFox ICP.
   const eligibleIcps = template.portfolioCompany
     ? icps.filter((i) => i.portfolioCompany === template.portfolioCompany)
     : icps
@@ -445,7 +445,7 @@ function TemplateEditor({
         <Input
           value={template.id}
           onChange={(e) => updateField('id', e.target.value)}
-          placeholder="e.g. bluebird-fazal"
+          placeholder="e.g. carla-fazal"
           disabled={!isNew}
         />
       </Field>
@@ -589,14 +589,14 @@ function TemplateEditor({
           <Input
             value={template.sender.company || ''}
             onChange={(e) => updateSender('company', e.target.value)}
-            placeholder="Bluebird Auto Rental Software"
+            placeholder="Carla Auto Rental Software"
           />
         </Field>
         <Field label="Email">
           <Input
             value={template.sender.email || ''}
             onChange={(e) => updateSender('email', e.target.value)}
-            placeholder="fazal@bluebird-arc.com"
+            placeholder="fazal@carla-arc.com"
           />
         </Field>
         <Field label="Signoff name" hint="Required - first-name as it appears at the bottom of the email.">
@@ -646,7 +646,7 @@ function TemplateEditor({
 
       <Field
         label="How to use LinkedIn information (optional)"
-        hint="Layered on top of the universal rules below. Free text - e.g. 'For Bluebird, lead with fleet-expansion or airport-branch posts; avoid booking-aggregator references.'"
+        hint="Layered on top of the universal rules below. Free text - e.g. 'For Carla, lead with fleet-expansion or airport-branch posts; avoid booking-aggregator references.'"
       >
         {/* Read-only "Always applied" panel shows the universal rules that
             ship in every prompt. Surfaced here so template editors can

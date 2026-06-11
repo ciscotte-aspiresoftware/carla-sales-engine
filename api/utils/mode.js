@@ -8,14 +8,14 @@
 // State lives in data/mode.json so a server restart preserves the operator's
 // last choice. There's only one process; cached in memory after first read.
 //
-// BLUEBIRD_MODE env override: on hosts with an EPHEMERAL filesystem (e.g.
+// CARLA_MODE env override: on hosts with an EPHEMERAL filesystem (e.g.
 // Render's free plan, which wipes data/ on every cold start / redeploy), the
 // mode file is lost on restart and the app would silently revert to "demo" -
-// making real pushes / sweeps no-op. Set BLUEBIRD_MODE=real|demo and it is
+// making real pushes / sweeps no-op. Set CARLA_MODE=real|demo and it is
 // AUTHORITATIVE: it wins over any data/mode.json so a stray/leftover file
 // can't silently flip a server back to demo, and the in-app toggle can't
 // override the server's pinned mode (the toggle is a local-dev convenience).
-// Leave BLUEBIRD_MODE unset for the original file-only behaviour.
+// Leave CARLA_MODE unset for the original file-only behaviour.
 
 const fs = require('fs');
 const path = require('path');
@@ -25,9 +25,9 @@ const VALID = new Set(['demo', 'real']);
 
 let cached = null;
 
-// The env-pinned mode, or null when BLUEBIRD_MODE is unset/invalid.
+// The env-pinned mode, or null when CARLA_MODE is unset/invalid.
 function pinnedMode() {
-    const m = String(process.env.BLUEBIRD_MODE || '').toLowerCase();
+    const m = String(process.env.CARLA_MODE || '').toLowerCase();
     return VALID.has(m) ? m : null;
 }
 
@@ -68,11 +68,11 @@ function getState() {
 
 function setMode(next) {
     if (!VALID.has(next)) throw new Error(`mode must be "demo" or "real" (got "${next}")`);
-    // When the server pins the mode via BLUEBIRD_MODE, the in-app toggle can't
+    // When the server pins the mode via CARLA_MODE, the in-app toggle can't
     // override it - report the pinned value back so the UI re-syncs to it.
     const pin = pinnedMode();
     if (pin) {
-        console.warn(`[Mode] BLUEBIRD_MODE=${pin} is pinned; ignoring toggle to "${next}".`);
+        console.warn(`[Mode] CARLA_MODE=${pin} is pinned; ignoring toggle to "${next}".`);
         cached = { mode: pin, updatedAt: Date.now(), pinned: true };
         return cached;
     }
@@ -85,7 +85,7 @@ function setMode(next) {
 function isReal() { return getMode() === 'real'; }
 function isDemo() { return getMode() === 'demo'; }
 
-// Is the mode currently pinned by the BLUEBIRD_MODE env var? (diagnostic)
+// Is the mode currently pinned by the CARLA_MODE env var? (diagnostic)
 function isPinned() { return pinnedMode() !== null; }
 
 module.exports = { getMode, getState, setMode, isReal, isDemo, isPinned };

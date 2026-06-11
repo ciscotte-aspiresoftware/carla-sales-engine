@@ -3,8 +3,8 @@
 // Two-message structure given to GPT:
 //   1. System message - voice, tone, structure, hard rules. Comes from
 //      the template's `systemPrompt` field after token substitution.
-//      Pre-templates this was hardcoded for Bluebird; now each portfolio
-//      company supplies its own (Bluebird/Thermeon/NedFox).
+//      Pre-templates this was hardcoded for Carla; now each portfolio
+//      company supplies its own (Carla/Thermeon/NedFox).
 //   2. User message - the data the LLM has to work with: sender persona,
 //      prospect fields, recipient lead. Generated here regardless of
 //      template since the shape doesn't vary per company.
@@ -29,7 +29,7 @@ function substitute(text, sender, template) {
 // Legacy hardcoded prompt - kept as a fallback for callers that don't
 // pass a template (some demo paths still do this). New code should
 // always provide a template.
-const LEGACY_BLUEBIRD_PROMPT = `You write short, specific outbound sales emails on behalf of Bluebird Auto Rental Software. Bluebird makes RentWorks, a fleet/reservation/counter management platform built specifically for independent car rental operators (not Hertz/Avis/Enterprise scale).
+const LEGACY_CARLA_PROMPT = `You write short, specific outbound sales emails on behalf of Carla Auto Rental Software. Carla makes RentWorks, a fleet/reservation/counter management platform built specifically for independent car rental operators (not Hertz/Avis/Enterprise scale).
 
 Voice:
 - Warm but professional. Not bro-y, not over-formal.
@@ -39,7 +39,7 @@ Voice:
 
 Structure:
 1. One-line opener referencing something concrete from their site (a city, a fleet detail, the booking flow).
-2. One sentence about what Bluebird/RentWorks does, framed against a likely pain point you can infer from the signals.
+2. One sentence about what Carla/RentWorks does, framed against a likely pain point you can infer from the signals.
 3. One soft ask - short call, demo, or "open to learning more?". No hard pitch.
 4. Signoff with sender's first name only.
 
@@ -154,7 +154,7 @@ function buildEmailPrompt({ classification, lead, sender, template, customInstru
 
     const rawSystem = template?.systemPrompt
         ? substitute(template.systemPrompt, sender, template)
-        : LEGACY_BLUEBIRD_PROMPT;
+        : LEGACY_CARLA_PROMPT;
 
     // Strip any pre-existing JSON-contract line from the resolved system
     // prompt so we don't end up with duplicates after appending the

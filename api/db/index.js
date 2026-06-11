@@ -1,6 +1,6 @@
 // Supabase connection - DISABLED by default.
 //
-// Bluebird currently persists everything to JSON files under api/data/.
+// Carla currently persists everything to JSON files under api/data/.
 // This module is the single seam for the future Postgres/Supabase backend:
 // a flag-gated client the rest of the app can adopt store-by-store later.
 //

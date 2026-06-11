@@ -6,7 +6,7 @@
 // filter to a single action type via a chip row.
 //
 // Adapted from the valsource activity-log page. SecretGate easter egg
-// dropped (Bluebird has no auth, no need to gate the audit trail).
+// dropped (Carla has no auth, no need to gate the audit trail).
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'

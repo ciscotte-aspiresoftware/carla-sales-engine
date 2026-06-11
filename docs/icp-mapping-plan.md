@@ -4,7 +4,7 @@
 **Owner**: Shehryar
 **Last updated**: 2026-05-07
 
-> Goal: turn BlueBird from a one-off "search a city" tool into a system that systematically maps every car-rental business in a region (UK first, then anywhere), assigns survivors to sales reps overnight, and visualizes coverage on the existing 3D globe — green = mapped, red = mapping in progress. Once the substrate works for Bluebird, swap the ICP config and re-point at Thermeon, Navotar, or any future Valsoft portfolio company.
+> Goal: turn Carla from a one-off "search a city" tool into a system that systematically maps every car-rental business in a region (UK first, then anywhere), assigns survivors to sales reps overnight, and visualizes coverage on the existing 3D globe — green = mapped, red = mapping in progress. Once the substrate works for Carla, swap the ICP config and re-point at Thermeon, Navotar, or any future Valsoft portfolio company.
 
 ---
 
@@ -30,8 +30,8 @@ A config object describing **what we're looking for** and **how to qualify it**.
 
 ```jsonc
 {
-  "id": "bluebird",
-  "name": "Bluebird Auto Rental Software",
+  "id": "carla",
+  "name": "Carla Auto Rental Software",
   "vertical": "Car Rental",
   "regions": ["UK", "US", "CA"],          // which Tier-1 city lists to use
   "searchTerms": [
@@ -49,7 +49,7 @@ A config object describing **what we're looking for** and **how to qualify it**.
 }
 ```
 
-Phase 1 ships with **just the Bluebird ICP**. Other portfolio companies get added once the pipeline proves out.
+Phase 1 ships with **just the Carla ICP**. Other portfolio companies get added once the pipeline proves out.
 
 ### Grid cell
 
@@ -117,7 +117,7 @@ Update cell:
 Sleep N seconds, next cell.
 ```
 
-Reuses **everything already in BlueBird**:
+Reuses **everything already in Carla**:
 - `scrapingdog.js` Search wrapper
 - `firecrawl.js` scrape wrapper
 - `openai.js` classify wrapper
@@ -141,7 +141,7 @@ New code:
 
 ```
 ┌───────────────────────────────────────────┐
-│ ICP: [Bluebird ▼]   Region: [UK ▼]   📊   │  ← header, switches ICP/region
+│ ICP: [Carla ▼]   Region: [UK ▼]   📊   │  ← header, switches ICP/region
 ├───────────────────────────────────────────┤
 │                                           │
 │            (3D globe, pre-zoomed          │
@@ -160,7 +160,7 @@ New code:
 
 ### Pre-zoom
 
-When the page loads with ICP=Bluebird, region=UK selected:
+When the page loads with ICP=Carla, region=UK selected:
 - Globe rotates to UK center (~54°N, -2°W) at altitude 1.2
 - 3D `pointOfView` animation, ~1.4 sec
 - User can still drag to rotate / zoom out
@@ -207,7 +207,7 @@ function cellColor(cell) {
 
 | column | type | notes |
 |---|---|---|
-| id | text PK | `'bluebird'` |
+| id | text PK | `'carla'` |
 | name | text | Display name |
 | vertical | text | `'Car Rental'` |
 | search_terms | text[] | rotated through Scrapingdog queries |
@@ -244,7 +244,7 @@ Indexes: `(icp_id, state, tier)` for the scheduler's "pick next pending Tier-1" 
 
 - `companies` — add `icp_id` text column. Already has place_id/domain/grata fields.
 - `leads` — already has `company` FK, no change needed.
-- `account_assignments` — already has assigned_to, just gets new rows from this pipeline. Add a `source` column or use existing `assigned_by` to label these as `'BlueBird sweep'` / `'Bluebird ICP'` / etc.
+- `account_assignments` — already has assigned_to, just gets new rows from this pipeline. Add a `source` column or use existing `assigned_by` to label these as `'Carla sweep'` / `'Carla ICP'` / etc.
 
 ---
 
@@ -278,7 +278,7 @@ After all Tier-1 for a region completes, schedule fills in Tier-2 (25-km grid ov
 
 ## 8. Phasing
 
-**Phase 1 — Bluebird MVP (no globe yet)**
+**Phase 1 — Carla MVP (no globe yet)**
 - `grid_cells` table
 - Hand-seed UK Tier-1 cities
 - Cron + cell scheduler
@@ -315,12 +315,12 @@ After all Tier-1 for a region completes, schedule fills in Tier-2 (25-km grid ov
 - **Authentication**: who can switch ICPs / trigger manual rescans? Admin-gated like the VMS queue's arm flow?
 - **Multi-region ICPs** (e.g. Navotar = US+CA): does the cron round-robin between regions or finish one before moving on? Default: finish one.
 - **Failure recovery**: what happens if Firecrawl 403s mid-cell? Mark the cell `scanning`-paused, retry next night? Skip-with-warning?
-- **Auth on the globe page**: same gate as the rest of BlueBird (whatever that ends up being).
-- **ICP changes invalidate state?**: if I change Bluebird's `searchTerms` from "car rental" to "vehicle hire", do all `complete` cells reopen? (Probably yes — should be user-confirmed.)
+- **Auth on the globe page**: same gate as the rest of Carla (whatever that ends up being).
+- **ICP changes invalidate state?**: if I change Carla's `searchTerms` from "car rental" to "vehicle hire", do all `complete` cells reopen? (Probably yes — should be user-confirmed.)
 
 ---
 
-## 10. Why this matches BlueBird's existing shape
+## 10. Why this matches Carla's existing shape
 
 - Already has Scrapingdog + Firecrawl + GPT classify wired
 - Already has the 3D globe + react-globe.gl + h3-js for cell tessellation

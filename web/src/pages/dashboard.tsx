@@ -139,7 +139,7 @@ export default function DashboardPage() {
   // Walk every (company, scoped-ICP) pair and bucket into pending/confirmed/
   // rejected. We use the scoped ICP list so an ICP outside the workspace
   // can't sneak into the count (e.g. when workspace=NedFox we don't want
-  // a Bluebird-classified company to count as anything here).
+  // a Carla-classified company to count as anything here).
   //
   // "Pending" means classifier said is_match AND there's no review yet -
   // mirrors the Accounts page logic so the numbers match exactly.

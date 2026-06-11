@@ -30,7 +30,7 @@ interface WorkspaceCtx {
 
 const Ctx = createContext<WorkspaceCtx | null>(null)
 
-const STORAGE_KEY = 'bluebird:workspace'
+const STORAGE_KEY = 'carla:workspace'
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Read initial value synchronously so first paint already has the right

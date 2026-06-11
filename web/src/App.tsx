@@ -94,10 +94,10 @@ function Shell() {
           </Button>
           {/* Workspace-aware page header. Shows "All Companies" when in
               cross-portfolio mode and the portfolio company name when a
-              workspace is picked. Was previously hardcoded to "Bluebird
-              Auto Rental Software" which was wrong for any non-Bluebird
-              workspace (and even wrong for the Bluebird workspace - that
-              portfolio company's name is "Bluebird Auto Rental Systems",
+              workspace is picked. Was previously hardcoded to "Carla
+              Auto Rental Software" which was wrong for any non-Carla
+              workspace (and even wrong for the Carla workspace - that
+              portfolio company's name is "Carla Auto Rental Systems",
               not Software). */}
           <h2 className="text-sm font-semibold">
             {workspace || 'All Companies'}
