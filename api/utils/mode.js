@@ -11,11 +11,11 @@
 // BLUEBIRD_MODE env override: on hosts with an EPHEMERAL filesystem (e.g.
 // Render's free plan, which wipes data/ on every cold start / redeploy), the
 // mode file is lost on restart and the app would silently revert to "demo" -
-// making real pushes / sweeps no-op. Set BLUEBIRD_MODE=real|demo to pin the
-// BOOT default. The in-app toggle still works within a running instance (it
-// writes the file, which wins while present); the env value is just the
-// fallback used when no file exists - which, on an ephemeral host, is every
-// boot. Leave it unset for the original file-only behaviour.
+// making real pushes / sweeps no-op. Set BLUEBIRD_MODE=real|demo and it is
+// AUTHORITATIVE: it wins over any data/mode.json so a stray/leftover file
+// can't silently flip a server back to demo, and the in-app toggle can't
+// override the server's pinned mode (the toggle is a local-dev convenience).
+// Leave BLUEBIRD_MODE unset for the original file-only behaviour.
 
 const fs = require('fs');
 const path = require('path');
@@ -25,14 +25,20 @@ const VALID = new Set(['demo', 'real']);
 
 let cached = null;
 
-// Boot default: BLUEBIRD_MODE when it's a valid value, else 'demo'.
-function envDefault() {
+// The env-pinned mode, or null when BLUEBIRD_MODE is unset/invalid.
+function pinnedMode() {
     const m = String(process.env.BLUEBIRD_MODE || '').toLowerCase();
-    return VALID.has(m) ? m : 'demo';
+    return VALID.has(m) ? m : null;
 }
 
 function load() {
     if (cached) return cached;
+    // Env pin is authoritative - check it BEFORE the file.
+    const pin = pinnedMode();
+    if (pin) {
+        cached = { mode: pin, updatedAt: 0, pinned: true };
+        return cached;
+    }
     try {
         if (fs.existsSync(FILE)) {
             const raw = JSON.parse(fs.readFileSync(FILE, 'utf8'));
@@ -42,7 +48,7 @@ function load() {
             }
         }
     } catch { /* fall through to default */ }
-    cached = { mode: envDefault(), updatedAt: 0 };
+    cached = { mode: 'demo', updatedAt: 0 };
     return cached;
 }
 
@@ -62,6 +68,14 @@ function getState() {
 
 function setMode(next) {
     if (!VALID.has(next)) throw new Error(`mode must be "demo" or "real" (got "${next}")`);
+    // When the server pins the mode via BLUEBIRD_MODE, the in-app toggle can't
+    // override it - report the pinned value back so the UI re-syncs to it.
+    const pin = pinnedMode();
+    if (pin) {
+        console.warn(`[Mode] BLUEBIRD_MODE=${pin} is pinned; ignoring toggle to "${next}".`);
+        cached = { mode: pin, updatedAt: Date.now(), pinned: true };
+        return cached;
+    }
     cached = { mode: next, updatedAt: Date.now() };
     save();
     console.log(`[Mode] Switched → ${next.toUpperCase()}${next === 'real' ? ' - real API credits will be spent' : ' - stubbed responses, no credits'}`);
@@ -71,4 +85,7 @@ function setMode(next) {
 function isReal() { return getMode() === 'real'; }
 function isDemo() { return getMode() === 'demo'; }
 
-module.exports = { getMode, getState, setMode, isReal, isDemo };
+// Is the mode currently pinned by the BLUEBIRD_MODE env var? (diagnostic)
+function isPinned() { return pinnedMode() !== null; }
+
+module.exports = { getMode, getState, setMode, isReal, isDemo, isPinned };

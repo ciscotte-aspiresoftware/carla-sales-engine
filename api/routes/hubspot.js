@@ -30,7 +30,7 @@ const hubspot = require('../utils/hubspot');
 const companiesStore = require('./companies');
 const realtime = require('../utils/realtime');
 const { trackActivity } = require('../middleware/activity');
-const { isDemo } = require('../utils/mode');
+const { isDemo, isPinned } = require('../utils/mode');
 
 const router = express.Router();
 
@@ -190,7 +190,11 @@ async function loadCompany(id) {
 // Token presence + a cheap account ping. Drives the Admin connection panel.
 router.get('/health', async (_req, res) => {
     const connected = hubspot.hasToken();
-    const out = { success: true, connected, demo: isDemo() };
+    // mode + modePinnedByEnv are diagnostics: if a push "does nothing" with no
+    // error, it's a demo no-op. modePinnedByEnv:true confirms BLUEBIRD_MODE is
+    // being read by THIS running build (so you can tell a stale deploy from a
+    // wrong env value).
+    const out = { success: true, connected, demo: isDemo(), mode: isDemo() ? 'demo' : 'real', modePinnedByEnv: isPinned() };
     if (connected && !isDemo()) {
         try {
             const acct = await hubspot.accountPing();
