@@ -9,27 +9,77 @@ const { consumePendingEnrichment } = require('../utils/apollo');
 
 const router = express.Router();
 
-// Extract the primary phone from Apollo's waterfall response.
+// Pull the first usable number out of a phone_numbers array.
+function pickFromPhoneArray(arr) {
+    if (!Array.isArray(arr)) return null;
+    for (const p of arr) {
+        if (typeof p === 'string' && p.trim()) return p.trim();
+        const n = p?.sanitized_number || p?.raw_number || p?.number;
+        if (n) return String(n);
+    }
+    return null;
+}
+
+// Extract the primary phone from Apollo's webhook payload. Apollo's actual
+// shape nests phone_numbers inside people[] (verified against the docs:
+// { status, people: [ { phone_numbers: [ { sanitized_number, raw_number } ] } ] }),
+// but the native vs waterfall formats differ and aren't fully documented, so we
+// check every known location and fall back to a recursive scan for ANY
+// phone_numbers array. This makes the extractor robust to whichever shape
+// Apollo actually sends, instead of silently returning null and hanging.
 function extractWaterfallPhone(payload) {
-    if (!payload) return null;
-    // Apollo sends phone_numbers array with {sanitized_number, raw_number, ...}
-    const phoneNumbers = Array.isArray(payload.phone_numbers) ? payload.phone_numbers : [];
-    if (phoneNumbers.length === 0) return null;
-    const first = phoneNumbers[0];
-    return first?.sanitized_number || first?.raw_number || null;
+    if (!payload || typeof payload !== 'object') return null;
+
+    // 1. people[] array (the documented shape) — first person with a number wins.
+    if (Array.isArray(payload.people)) {
+        for (const person of payload.people) {
+            const n = pickFromPhoneArray(person?.phone_numbers);
+            if (n) return n;
+        }
+    }
+    // 2. single person object.
+    const fromPerson = pickFromPhoneArray(payload.person?.phone_numbers);
+    if (fromPerson) return fromPerson;
+    // 3. top-level phone_numbers (older assumption).
+    const fromTop = pickFromPhoneArray(payload.phone_numbers);
+    if (fromTop) return fromTop;
+    // 4. contact subobject.
+    const fromContact = pickFromPhoneArray(payload.contact?.phone_numbers);
+    if (fromContact) return fromContact;
+
+    // 5. Last resort: recursively scan for any phone_numbers array anywhere in
+    // the payload (covers waterfall vendor-nested shapes we haven't seen).
+    let found = null;
+    const seen = new Set();
+    (function scan(node, depth) {
+        if (found || !node || typeof node !== 'object' || depth > 6 || seen.has(node)) return;
+        seen.add(node);
+        if (Array.isArray(node.phone_numbers)) {
+            const n = pickFromPhoneArray(node.phone_numbers);
+            if (n) { found = n; return; }
+        }
+        for (const v of Array.isArray(node) ? node : Object.values(node)) {
+            if (v && typeof v === 'object') scan(v, depth + 1);
+        }
+    })(payload, 0);
+    return found;
 }
 
 // POST /api/apollo/webhook
-// Payload (from Apollo docs):
+// Apollo's actual phone-enrichment webhook payload (verified against docs):
 // {
-//   request_id: "...",
-//   person: {...},
-//   phone_numbers: [{sanitized_number, raw_number, ...}, ...],
-//   status: "success" | "not_found",
-//   ... (metadata)
+//   status: "success",
+//   request_id: "...",                       // waterfall format; top-level
+//   people: [ { id, status, phone_numbers: [ { sanitized_number, raw_number, status_cd } ] } ],
+//   ...metadata (credits_consumed, vendor details, target_fields)
 // }
 router.post('/webhook', async (req, res) => {
     const payload = req.body;
+    // Log the raw payload (truncated) so we can see Apollo's actual waterfall
+    // shape in production — the native vs waterfall formats differ and the docs
+    // are inconsistent. Remove or downgrade once the shape is confirmed stable.
+    const rawForLog = req.rawBody ? req.rawBody.toString('utf8') : JSON.stringify(payload);
+    console.log(`[Apollo] webhook payload (${rawForLog.length}b): ${rawForLog.slice(0, 1500)}`);
     // Extract request_id from the RAW body first (precision-safe), symmetric with
     // how enrichPersonWithWaterfall registers it. Apollo's request_ids are 64-bit
     // integers > Number.MAX_SAFE_INTEGER; if Apollo ever POSTs request_id as a JSON
