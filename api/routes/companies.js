@@ -54,6 +54,8 @@ function companyRowToBase(r) {
         source: r.source ?? null,
         location: (r.lat != null && r.lng != null) ? { lat: r.lat, lng: r.lng } : null,
         scrapedContacts: r.scraped_contacts ?? null,
+        hubspotId: r.hubspot_id || null,
+        hubspotSyncedAt: toMs(r.hubspot_synced_at) || null,
         createdAt: toMs(r.created_at) || 0,
         updatedAt: toMs(r.updated_at) || 0,
         leadsUpdatedAt: toMs(r.leads_updated_at),
@@ -121,6 +123,8 @@ function leadRowToEntry(r) {
         liSummary: r.li_summary ?? null,
         liPosts: r.li_posts ?? null,
         liScrapedAt: toMs(r.li_scraped_at),
+        hubspotId: r.hubspot_id || null,
+        hubspotSyncedAt: toMs(r.hubspot_synced_at) || null,
         addedAt: toMs(r.added_at) || undefined,
     };
 }
@@ -143,6 +147,8 @@ function leadEntryToRow(companyId, l) {
         li_summary: l.liSummary ?? null,
         li_posts: l.liPosts ?? null,
         li_scraped_at: toIso(l.liScrapedAt),
+        hubspot_id: l.hubspotId || null,
+        hubspot_synced_at: toIso(l.hubspotSyncedAt) || null,
         added_at: toIso(l.addedAt) || new Date().toISOString(),
     };
 }
@@ -289,6 +295,10 @@ function migrateCompanyShape(c) {
         const segs = c.source.split(':');
         if (segs.length >= 2 && segs[1]) c.city = segs[1];
     }
+
+    // 4. HubSpot sync-state defaults - legacy records predate these fields.
+    if (c.hubspotId === undefined) c.hubspotId = null;
+    if (c.hubspotSyncedAt === undefined) c.hubspotSyncedAt = null;
 
     return c;
 }
@@ -445,6 +455,10 @@ async function upsertCompany({
                 ? { lat: location.lat, lng: location.lng }
                 : null,
             scrapedContacts: scrapedContacts ? { ...scrapedContacts, extractedAt: now } : null,
+            // HubSpot sync state - set by the /api/hubspot push route. null
+            // until this company has been pushed at least once.
+            hubspotId: null,
+            hubspotSyncedAt: null,
             createdAt: now,
             updatedAt: now,
             leads: [],
@@ -669,6 +683,10 @@ function mergeLeads(priorLeads, incoming, now) {
             liPosts: prior.liPosts != null ? prior.liPosts : (l.liPosts ?? null),
             liScrapedAt: prior.liScrapedAt || l.liScrapedAt || null,
             phoneCheckedAt: prior.phoneCheckedAt || l.phoneCheckedAt || null,
+            // HubSpot sync ids are sticky - a re-search must not wipe the fact
+            // that this lead was already pushed to HubSpot.
+            hubspotId: prior.hubspotId || l.hubspotId || null,
+            hubspotSyncedAt: prior.hubspotSyncedAt || l.hubspotSyncedAt || null,
             addedAt: prior.addedAt || l.addedAt || now,
         };
     });
@@ -738,6 +756,10 @@ async function attachLeads(companyId, leads) {
             liPosts:        prior.liPosts != null ? prior.liPosts : (l.liPosts ?? null),
             liScrapedAt:    prior.liScrapedAt || l.liScrapedAt || null,
             phoneCheckedAt: prior.phoneCheckedAt || l.phoneCheckedAt || null,
+            // HubSpot sync ids are sticky - a re-search must not wipe the fact
+            // that this lead was already pushed to HubSpot.
+            hubspotId:      prior.hubspotId || l.hubspotId || null,
+            hubspotSyncedAt: prior.hubspotSyncedAt || l.hubspotSyncedAt || null,
             addedAt:        prior.addedAt || l.addedAt || now,
         };
     });
@@ -811,6 +833,58 @@ async function listVerticals() {
         if (c.vertical) set.add(c.vertical);
     }
     return Array.from(set).sort();
+}
+
+// ─── HubSpot sync-state write-back ────────────────────────────────────────
+// Persist the HubSpot company id + sync timestamp onto a company after a
+// successful push. Idempotent: re-push just advances hubspotSyncedAt so the
+// "Synced" badge + note-staleness check stay accurate.
+async function setCompanyHubspot(id, { hubspotId = null, syncedAt = null } = {}) {
+    const now = syncedAt || Date.now();
+    if (isEnabled()) {
+        const sb = getClient();
+        const patch = { hubspot_synced_at: new Date(now).toISOString(), updated_at: new Date().toISOString() };
+        if (hubspotId) patch.hubspot_id = hubspotId;
+        const { error } = await sb.from('companies').update(patch).eq('id', id);
+        // Surface a missing-column error loudly - it means migration
+        // 0016_hubspot_sync.sql hasn't been applied to this Supabase project,
+        // which breaks the synced badge + note-dedup. Don't fail the push.
+        if (error) console.warn(`[HubSpot] company sync write-back failed (apply migration 0016?): ${error.message}`);
+        return await getCompanyByIdSupabase(id);
+    }
+    const data = await readAll();
+    const company = data.companies.find(c => c.id === id);
+    if (!company) return null;
+    if (hubspotId) company.hubspotId = hubspotId;
+    company.hubspotSyncedAt = now;
+    company.updatedAt = Date.now();
+    await writeAll(data);
+    return company;
+}
+
+// Persist the HubSpot contact id onto one lead, keyed by apolloId||email
+// (the same identity key attachLeads/mergeLeads dedupe on).
+async function setLeadHubspot(companyId, leadKey, { hubspotId = null, syncedAt = null } = {}) {
+    const now = syncedAt || Date.now();
+    if (isEnabled()) {
+        const sb = getClient();
+        const patch = { hubspot_synced_at: new Date(now).toISOString() };
+        if (hubspotId) patch.hubspot_id = hubspotId;
+        // leadKey is the apolloId when present, else the email.
+        const { error } = await sb.from('leads').update(patch).eq('company_id', companyId)
+            .or(`apollo_id.eq.${leadKey},email.eq.${leadKey}`);
+        if (error) console.warn(`[HubSpot] lead sync write-back failed (apply migration 0016?): ${error.message}`);
+        return true;
+    }
+    const data = await readAll();
+    const company = data.companies.find(c => c.id === companyId);
+    if (!company || !Array.isArray(company.leads)) return null;
+    const lead = company.leads.find(l => (l.apolloId || l.email) === leadKey);
+    if (!lead) return null;
+    if (hubspotId) lead.hubspotId = hubspotId;
+    lead.hubspotSyncedAt = now;
+    await writeAll(data);
+    return lead;
 }
 
 const router = express.Router();
@@ -1204,3 +1278,5 @@ module.exports.listByVertical = listByVertical;
 module.exports.listVerticals = listVerticals;
 module.exports.isDemoRecord = isDemoRecord;
 module.exports.readAll = readAll;
+module.exports.setCompanyHubspot = setCompanyHubspot;
+module.exports.setLeadHubspot = setLeadHubspot;

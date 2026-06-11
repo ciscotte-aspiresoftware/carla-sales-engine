@@ -26,7 +26,8 @@ import { GLASS } from '@/lib/glass'
 import { cn } from '@/lib/utils'
 import { API_BASE } from '@/lib/api-base'
 import { useBackground } from '@/context/background-context'
-import { Image as ImageIcon, Square, MapPinned, Loader2, AlertTriangle, Save, RotateCcw, FileSearch, Sparkles, Linkedin, Scissors, Layers, CheckCircle2 } from 'lucide-react'
+import { getHubspotHealth, type HubspotHealth } from '@/lib/api'
+import { Image as ImageIcon, Square, MapPinned, Loader2, AlertTriangle, Save, RotateCcw, FileSearch, Sparkles, Linkedin, Scissors, Layers, CheckCircle2, CloudUpload, XCircle } from 'lucide-react'
 
 type ZoomEntry = { zoom: number; radiusKm: number }
 type ZoomTier = 'urban' | 'suburban' | 'rural' | 'sparse' | 'airport'
@@ -179,6 +180,8 @@ export default function AdminPage() {
         </>
       )}
 
+      <HubspotCard />
+
       <Card className={cn(GLASS)}>
         <CardContent className="p-6 space-y-5">
           <div className="flex items-start gap-3">
@@ -221,6 +224,93 @@ export default function AdminPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+// ─── HubSpot connection card ───────────────────────────────────────────
+// Read-only status panel. The Private App token lives in .env
+// (HUBSPOT_PRIVATE_APP_TOKEN), not here - this card just reports whether the
+// backend can reach HubSpot and documents the field mapping the push uses.
+function HubspotCard() {
+  const [health, setHealth] = useState<HubspotHealth | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  async function check() {
+    setLoading(true)
+    try { setHealth(await getHubspotHealth()) }
+    catch (e: any) { setHealth({ success: true, connected: false, demo: false, error: e?.message || 'Health check failed' }) }
+    finally { setLoading(false) }
+  }
+  useEffect(() => { check() }, [])
+
+  const connected = !!health?.connected
+  const mapping: Array<[string, string]> = [
+    ['Company name', 'name'],
+    ['Domain (dedupe key)', 'domain'],
+    ['Phone', 'phone'],
+    ['Address (full)', 'address'],
+    ['Verdict + reason', 'icp_summary'],
+    ['Google rating', 'rating'],
+    ['Review count', 'reviews'],
+    ['Vertical', 'vertical'],
+    ['Signals', 'signalssummary'],
+    ['Report + key quotes', 'timeline Note'],
+    ['Contacts (with email)', 'Contact · email/firstname/lastname/jobtitle/phone/hs_linkedin_url'],
+  ]
+
+  return (
+    <Card className={cn(GLASS)}>
+      <CardContent className="p-6 space-y-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500/15 text-orange-600 dark:text-orange-400">
+            <CloudUpload className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg font-semibold">HubSpot</h2>
+              {loading ? (
+                <Badge variant="secondary" className="text-[10px] gap-1"><Loader2 className="h-3 w-3 animate-spin" /> checking…</Badge>
+              ) : connected ? (
+                <Badge variant="secondary" className="text-[10px] gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30">
+                  <CheckCircle2 className="h-3 w-3" /> Connected{health?.portal?.portalId ? ` · ${health.portal.portalId}` : ''}
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[10px] gap-1 bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30">
+                  <XCircle className="h-3 w-3" /> Not connected
+                </Badge>
+              )}
+              {health?.demo && (
+                <Badge variant="secondary" className="text-[10px]">demo mode · pushes are no-ops</Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              One-way push of companies + email-bearing contacts to HubSpot. Set <code className="text-xs">HUBSPOT_PRIVATE_APP_TOKEN</code> in the backend <code className="text-xs">.env</code> to connect. Pushes upsert by domain (company) / email (contact), so re-pushing updates in place.
+            </p>
+            {!connected && !loading && health?.error && (
+              <p className="text-xs text-red-600 dark:text-red-400 mt-1">{health.error}</p>
+            )}
+          </div>
+          <Button size="sm" variant="outline" onClick={check} disabled={loading} className="gap-1.5 shrink-0">
+            <RotateCcw className="h-3.5 w-3.5" /> Re-check
+          </Button>
+        </div>
+
+        <div className="rounded-lg border border-border/60 overflow-hidden">
+          <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground bg-foreground/[0.03]">
+            Field mapping (Atlas → HubSpot)
+          </div>
+          <div className="divide-y divide-border/50">
+            {mapping.map(([atlas, hs]) => (
+              <div key={atlas} className="flex items-center gap-2 px-3 py-1.5 text-xs">
+                <span className="text-muted-foreground w-44 shrink-0">{atlas}</span>
+                <span className="opacity-50">→</span>
+                <code className="text-[11px]">{hs}</code>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

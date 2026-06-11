@@ -20,6 +20,7 @@ import {
   IconBrandLinkedin,
   IconList,
   IconMap2,
+  IconCloudUpload,
 } from '@tabler/icons-react'
 
 const CompaniesMap = lazy(() => import('@/components/database/companies-map'))
@@ -31,7 +32,7 @@ import { CompanyReport } from '@/components/ui/company-report'
 import { CompanyLeads } from '@/components/ui/company-leads'
 import { GLASS, GLASS_SUBTLE } from '@/lib/glass'
 import { cn } from '@/lib/utils'
-import { fetchCompanies, fetchVerticals, fetchPortfolioCompanies, type CompanyRecord, type FetchCompaniesFilters } from '@/lib/api'
+import { fetchCompanies, fetchVerticals, fetchPortfolioCompanies, pushCompanyToHubSpot, pushCompaniesToHubSpot, type CompanyRecord, type FetchCompaniesFilters } from '@/lib/api'
 import { API_BASE } from '@/lib/api-base'
 import { useWorkspace } from '@/context/workspace-context'
 
@@ -84,6 +85,36 @@ export default function DatabasePage() {
   // coordinate). Selected company in map view drives the side drawer.
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Bulk HubSpot push - set of selected company ids + in-flight + last-result
+  // message. Checkbox per row toggles membership; the toolbar button pushes
+  // the whole set best-effort and reports a summary.
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkPushing, setBulkPushing] = useState(false)
+  const [bulkMsg, setBulkMsg] = useState<string | null>(null)
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  async function bulkPush() {
+    if (bulkPushing || selected.size === 0) return
+    setBulkPushing(true); setBulkMsg(null)
+    try {
+      const res = await pushCompaniesToHubSpot(Array.from(selected))
+      const parts = [`Pushed ${res.pushed.length}`]
+      if (res.skipped.length) parts.push(`${res.skipped.length} skipped`)
+      if (res.errors.length) parts.push(`${res.errors.length} failed`)
+      setBulkMsg(parts.join(' · '))
+      setSelected(new Set())
+      load() // refresh so synced badges render
+    } catch (e: any) {
+      setBulkMsg(e?.message || 'Bulk push failed')
+    } finally {
+      setBulkPushing(false)
+    }
+  }
 
   // Filter state. Vertical and ICP are independently selectable; match
   // (qualified/rejected) only kicks in when an ICP is picked because match
@@ -394,6 +425,23 @@ export default function DatabasePage() {
             </Button>
           )}
           <div className="flex-1" />
+          {bulkMsg && (
+            <span className="text-[11px] text-muted-foreground">{bulkMsg}</span>
+          )}
+          {selected.size > 0 && (
+            <Button
+              size="sm"
+              onClick={bulkPush}
+              disabled={bulkPushing}
+              className="h-7 text-xs gap-1.5 bg-orange-600 hover:bg-orange-700 text-white"
+              title="Push the selected companies (+ their email contacts) to HubSpot"
+            >
+              {bulkPushing
+                ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
+                : <IconCloudUpload className="h-3.5 w-3.5" />}
+              {bulkPushing ? 'Pushing…' : `Push ${selected.size} to HubSpot`}
+            </Button>
+          )}
           <span className="text-[11px] text-muted-foreground tabular-nums">
             {visibleCompanies.length} result{visibleCompanies.length === 1 ? '' : 's'}
           </span>
@@ -451,6 +499,8 @@ export default function DatabasePage() {
               onToggle={() => toggleExpand(c.id)}
               onOpen={() => openInSalesAgent(c)}
               onChanged={load}
+              selected={selected.has(c.id)}
+              onToggleSelect={() => toggleSelect(c.id)}
             />
           ))}
         </div>
@@ -655,6 +705,8 @@ function CompanyRow({
   onToggle,
   onOpen,
   onChanged,
+  selected,
+  onToggleSelect,
 }: {
   company: CompanyRecord
   icpFilter: string
@@ -662,7 +714,12 @@ function CompanyRow({
   onToggle: () => void
   onOpen: () => void
   onChanged: () => void
+  selected: boolean
+  onToggleSelect: () => void
 }) {
+  // Per-row HubSpot push - local in-flight + error so rows push independently.
+  const [pushing, setPushing] = useState(false)
+  const [pushErr, setPushErr] = useState<string | null>(null)
   // Classification picker. `c.classification` is whichever ICP wrote last
   // (auto-fanout means a sibling ICP's stricter verdict often overwrites
   // the primary's, even though both verdicts are still stored under
@@ -693,6 +750,20 @@ function CompanyRow({
         onClick={onToggle}
         className="w-full text-left flex items-start gap-3 p-4 hover:bg-foreground/[0.03] transition-colors"
       >
+        {/* Bulk-select checkbox (clickable span, not an <input>, to avoid
+            nesting an interactive element inside the row toggle button). */}
+        <span
+          role="checkbox"
+          aria-checked={selected}
+          onClick={(e) => { e.stopPropagation(); onToggleSelect() }}
+          className={cn(
+            'mt-0.5 h-4 w-4 rounded border flex items-center justify-center cursor-pointer shrink-0 transition-colors',
+            selected ? 'bg-orange-600 border-orange-600 text-white' : 'border-border hover:border-orange-500/60',
+          )}
+          title={selected ? 'Deselect' : 'Select for bulk HubSpot push'}
+        >
+          {selected && <IconCheck className="h-3 w-3" />}
+        </span>
         <div className="mt-0.5 text-muted-foreground">
           {expanded ? <IconChevronDown className="h-4 w-4" /> : <IconChevronRight className="h-4 w-4" />}
         </div>
@@ -718,6 +789,15 @@ function CompanyRow({
             )}
             {sourceType(c.source) === 'scrapingdog-maps' && (
               <Badge variant="outline" className="text-[10px]">via Sourcing</Badge>
+            )}
+            {c.hubspotId && (
+              <Badge
+                variant="secondary"
+                className="text-[10px] bg-orange-500/15 text-orange-700 dark:text-orange-300 gap-1"
+                title={c.hubspotSyncedAt ? `Last synced ${new Date(c.hubspotSyncedAt).toLocaleString()}` : 'Synced to HubSpot'}
+              >
+                <IconCloudUpload className="h-2.5 w-2.5" /> HubSpot
+              </Badge>
             )}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
@@ -761,6 +841,29 @@ function CompanyRow({
             </span>
           </div>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={async (e) => {
+            e.stopPropagation()
+            if (pushing) return
+            setPushing(true); setPushErr(null)
+            try {
+              await pushCompanyToHubSpot(c.id)
+              onChanged()
+            } catch (err: any) {
+              setPushErr(err?.message || 'Push failed')
+            } finally {
+              setPushing(false)
+            }
+          }}
+          disabled={pushing || !c.domain}
+          className="gap-1 h-7 text-xs shrink-0"
+          title={pushErr || (!c.domain ? 'No domain - cannot dedupe in HubSpot' : 'Push this company + email contacts to HubSpot')}
+        >
+          {pushing ? <IconLoader2 className="h-3 w-3 animate-spin" /> : <IconCloudUpload className="h-3 w-3" />}
+          {c.hubspotId ? 'Re-push' : 'HubSpot'}
+        </Button>
         <Button
           size="sm"
           variant="outline"

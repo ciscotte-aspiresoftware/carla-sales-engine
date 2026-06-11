@@ -35,6 +35,7 @@ const discoverRoute = require('./routes/discover');
 const activityRoute = require('./routes/activity');
 const costsRoute = require('./routes/costs');
 const sequencesRoute = require('./routes/sequences');
+const hubspotRoute = require('./routes/hubspot');
 const { startCron: startSweepCron } = require('./utils/grid-cron');
 const reclassifyWorker = require('./utils/reclassify-worker');
 const reclassifyJobs = require('./utils/reclassify-jobs');
@@ -64,6 +65,7 @@ app.get('/api/health', (req, res) => {
             gemini: !!process.env.GEMINI_API_KEY,
             apollo: !!process.env.APOLLO_API_KEY,
             scrapingdog: !!process.env.SCRAPINGDOG_API_KEY,
+            hubspot: !!process.env.HUBSPOT_PRIVATE_APP_TOKEN,
         },
     });
 });
@@ -105,6 +107,11 @@ app.use('/api/discover', discoverRoute);
 app.use('/api/activity', activityRoute);
 app.use('/api/costs', costsRoute);
 app.use('/api/sequences', sequencesRoute);
+// HubSpot - one-way push of companies + qualified contacts to HubSpot CRM via
+// a Private App token (HUBSPOT_PRIVATE_APP_TOKEN). Idempotent: dedupes by
+// domain (company) / email (contact) and writes the HubSpot ids back onto the
+// Atlas records. Companion UI: per-company button on Accounts/Database pages.
+app.use('/api/hubspot', hubspotRoute);
 
 // 404 fallback that returns JSON instead of Express's default HTML so
 // the frontend's fetch handlers always parse cleanly.

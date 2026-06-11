@@ -40,12 +40,14 @@ import {
   IconMail,
   IconMailForward,
   IconCloudDownload,
+  IconCloudUpload,
 } from '@tabler/icons-react'
 import {
   fetchCompanies,
   submitReview,
   clearReview,
   recoverPlaceDetails,
+  pushCompanyToHubSpot,
   type CompanyRecord,
   type Review,
   type Classification,
@@ -516,6 +518,9 @@ function AccountCard({
   // adjacent cards can run concurrently without their spinners aliasing.
   const [recovering, setRecovering] = useState(false)
   const [recoverErr, setRecoverErr] = useState<string | null>(null)
+  // HubSpot push - per-card loading + error so two cards push independently.
+  const [pushing, setPushing] = useState(false)
+  const [pushErr, setPushErr] = useState<string | null>(null)
   const cls = (company.classifications?.[icpId] || company.classification || {}) as Classification & { city?: string; country?: string; rating?: number; reviews?: number; title?: string; phone?: string; address?: string; signals?: string[]; fleetSizeHint?: string; fleetVehicleTypes?: string[]; bookingPlatformHints?: string[]; tagline?: string }
   const review: Review | undefined = company.reviews?.[icpId]
 
@@ -541,6 +546,11 @@ function AccountCard({
               )}
               {company.vertical && (
                 <Badge variant="secondary" className="text-[10px]">{company.vertical}</Badge>
+              )}
+              {company.hubspotId && (
+                <Badge variant="secondary" className="text-[10px] bg-orange-500/15 text-orange-700 dark:text-orange-300" title={company.hubspotSyncedAt ? `Last synced ${new Date(company.hubspotSyncedAt).toLocaleString()}` : 'Synced to HubSpot'}>
+                  <IconCloudUpload className="h-2.5 w-2.5 mr-1" /> HubSpot
+                </Badge>
               )}
             </div>
             <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
@@ -741,6 +751,39 @@ function AccountCard({
               <IconMailForward className="h-3.5 w-3.5 mr-1.5" />
               Sequence
             </Button>
+          )}
+          {/* Push to HubSpot - upserts this company (dedupe by domain) with its
+              verdict/rating/signals + a report note, and every contact that
+              has an email. Idempotent: re-push updates in place. Primary on
+              Confirmed; available (outline) on Pending too. */}
+          {lane !== 'rejected' && lane !== 'needs-check' && (
+            <Button
+              size="sm"
+              variant={lane === 'confirmed' && !company.hubspotId ? 'default' : 'outline'}
+              className={lane === 'confirmed' && !company.hubspotId ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''}
+              disabled={pushing}
+              onClick={async () => {
+                if (pushing) return
+                setPushing(true); setPushErr(null)
+                try {
+                  await pushCompanyToHubSpot(company.id)
+                  onChanged() // refresh so the HubSpot badge + sticky state render
+                } catch (e: any) {
+                  setPushErr(e?.message || 'Push failed')
+                } finally {
+                  setPushing(false)
+                }
+              }}
+              title="Push this company + its email contacts to HubSpot (dedupes by domain/email; re-push updates in place)"
+            >
+              {pushing
+                ? <IconLoader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                : <IconCloudUpload className="h-3.5 w-3.5 mr-1.5" />}
+              {pushing ? 'Pushing…' : company.hubspotId ? 'Re-push' : 'Push to HubSpot'}
+            </Button>
+          )}
+          {pushErr && (
+            <span className="text-[10px] text-red-600 dark:text-red-400">{pushErr}</span>
           )}
           <div className="flex-1" />
           <Button size="sm" variant="ghost" onClick={() => setExpanded((v) => !v)}>

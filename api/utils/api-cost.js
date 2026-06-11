@@ -109,6 +109,8 @@ const SERVICE_UNIT_USD = {
     apollo_search:    0.0,     // search doesn't burn enrichment credits
     apify_profile:    0.004,   // $/profile (HarvestAPI actor: $4/1k profiles)
     apify_post:       0.003,   // $/post (supreme_coder actor: $3/1k posts)
+    hubspot:          0.0,     // subscription-priced, no per-call charge - rate is 0 so the
+                               // Costs page tracks HubSpot call VOLUME (units) without inflating $ spend
 };
 
 // ─── Flat monthly infrastructure subscriptions ─────────────────────────

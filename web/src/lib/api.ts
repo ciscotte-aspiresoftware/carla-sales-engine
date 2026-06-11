@@ -130,6 +130,10 @@ export interface Lead {
   // Stamped by attachLeads on first insert. Older leads (pre-stamp) won't
   // have this - UI falls back to companyCreatedAt with a `~` prefix.
   addedAt?: number
+  // HubSpot sync state - set by the /api/hubspot push when this lead (a
+  // contact with an email) was upserted into HubSpot. Sticky across re-search.
+  hubspotId?: string | null
+  hubspotSyncedAt?: number | null
 }
 
 // Returned by GET /api/leads - Lead + flat company-context fields tacked
@@ -492,6 +496,54 @@ export interface CompanyRecord {
   updatedAt: number
   leads: Array<Lead & { enriched?: boolean; enrichedAt?: number }>
   leadsUpdatedAt?: number
+  // HubSpot sync state - set by the /api/hubspot push route. hubspotId is the
+  // HubSpot company object id (null until first push); hubspotSyncedAt is the
+  // last successful push time. The Accounts/Database pages render a "Synced"
+  // badge off these.
+  hubspotId?: string | null
+  hubspotSyncedAt?: number | null
+}
+
+// ─── HubSpot push ──────────────────────────────────────────────────────
+export interface HubspotHealth {
+  success: true
+  connected: boolean
+  demo: boolean
+  portal?: { portalId?: string; uiDomain?: string; timeZone?: string }
+  error?: string
+}
+
+export interface HubspotPushResult {
+  success: true
+  companyId: string
+  hubspotId: string
+  created: boolean
+  contacts: { pushed: number; withoutEmail: number; failed: number; errors: Array<{ email: string; error: string }> }
+  note: { created: boolean }
+  errors: string[]
+}
+
+export interface HubspotBulkResult {
+  success: true
+  pushed: Array<{ id: string; hubspotId: string; contacts: number }>
+  skipped: Array<{ id: string; reason: string }>
+  errors: Array<{ id: string; error: string }>
+  total: number
+}
+
+// Connection status for the Admin HubSpot panel (token presence + account ping).
+export function getHubspotHealth() {
+  return getJson<HubspotHealth>('/api/hubspot/health')
+}
+
+// Push one company (+ its email-bearing contacts + a report note) to HubSpot.
+export function pushCompanyToHubSpot(companyId: string) {
+  return postJson<HubspotPushResult>(`/api/hubspot/push/${encodeURIComponent(companyId)}`, {})
+}
+
+// Bulk push. Best-effort per company; returns pushed/skipped/errors summary.
+export function pushCompaniesToHubSpot(companyIds: string[]) {
+  return postJson<HubspotBulkResult>('/api/hubspot/push', { companyIds })
 }
 
 // Filters supported by GET /api/companies. All optional; AND-combined.
