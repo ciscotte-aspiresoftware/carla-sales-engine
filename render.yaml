@@ -42,9 +42,21 @@ services:
         sync: false
       - key: APIFY_API_TOKEN
         sync: false
+      # HubSpot Private App / account service-key token for the CRM push
+      # (/api/hubspot). Set the secret in the dashboard.
+      - key: HUBSPOT_PRIVATE_APP_TOKEN
+        sync: false
       # ─── Runtime tunables ─────────────────────────────────────────────────
       - key: NODE_ENV
         value: production
+      # Demo/Real mode BOOT default. Render's filesystem is ephemeral, so the
+      # in-app toggle (data/mode.json) resets to demo on every cold start -
+      # which silently no-ops real pushes/sweeps. Pin "real" here so the
+      # service always boots ready to write. NOTE: "real" also arms the sweep
+      # cron + lets Sales Agent spend Apollo/Firecrawl/OpenAI credits; set
+      # BLUEBIRD_SWEEP_TICK_MS=0 below if you want push/leads WITHOUT auto-sweeps.
+      - key: BLUEBIRD_MODE
+        value: "real"
       # Sweep cron tick. Default in code is 5s; 10 min is safer for production
       # credit spend. Set to 0 to disable the auto-sweep loop entirely.
       - key: BLUEBIRD_SWEEP_TICK_MS

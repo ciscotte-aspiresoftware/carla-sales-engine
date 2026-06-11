@@ -7,6 +7,15 @@
 //
 // State lives in data/mode.json so a server restart preserves the operator's
 // last choice. There's only one process; cached in memory after first read.
+//
+// BLUEBIRD_MODE env override: on hosts with an EPHEMERAL filesystem (e.g.
+// Render's free plan, which wipes data/ on every cold start / redeploy), the
+// mode file is lost on restart and the app would silently revert to "demo" -
+// making real pushes / sweeps no-op. Set BLUEBIRD_MODE=real|demo to pin the
+// BOOT default. The in-app toggle still works within a running instance (it
+// writes the file, which wins while present); the env value is just the
+// fallback used when no file exists - which, on an ephemeral host, is every
+// boot. Leave it unset for the original file-only behaviour.
 
 const fs = require('fs');
 const path = require('path');
@@ -15,6 +24,12 @@ const FILE = path.resolve(__dirname, '..', 'data', 'mode.json');
 const VALID = new Set(['demo', 'real']);
 
 let cached = null;
+
+// Boot default: BLUEBIRD_MODE when it's a valid value, else 'demo'.
+function envDefault() {
+    const m = String(process.env.BLUEBIRD_MODE || '').toLowerCase();
+    return VALID.has(m) ? m : 'demo';
+}
 
 function load() {
     if (cached) return cached;
@@ -27,7 +42,7 @@ function load() {
             }
         }
     } catch { /* fall through to default */ }
-    cached = { mode: 'demo', updatedAt: 0 };
+    cached = { mode: envDefault(), updatedAt: 0 };
     return cached;
 }
 
