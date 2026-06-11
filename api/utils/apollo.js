@@ -68,12 +68,22 @@ function getTitleTier(title) {
 // for - those would need the paid reveal_phone_number=true + webhook flow).
 function extractPhone(person) {
     if (!person) return null;
+    // Try top-level phone_numbers first (from /mixed_people/api_search)
+    if (Array.isArray(person.phone_numbers) && person.phone_numbers.length > 0) {
+        const first = person.phone_numbers[0];
+        const phone = first?.sanitized_number || first?.raw_number;
+        if (phone) return String(phone);
+    }
+    // Fall back to contact subobject (from /people/match enrichment)
     const contact = person.contact || {};
     if (contact.sanitized_phone) return String(contact.sanitized_phone);
     if (Array.isArray(contact.phone_numbers) && contact.phone_numbers.length > 0) {
         const first = contact.phone_numbers[0];
         return first?.sanitized_number || first?.raw_number || null;
     }
+    // Last resort: organization phone
+    if (person.organization?.primary_phone?.number) return String(person.organization.primary_phone.number);
+    if (person.organization?.phone) return String(person.organization.phone);
     return null;
 }
 
@@ -159,14 +169,16 @@ async function enrichPersonWithWaterfall(apolloId, { companyId, leadKey, webhook
             }
         );
 
-        const requestId = String(response.data?.request_id);
+        // Apollo returns request_id as JSON number, which loses precision in JavaScript.
+        // Log both number and string form to diagnose mismatch.
+        const rawRequestId = response.data?.request_id;
+        const requestId = String(rawRequestId);
         if (requestId === 'undefined' || !requestId) {
             console.warn('[Apollo] waterfall /people/match returned no request_id', response.data);
             return null;
         }
 
         // Register this request so when Apollo's webhook fires we know which lead to update.
-        // Convert to string to avoid precision loss on large numeric IDs.
         registerPendingEnrichment(requestId, { apolloId, companyId, leadKey });
 
         recordUsage({
@@ -178,7 +190,7 @@ async function enrichPersonWithWaterfall(apolloId, { companyId, leadKey, webhook
             metadata: { apolloId, requestId },
         });
 
-        console.log(`[Apollo] waterfall initiated for ${apolloId}: request_id=${requestId}`);
+        console.log(`[Apollo] waterfall initiated for ${apolloId}: request_id=${requestId} (raw type: ${typeof rawRequestId})`);
 
         // Return a marker that phone enrichment is pending — the webhook will update it.
         return {

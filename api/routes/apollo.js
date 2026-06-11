@@ -30,9 +30,10 @@ function extractWaterfallPhone(payload) {
 // }
 router.post('/webhook', async (req, res) => {
     const payload = req.body;
-    const requestId = payload?.request_id;
+    const rawRequestId = payload?.request_id;
+    const requestId = String(rawRequestId);
 
-    if (!requestId) {
+    if (!requestId || requestId === 'undefined') {
         console.warn('[Apollo] webhook received without request_id');
         return res.status(400).json({ success: false, error: 'request_id required' });
     }
@@ -42,7 +43,7 @@ router.post('/webhook', async (req, res) => {
     if (!pending) {
         // Request not found (expired, never registered, or duplicate). Not an error—
         // just means we discarded it or this is a late/duplicate webhook fire.
-        console.warn(`[Apollo] webhook request_id ${requestId} not in pending map`);
+        console.warn(`[Apollo] webhook request_id ${requestId} (raw type: ${typeof rawRequestId}, raw: ${rawRequestId}) not in pending map`);
         return res.status(200).json({ success: true, message: 'request not in pending map' });
     }
 
