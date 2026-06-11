@@ -50,7 +50,16 @@ const PORT = process.env.PORT || process.env.CARLA_API_PORT || 3001;
 // Permissive CORS for the demo - frontend on Vite dev server can reach us
 // from any localhost port without a custom config.
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: '5mb' }));
+// Capture the raw request body alongside the parsed JSON. The Apollo webhook
+// (api/routes/apollo.js) needs the raw text to extract request_id as an exact
+// string: Apollo's request_ids are 64-bit integers that exceed
+// Number.MAX_SAFE_INTEGER, and JSON.parse silently truncates them. Stashing the
+// buffer here lets the webhook regex it out precisely without changing parsing
+// for every other route.
+app.use(express.json({
+    limit: '5mb',
+    verify: (req, _res, buf) => { req.rawBody = buf; },
+}));
 
 // Quick liveness check so the frontend can show a "backend is up" indicator
 // if we ever want one. Also useful for debugging port conflicts.

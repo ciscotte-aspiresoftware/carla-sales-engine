@@ -227,10 +227,16 @@ export default function LeadsPage() {
           if (attempts > maxAttempts) {
             clearInterval(pollInterval)
             setEnrichingPhone(prev => { const next = new Set(prev); next.delete(key); return next })
+            addToast(`⏱ Phone reveal timed out for ${lead.firstName} ${lead.lastName || ''} — try again later`, 'info', 5000)
             return
           }
           try {
-            const updated = await fetch(`${API_BASE}/api/leads?companyId=${lead.companyId}&search=${lead.apolloId}`)
+            // Fetch this company's leads (NOT a text search — the /api/leads
+            // ?search filter matches name/title/email/company only, never
+            // apolloId, so passing the apolloId as `search` returned zero rows
+            // and the poll never detected the saved phone). Find by apolloId
+            // client-side instead.
+            const updated = await fetch(`${API_BASE}/api/leads?companyId=${lead.companyId}`)
               .then(r => r.json())
               .then(r => (r.leads || []).find((l: any) => l.apolloId === lead.apolloId))
             if (updated?.phone && updated.phone !== lead.phone) {
@@ -244,6 +250,19 @@ export default function LeadsPage() {
             }
           } catch (e) { /* silently ignore poll errors */ }
         }, 5000)
+      } else {
+        // Endpoint returned without initiating a waterfall (e.g. phone already
+        // on file, or nothing to reveal). Clear the spinner so it never hangs,
+        // and surface a one-shot note when no phone came back.
+        setEnrichingPhone(prev => { const next = new Set(prev); next.delete(key); return next })
+        if (res.lead?.phone) {
+          setLeads(prev => prev.map(l => {
+            if (l.companyId !== lead.companyId || l.apolloId !== lead.apolloId) return l
+            return { ...l, ...res.lead }
+          }))
+        } else if (res.phoneFound === false) {
+          setPhoneEmptyNote(prev => ({ ...prev, [key]: true }))
+        }
       }
     } catch (err: any) {
       setRowError(prev => ({ ...prev, [key]: err.message || 'Phone reveal failed' }))

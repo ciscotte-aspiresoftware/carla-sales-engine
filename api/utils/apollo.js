@@ -68,10 +68,14 @@ function getTitleTier(title) {
 // for - those would need the paid reveal_phone_number=true + webhook flow).
 function extractPhone(person) {
     if (!person) return null;
-    // Try top-level phone_numbers first (from /mixed_people/api_search)
+    // Try top-level phone_numbers first (from /mixed_people/api_search).
+    // Field naming varies across Apollo endpoints, so accept the known variants
+    // (sanitized_number/raw_number/number) and a bare string element.
     if (Array.isArray(person.phone_numbers) && person.phone_numbers.length > 0) {
         const first = person.phone_numbers[0];
-        const phone = first?.sanitized_number || first?.raw_number;
+        const phone = typeof first === 'string'
+            ? first
+            : (first?.sanitized_number || first?.raw_number || first?.number);
         if (phone) return String(phone);
     }
     // Fall back to contact subobject (from /people/match enrichment)
@@ -166,15 +170,25 @@ async function enrichPersonWithWaterfall(apolloId, { companyId, leadKey, webhook
                     'Cache-Control': 'no-cache',
                     'X-Api-Key': APOLLO_API_KEY,
                 },
+                // CRITICAL: Apollo returns request_id as a JSON *number* that exceeds
+                // Number.MAX_SAFE_INTEGER (e.g. -8241163677913785796). The default
+                // JSON.parse truncates it (→ -8241163677913785000, last digits lost),
+                // but Apollo's webhook sends the SAME id back as a full-precision
+                // *string*. Truncated-number vs full-string can never match, so the
+                // webhook lands on a lead we never registered and the reveal hangs
+                // forever. Keep the body as raw text so we can pull request_id out as
+                // an exact string BEFORE any numeric parse happens.
+                transformResponse: [(raw) => raw],
             }
         );
 
-        // Apollo returns request_id as JSON number, which loses precision in JavaScript.
-        // Log both number and string form to diagnose mismatch.
-        const rawRequestId = response.data?.request_id;
-        const requestId = String(rawRequestId);
-        if (requestId === 'undefined' || !requestId) {
-            console.warn('[Apollo] waterfall /people/match returned no request_id', response.data);
+        const rawBody = typeof response.data === 'string' ? response.data : '';
+        // Extract request_id as an exact string straight from the raw JSON text.
+        // Matches both quoted ("request_id":"123") and unquoted ("request_id":123) forms.
+        const ridMatch = /"request_id"\s*:\s*"?(-?\d+)"?/.exec(rawBody);
+        const requestId = ridMatch ? ridMatch[1] : null;
+        if (!requestId) {
+            console.warn('[Apollo] waterfall /people/match returned no request_id', rawBody.slice(0, 500));
             return null;
         }
 
@@ -190,7 +204,7 @@ async function enrichPersonWithWaterfall(apolloId, { companyId, leadKey, webhook
             metadata: { apolloId, requestId },
         });
 
-        console.log(`[Apollo] waterfall initiated for ${apolloId}: request_id=${requestId} (raw type: ${typeof rawRequestId})`);
+        console.log(`[Apollo] waterfall initiated for ${apolloId}: request_id=${requestId}`);
 
         // Return a marker that phone enrichment is pending — the webhook will update it.
         return {

@@ -30,8 +30,15 @@ function extractWaterfallPhone(payload) {
 // }
 router.post('/webhook', async (req, res) => {
     const payload = req.body;
-    const rawRequestId = payload?.request_id;
-    const requestId = String(rawRequestId);
+    // Extract request_id from the RAW body first (precision-safe), symmetric with
+    // how enrichPersonWithWaterfall registers it. Apollo's request_ids are 64-bit
+    // integers > Number.MAX_SAFE_INTEGER; if Apollo ever POSTs request_id as a JSON
+    // number, express.json's JSON.parse truncates it and the parsed value can never
+    // match the registered string key. The raw regex avoids that entirely. Falls
+    // back to the parsed value only if the raw buffer is unavailable.
+    const rawBody = req.rawBody ? req.rawBody.toString('utf8') : '';
+    const ridMatch = /"request_id"\s*:\s*"?(-?\d+)"?/.exec(rawBody);
+    const requestId = ridMatch ? ridMatch[1] : (payload?.request_id != null ? String(payload.request_id) : '');
 
     if (!requestId || requestId === 'undefined') {
         console.warn('[Apollo] webhook received without request_id');
@@ -43,7 +50,7 @@ router.post('/webhook', async (req, res) => {
     if (!pending) {
         // Request not found (expired, never registered, or duplicate). Not an error—
         // just means we discarded it or this is a late/duplicate webhook fire.
-        console.warn(`[Apollo] webhook request_id ${requestId} (raw type: ${typeof rawRequestId}, raw: ${rawRequestId}) not in pending map`);
+        console.warn(`[Apollo] webhook request_id ${requestId} not in pending map`);
         return res.status(200).json({ success: true, message: 'request not in pending map' });
     }
 

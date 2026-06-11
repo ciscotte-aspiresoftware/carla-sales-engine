@@ -703,14 +703,34 @@ async function attachLeads(companyId, leads) {
         const sb = getClient();
         const now = Date.now();
         const { data: comp } = await sb.from('companies').select('id').eq('id', companyId).maybeSingle();
-        if (!comp) return null;
+        if (!comp) {
+            // The frontend still shows the search results (leads.js falls back to
+            // the freshly-searched `tagged` array when attachLeads returns null),
+            // so a missing company row silently loses the data on reload. Surface
+            // it loudly instead of swallowing it.
+            console.error(`[Leads] attachLeads: company ${companyId} not found in Supabase — ${(leads || []).length} lead(s) NOT persisted`);
+            return null;
+        }
         const { data: priorRows } = await sb.from('leads').select('*').eq('company_id', companyId);
         const prior = (priorRows || []).map(leadRowToEntry);
         const merged = mergeLeads(prior, leads, now);
         // Replace this company's lead set: clear then re-insert the merged
         // list (small N per company; keeps the row set exactly in sync).
-        await sb.from('leads').delete().eq('company_id', companyId);
-        if (merged.length) await sb.from('leads').insert(merged.map((l) => leadEntryToRow(companyId, l)));
+        const { error: delErr } = await sb.from('leads').delete().eq('company_id', companyId);
+        if (delErr) {
+            console.error(`[Leads] attachLeads: delete failed for companyId=${companyId}:`, delErr.message);
+            throw new Error(`Failed to clear leads: ${delErr.message}`);
+        }
+        if (merged.length) {
+            const { error: insErr } = await sb.from('leads').insert(merged.map((l) => leadEntryToRow(companyId, l)));
+            if (insErr) {
+                // Without this throw the insert failure was invisible: the route
+                // returned the in-memory search results, the UI showed the phone,
+                // and the reload came back empty because nothing was written.
+                console.error(`[Leads] attachLeads: insert failed for companyId=${companyId} (${merged.length} leads):`, insErr.message);
+                throw new Error(`Failed to persist ${merged.length} leads: ${insErr.message}`);
+            }
+        }
         await touchCompany(sb, companyId, { leads_updated_at: new Date(now).toISOString() });
         return await getCompanyByIdSupabase(companyId);
     }
