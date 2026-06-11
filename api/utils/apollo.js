@@ -159,13 +159,14 @@ async function enrichPersonWithWaterfall(apolloId, { companyId, leadKey, webhook
             }
         );
 
-        const requestId = response.data?.request_id;
-        if (!requestId) {
+        const requestId = String(response.data?.request_id);
+        if (requestId === 'undefined' || !requestId) {
             console.warn('[Apollo] waterfall /people/match returned no request_id', response.data);
             return null;
         }
 
         // Register this request so when Apollo's webhook fires we know which lead to update.
+        // Convert to string to avoid precision loss on large numeric IDs.
         registerPendingEnrichment(requestId, { apolloId, companyId, leadKey });
 
         recordUsage({
