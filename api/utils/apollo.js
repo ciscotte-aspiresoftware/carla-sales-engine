@@ -63,7 +63,7 @@ async function enrichPerson(apolloId) {
     try {
         const response = await axios.post(
             'https://api.apollo.io/api/v1/people/match',
-            { id: apolloId, reveal_personal_emails: true, reveal_phone_number: true },
+            { id: apolloId, reveal_personal_emails: true },
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -93,8 +93,10 @@ async function enrichPerson(apolloId) {
             email: person.email || null,
             emailStatus: person.email_status || null,
             linkedinUrl: person.linkedin_url || null,
-            // Phone is gated by reveal_phone_number flag; included when set.
-            // For mobiles Apollo hasn't seen, this stays null.
+            // Apollo returns whatever phone it has on file in the standard
+            // match response (no reveal_phone_number flag needed for these).
+            // For mobiles Apollo hasn't seen, this stays null and the caller
+            // would need the webhook-based reveal flow to chase them.
             phone: extractPhone(person),
         };
     } catch (error) {
