@@ -27,6 +27,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CopyEmail } from '@/components/ui/copy-email'
+import { ToastContainer, addToast } from '@/components/ui/toast'
+import { LeadStatusBadges } from '@/components/ui/lead-status-badges'
 import { GLASS, GLASS_SUBTLE } from '@/lib/glass'
 import { cn } from '@/lib/utils'
 import {
@@ -211,14 +213,40 @@ export default function LeadsPage() {
     setPhoneEmptyNote(prev => { const { [key]: _drop, ...rest } = prev; return rest })
     try {
       const res = await enrichLeadPhone(lead.companyId, lead.apolloId)
-      setLeads(prev => prev.map(l => {
-        if (l.companyId !== lead.companyId || l.apolloId !== lead.apolloId) return l
-        return { ...l, ...res.lead }
-      }))
-      if (!res.phoneFound) setPhoneEmptyNote(prev => ({ ...prev, [key]: true }))
+
+      // Waterfall enrichment is async - Apollo will enrich in background and
+      // POST the result to our webhook. Poll for the phone to arrive (~minutes).
+      if (res.waterfall_pending) {
+        addToast(`📱 Phone reveal in progress for ${lead.firstName} ${lead.lastName || ''}`, 'info', 5000)
+
+        // Poll every 5s for up to 5 minutes for the phone to arrive
+        const maxAttempts = 60
+        let attempts = 0
+        const pollInterval = setInterval(async () => {
+          attempts++
+          if (attempts > maxAttempts) {
+            clearInterval(pollInterval)
+            setEnrichingPhone(prev => { const next = new Set(prev); next.delete(key); return next })
+            return
+          }
+          try {
+            const updated = await fetch(`${API_BASE}/api/leads?companyId=${lead.companyId}&search=${lead.apolloId}`)
+              .then(r => r.json())
+              .then(r => (r.leads || []).find((l: any) => l.apolloId === lead.apolloId))
+            if (updated?.phone && updated.phone !== lead.phone) {
+              clearInterval(pollInterval)
+              setLeads(prev => prev.map(l => {
+                if (l.companyId !== lead.companyId || l.apolloId !== lead.apolloId) return l
+                return { ...l, ...updated }
+              }))
+              addToast(`✅ Phone number revealed for ${lead.firstName} ${lead.lastName || ''}`, 'success', 4000)
+              setEnrichingPhone(prev => { const next = new Set(prev); next.delete(key); return next })
+            }
+          } catch (e) { /* silently ignore poll errors */ }
+        }, 5000)
+      }
     } catch (err: any) {
-      setRowError(prev => ({ ...prev, [key]: err.message || 'Phone enrich failed' }))
-    } finally {
+      setRowError(prev => ({ ...prev, [key]: err.message || 'Phone reveal failed' }))
       setEnrichingPhone(prev => { const next = new Set(prev); next.delete(key); return next })
     }
   }
@@ -398,6 +426,7 @@ export default function LeadsPage() {
           })}
         </div>
       )}
+      <ToastContainer />
     </div>
   )
 }
@@ -473,7 +502,13 @@ function LeadRow({
                 </>
               )}
             </div>
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-2.5 mt-1 text-xs text-muted-foreground flex-wrap">
+              <LeadStatusBadges
+                email={lead.email}
+                phone={lead.phone}
+                linkedinUrl={lead.linkedinUrl}
+                phoneChecking={enrichingPhone}
+              />
               {lead.vertical && (
                 <Badge variant="outline" className="text-[10px] h-4 px-1.5">{lead.vertical}</Badge>
               )}
@@ -595,12 +630,12 @@ function LeadRow({
                 onClick={onEnrichPhone}
                 disabled={enrichingPhone}
                 className="gap-1.5 h-7 text-xs"
-                title="Get phone number from Apollo (1 credit). Empty if Apollo has no phone on file for this contact."
+                title="Reveal phone number via Apollo waterfall. Apollo enriches in background (~minutes)."
               >
                 {enrichingPhone
                   ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
                   : <IconPhone className="h-3.5 w-3.5" />}
-                {enrichingPhone ? 'Checking…' : 'Get phone'}
+                {enrichingPhone ? 'Revealing…' : 'Reveal phone'}
               </Button>
             )}
           </div>

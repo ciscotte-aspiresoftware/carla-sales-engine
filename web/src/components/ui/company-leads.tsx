@@ -1,6 +1,7 @@
 import { IconCheck, IconBrandLinkedin } from '@tabler/icons-react'
 import { Badge } from '@/components/ui/badge'
 import { CopyEmail } from '@/components/ui/copy-email'
+import { LeadStatusBadges } from '@/components/ui/lead-status-badges'
 import type { CompanyRecord } from '@/lib/api'
 
 // Cached Apollo leads attached to a company - the decision-makers found via
@@ -32,8 +33,11 @@ export function CompanyLeads({ leads }: { leads?: CompanyRecord['leads'] | null 
                   </Badge>
                 )}
               </div>
-              <div className="text-muted-foreground">{l.title || '-'}</div>
-              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground mt-0.5">
+              <div className="text-muted-foreground text-xs">{l.title || '-'}</div>
+              <div className="flex items-center gap-2 mt-1.5">
+                <LeadStatusBadges email={l.email} phone={l.phone} linkedinUrl={l.linkedinUrl} />
+              </div>
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground mt-1">
                 {l.email && (
                   <span className="inline-flex items-center">
                     <CopyEmail email={l.email} />

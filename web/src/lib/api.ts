@@ -237,7 +237,14 @@ export function enrichLead(companyId: string, apolloId: string) {
 // field is persisted - leaves email/LI untouched. `phoneFound` tells the UI
 // whether Apollo actually had a phone on file (false = "we tried, nothing").
 export function enrichLeadPhone(companyId: string, apolloId: string) {
-  return postJson<{ success: true; lead: Lead; phoneFound: boolean; demo?: boolean }>(
+  return postJson<{
+    success: true;
+    waterfall_pending?: boolean;
+    request_id?: string;
+    message?: string;
+    lead?: Lead;
+    phoneFound?: boolean;
+  }>(
     `/api/leads/${encodeURIComponent(companyId)}/${encodeURIComponent(apolloId)}/enrich-phone`,
     {},
   )
