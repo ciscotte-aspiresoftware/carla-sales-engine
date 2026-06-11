@@ -1266,6 +1266,8 @@ router.post('/:id/override-classification', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.readAll = readAll;
+module.exports.writeAll = writeAll;
 module.exports.upsertCompany = upsertCompany;
 module.exports.attachLeads = attachLeads;
 module.exports.upsertLeadInCompany = upsertLeadInCompany;
