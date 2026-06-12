@@ -45,6 +45,11 @@ function icpRowToObj(r) {
         excludeCompanies: r.exclude_companies || [], extraNotes: r.extra_notes || '',
         classifyPrompt: r.classify_prompt || '', useCustomPrompt: !!r.use_custom_prompt,
         reportEnabled: !!r.report_enabled, reportTemplate: r.report_template || '',
+        // When ON, the sweep cross-references Apollo for people at each
+        // is_match company: attach them as leads, or auto-reject if none.
+        // Read is safe before migration 0017 - column-missing returns
+        // undefined and we coerce to false.
+        autoAssociateLeads: !!r.auto_associate_leads,
     };
 }
 function icpObjToRow(i) {
@@ -71,6 +76,12 @@ function icpObjToRow(i) {
     // use city overrides.
     if (i.cityTerms && typeof i.cityTerms === 'object' && Object.keys(i.cityTerms).length > 0) {
         row.city_terms = i.cityTerms;
+    }
+    // Same conditional pattern: only write auto_associate_leads when truthy,
+    // so a deploy before migration 0017 still saves ICPs that don't enable it.
+    // An ICP that DOES enable it fails loudly until the migration is applied.
+    if (i.autoAssociateLeads) {
+        row.auto_associate_leads = true;
     }
     return row;
 }
@@ -532,6 +543,7 @@ function validateIcp(data, { existingId = null } = {}) {
     // enabled falls back to the default at generation time.
     const reportEnabled = !!data.reportEnabled;
     const reportTemplate = String(data.reportTemplate || '').trim();
+    const autoAssociateLeads = !!data.autoAssociateLeads;
 
     return {
         id,
@@ -553,6 +565,7 @@ function validateIcp(data, { existingId = null } = {}) {
         useCustomPrompt,
         reportEnabled,
         reportTemplate,
+        autoAssociateLeads,
         existingId,
     };
 }
@@ -581,6 +594,7 @@ async function createIcp(data) {
         useCustomPrompt: v.useCustomPrompt,
         reportEnabled: v.reportEnabled,
         reportTemplate: v.reportTemplate,
+        autoAssociateLeads: v.autoAssociateLeads,
     };
     if (isEnabled()) {
         const { error } = await getClient().from('icps').insert(icpObjToRow(icp));
@@ -620,6 +634,7 @@ async function updateIcp(id, data) {
         useCustomPrompt: v.useCustomPrompt,
         reportEnabled: v.reportEnabled,
         reportTemplate: v.reportTemplate,
+        autoAssociateLeads: v.autoAssociateLeads,
     };
     if (isEnabled()) {
         const { error } = await getClient().from('icps').update(icpObjToRow(icp)).eq('id', id);

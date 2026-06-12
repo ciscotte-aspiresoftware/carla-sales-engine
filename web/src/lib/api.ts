@@ -233,6 +233,31 @@ export function enrichLead(companyId: string, apolloId: string) {
   )
 }
 
+// Bulk email/LinkedIn enrichment for several selected leads on one company.
+// Used by the Accounts page "Reveal email (N)" button. Best-effort, sequential
+// server-side; ~1 Apollo credit per lead actually enriched (already-enriched
+// leads are skipped). Phone is NOT revealed here — that stays the separate
+// per-person waterfall via enrichLeadPhone.
+export interface BulkEnrichResult {
+  success: true
+  results: Array<{
+    apolloId: string
+    status: 'enriched' | 'skipped' | 'error' | 'credits_exhausted'
+    lead?: Lead
+    error?: string
+  }>
+  enriched: number
+  skipped: number
+  errors: number
+  warnings: string[]
+}
+export function enrichLeadsBulk(companyId: string, apolloIds: string[]) {
+  return postJson<BulkEnrichResult>(
+    `/api/leads/${encodeURIComponent(companyId)}/enrich-bulk`,
+    { apolloIds },
+  )
+}
+
 // Phone-only re-check. Same Apollo call under the hood, but only the phone
 // field is persisted - leaves email/LI untouched. `phoneFound` tells the UI
 // whether Apollo actually had a phone on file (false = "we tried, nothing").

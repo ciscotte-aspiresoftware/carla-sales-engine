@@ -223,6 +223,84 @@ router.post('/:companyId/:apolloId/enrich', async (req, res) => {
     }
 });
 
+// POST /api/leads/:companyId/enrich-bulk
+// Body: { apolloIds: [] }
+// Bulk email/LinkedIn enrichment for several leads on one company. Used by the
+// Accounts page "Reveal email (N)" button so an operator can reveal a selected
+// set of contacts in one click instead of one at a time. Costs ~1 Apollo
+// enrichment credit per lead that actually gets enriched. Same per-person Apollo
+// call as /enrich; runs SEQUENTIALLY (Apollo rate limits) and is best-effort
+// (one failure never aborts the batch). Phone is NOT revealed here — that stays
+// the separate, pricier waterfall on /enrich-phone.
+router.post('/:companyId/enrich-bulk', async (req, res) => {
+    const { companyId } = req.params;
+    const apolloIds = Array.isArray(req.body?.apolloIds) ? req.body.apolloIds.filter(Boolean) : [];
+    if (!companyId) return res.status(400).json({ success: false, error: 'companyId is required' });
+    if (apolloIds.length === 0) return res.status(400).json({ success: false, error: 'apolloIds (non-empty array) is required' });
+
+    const startedAt = Date.now();
+    console.log(`[Leads] ▶ bulk enrich ${apolloIds.length} lead(s) on company=${companyId}`);
+
+    const results = [];
+    const warnings = [];
+    let enriched = 0, skipped = 0, errors = 0;
+    let creditsExhausted = false;
+
+    for (const apolloId of apolloIds) {
+        // Credit guard: skip leads we've already enriched (or that already have
+        // an email). Mirrors the phone-reveal already-checked guard so a repeat
+        // bulk-reveal never re-spends on people we already resolved.
+        const existing = await getLeadInCompany(companyId, apolloId);
+        if (existing && (existing.enriched || existing.email)) {
+            skipped++;
+            results.push({ apolloId, status: 'skipped', lead: existing });
+            continue;
+        }
+
+        try {
+            const result = await enrichPerson(apolloId);
+            if (result && result.warning) {
+                // Credits gone — stop here so we don't keep hammering a depleted
+                // balance. Remaining ids are returned as untouched 'skipped'.
+                creditsExhausted = true;
+                warnings.push(result.warning);
+                results.push({ apolloId, status: 'credits_exhausted', error: result.warning });
+                break;
+            }
+            if (!result) {
+                errors++;
+                results.push({ apolloId, status: 'error', error: 'Apollo returned no data' });
+                continue;
+            }
+            const patch = {
+                firstName: result.firstName || undefined,
+                lastName: result.lastName || undefined,
+                email: result.email,
+                emailStatus: result.emailStatus,
+                linkedinUrl: result.linkedinUrl,
+                hasEmail: !!result.email,
+                enriched: true,
+                enrichedAt: Date.now(),
+            };
+            if (result.phone) patch.phone = result.phone;
+            const updated = await upsertLeadInCompany(companyId, apolloId, patch);
+            if (!updated) {
+                errors++;
+                results.push({ apolloId, status: 'error', error: 'Lead not found in company' });
+                continue;
+            }
+            enriched++;
+            results.push({ apolloId, status: 'enriched', lead: updated });
+        } catch (err) {
+            errors++;
+            results.push({ apolloId, status: 'error', error: err.message || 'Enrichment failed' });
+        }
+    }
+
+    console.log(`[Leads] ✓ bulk enrich ${Date.now() - startedAt}ms | enriched=${enriched} skipped=${skipped} errors=${errors}${creditsExhausted ? ' (credits exhausted)' : ''}`);
+    return res.json({ success: true, results, enriched, skipped, errors, warnings });
+});
+
 // POST /api/leads/:companyId/:apolloId/enrich-phone
 // Async phone enrichment via Apollo's waterfall API. Sales Agent search
 // already extracted cached phone from Apollo's results — this endpoint is

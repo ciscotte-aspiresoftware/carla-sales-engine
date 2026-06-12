@@ -76,6 +76,11 @@ interface Icp {
   // operator's own markdown - sections named whatever they want.
   reportEnabled?: boolean
   reportTemplate?: string
+  // When ON, the sweep cross-references Apollo (search-only) for people at
+  // every is_match company: people found are attached as leads so the Accounts
+  // pending lane arrives pre-populated; companies with no Apollo people are
+  // auto-rejected. Spends Apollo search credits per qualified company.
+  autoAssociateLeads?: boolean
 }
 
 const API = API_BASE
@@ -144,6 +149,7 @@ const EMPTY_ICP: Icp = {
   useCustomPrompt: false,
   reportEnabled: false,
   reportTemplate: '',
+  autoAssociateLeads: false,
 }
 
 export default function IcpPage() {
@@ -248,6 +254,7 @@ export default function IcpPage() {
       useCustomPrompt: !!icp.useCustomPrompt,
       reportEnabled: !!icp.reportEnabled,
       reportTemplate: icp.reportTemplate || '',
+      autoAssociateLeads: !!icp.autoAssociateLeads,
     })
     setIsNew(false)
   }
@@ -1856,6 +1863,28 @@ function Editor({
             </div>
           </Field>
         )}
+      </div>
+
+      {/* ─── Auto-associate leads ─────────────────────────────────────────
+          When ON, the sweep cross-references Apollo (search-only) for people
+          at every qualified company: people found are attached as leads so
+          the Accounts page arrives pre-populated, and companies with no Apollo
+          contacts are auto-rejected. Costs Apollo search credits per match. */}
+      <div className="rounded-lg border border-white/30 dark:border-white/10 p-3 space-y-3">
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!icp.autoAssociateLeads}
+            onChange={(e) => onChange({ ...icp, autoAssociateLeads: e.target.checked })}
+            className="mt-0.5 h-3.5 w-3.5 accent-sky-500"
+          />
+          <span>
+            <span className="text-xs font-semibold">Auto-associate leads during sweep</span>
+            <span className="block text-[11px] text-muted-foreground">
+              For every qualified company, search Apollo for the people who work there and attach them as leads — so the Accounts page arrives pre-populated with names (no Sales Agent step needed). Companies with no Apollo contacts are auto-rejected. Spends Apollo search credits per qualified company.
+            </span>
+          </span>
+        </label>
       </div>
 
       {/* Reclassify CTA at the bottom of the form. Originally this panel ran
