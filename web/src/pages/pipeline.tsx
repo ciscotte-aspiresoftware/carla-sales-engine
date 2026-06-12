@@ -203,23 +203,59 @@ export default function PipelinePage() {
   const [phoneEmpty, setPhoneEmpty] = useState<Record<string, true>>({})
   const [phoneError, setPhoneError] = useState<Record<string, string>>({})
 
-  // Phone-only re-check on a single lead. Same Apollo call as the main
-  // Enrich, but only the phone field is persisted server-side. Splices the
-  // updated lead back into `leads` so the row updates without a refetch.
+  // Phone-only reveal on a single lead. This hits the async Apollo waterfall:
+  // the endpoint returns immediately with waterfall_pending, and Apollo POSTs
+  // the cell to our webhook a few minutes later. We must POLL for that result
+  // rather than declaring "no phone" on the immediate response (the old bug:
+  // the row said "no phone" while the number actually saved server-side).
+  // Splices the updated lead back into `leads` so the row updates without a
+  // full refetch. Uses the page's phoneEnriching/phoneEmpty/phoneError states.
   async function handleGetPhone(lead: Lead) {
     if (!lead.apolloId || !companyId) return
     const key = lead.apolloId
+    const cid = companyId
     setPhoneEnriching(prev => { const next = new Set(prev); next.add(key); return next })
     setPhoneEmpty(prev => { const { [key]: _drop, ...rest } = prev; return rest })
     setPhoneError(prev => { const { [key]: _drop, ...rest } = prev; return rest })
+    const stopSpinner = () => setPhoneEnriching(prev => { const next = new Set(prev); next.delete(key); return next })
     try {
-      const res = await enrichLeadPhone(companyId, lead.apolloId)
-      setLeads(prev => prev ? prev.map(l => l.apolloId === key ? { ...l, ...res.lead } : l) : prev)
-      if (!res.phoneFound) setPhoneEmpty(prev => ({ ...prev, [key]: true }))
+      const res = await enrichLeadPhone(cid, lead.apolloId)
+      if (res.waterfall_pending) {
+        // Async — poll every 5s for up to 5 minutes. Stop as soon as the
+        // webhook answers (phoneCheckedAt is set on any outcome).
+        const maxAttempts = 60
+        let attempts = 0
+        const poll = setInterval(async () => {
+          attempts++
+          if (attempts > maxAttempts) {
+            clearInterval(poll)
+            stopSpinner()
+            setPhoneError(prev => ({ ...prev, [key]: 'Phone reveal timed out — try again later' }))
+            return
+          }
+          try {
+            const updated = await fetch(`${API_BASE}/api/leads?companyId=${cid}`)
+              .then(r => r.json())
+              .then(r => (r.leads || []).find((l: any) => l.apolloId === key))
+            if (updated?.phoneCheckedAt) {
+              clearInterval(poll)
+              setLeads(prev => prev ? prev.map(l => l.apolloId === key ? { ...l, ...updated } : l) : prev)
+              if (!(updated.phone && updated.phone !== lead.phone)) {
+                setPhoneEmpty(prev => ({ ...prev, [key]: true }))
+              }
+              stopSpinner()
+            }
+          } catch { /* ignore poll errors, keep trying */ }
+        }, 5000)
+      } else {
+        // Synchronous answer: already revealed earlier, or nothing to reveal.
+        if (res.lead) setLeads(prev => prev ? prev.map(l => l.apolloId === key ? { ...l, ...res.lead } : l) : prev)
+        if (!res.phoneFound) setPhoneEmpty(prev => ({ ...prev, [key]: true }))
+        stopSpinner()
+      }
     } catch (err: any) {
-      setPhoneError(prev => ({ ...prev, [key]: err.message || 'Phone enrich failed' }))
-    } finally {
-      setPhoneEnriching(prev => { const next = new Set(prev); next.delete(key); return next })
+      setPhoneError(prev => ({ ...prev, [key]: err.message || 'Phone reveal failed' }))
+      stopSpinner()
     }
   }
 
@@ -1930,12 +1966,12 @@ function LeadRow({
             onClick={onGetPhone}
             disabled={enrichingPhone}
             className="h-6 px-2 text-[10px] gap-1"
-            title="Re-check Apollo for a phone number (1 credit)"
+            title="Reveal this person's mobile/cell via Apollo waterfall (uses 1 Apollo mobile credit). Apollo enriches in the background — this can take a few minutes."
           >
             {enrichingPhone
               ? <IconLoader2 className="h-3 w-3 animate-spin" />
               : <IconPhone className="h-3 w-3" />}
-            {enrichingPhone ? 'Checking…' : 'Get phone'}
+            {enrichingPhone ? 'Revealing…' : 'Reveal cell'}
           </Button>
         )}
       </div>
