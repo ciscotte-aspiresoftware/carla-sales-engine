@@ -239,13 +239,23 @@ export default function LeadsPage() {
             const updated = await fetch(`${API_BASE}/api/leads?companyId=${lead.companyId}`)
               .then(r => r.json())
               .then(r => (r.leads || []).find((l: any) => l.apolloId === lead.apolloId))
-            if (updated?.phone && updated.phone !== lead.phone) {
+            // Stop as soon as Apollo's webhook has ANSWERED — phoneCheckedAt is
+            // set on any outcome (a cell, or a definitive "no mobile"). Without
+            // this, a "no cell found" result was indistinguishable from "still
+            // pending" and the poll spun the full 5 minutes for nothing.
+            if (updated?.phoneCheckedAt) {
               clearInterval(pollInterval)
               setLeads(prev => prev.map(l => {
                 if (l.companyId !== lead.companyId || l.apolloId !== lead.apolloId) return l
                 return { ...l, ...updated }
               }))
-              addToast(`✅ Phone number revealed for ${lead.firstName} ${lead.lastName || ''}`, 'success', 4000)
+              const gotNewPhone = updated.phone && updated.phone !== lead.phone
+              if (gotNewPhone) {
+                addToast(`✅ Cell revealed for ${lead.firstName} ${lead.lastName || ''}`, 'success', 4000)
+              } else {
+                addToast(`📵 No mobile on file for ${lead.firstName} ${lead.lastName || ''}`, 'info', 4000)
+                setPhoneEmptyNote(prev => ({ ...prev, [key]: true }))
+              }
               setEnrichingPhone(prev => { const next = new Set(prev); next.delete(key); return next })
             }
           } catch (e) { /* silently ignore poll errors */ }
@@ -497,9 +507,15 @@ function LeadRow({
   // a verified email OR a LinkedIn URL - the two things Apollo's enrichment
   // actually adds. If both are present, enrichment has nothing to give.
   const needsEnrich = !!lead.apolloId && (!lead.email || !lead.linkedinUrl) && !lead.enriched
-  // Show the Get-phone button when we don't already have a phone on this lead
-  // AND there's an apolloId to look up. Hidden once a phone is on file.
-  const needsPhone = !!lead.apolloId && !lead.phone
+  // Show the reveal-phone button until we've run the waterfall once
+  // (phoneCheckedAt is set only when Apollo's webhook answers). We show it even
+  // when a phone is already present, because the search-time number is usually
+  // the business/HQ line — the waterfall reveals the person's CELL. Once we've
+  // checked (got a cell or a definitive "no mobile"), hide it; the backend also
+  // refuses to spend a second credit. `hasBusinessPhone` switches the label so
+  // the rep knows clicking upgrades a business number to the personal cell.
+  const needsPhone = !!lead.apolloId && !lead.phoneCheckedAt
+  const hasBusinessPhone = needsPhone && !!lead.phone
   // Transient "copied!" flash for the collapsed-card email badge.
   const [emailCopied, setEmailCopied] = useState(false)
   return (
@@ -649,12 +665,16 @@ function LeadRow({
                 onClick={onEnrichPhone}
                 disabled={enrichingPhone}
                 className="gap-1.5 h-7 text-xs"
-                title="Reveal phone number via Apollo waterfall. Apollo enriches in background (~minutes)."
+                title={
+                  hasBusinessPhone
+                    ? "Reveal this person's mobile/cell via Apollo waterfall (uses 1 Apollo mobile credit). The number shown is the business line; this fetches their personal cell in the background (~minutes)."
+                    : 'Reveal mobile/cell via Apollo waterfall (uses 1 Apollo mobile credit). Apollo enriches in the background (~minutes).'
+                }
               >
                 {enrichingPhone
                   ? <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
                   : <IconPhone className="h-3.5 w-3.5" />}
-                {enrichingPhone ? 'Revealing…' : 'Reveal phone'}
+                {enrichingPhone ? 'Revealing…' : hasBusinessPhone ? 'Reveal cell' : 'Reveal phone'}
               </Button>
             )}
           </div>
