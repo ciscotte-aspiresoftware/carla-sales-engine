@@ -22,7 +22,8 @@ const { extractDomain, isChain, isTargetType } = require('./chains');
 const { scrapeUrl } = require('./firecrawl');
 const { chat } = require('./openai');
 const grid = require('./grid-store');
-const { upsertCompany, attachLeads, setClassificationForIcp } = require('../routes/companies');
+const { upsertCompany, attachLeads, setClassificationForIcp, setReviewForIcp } = require('../routes/companies');
+const { searchTopPeople } = require('./apollo');
 const { pushEvent } = require('./activity-log');
 const scrapeCache = require('./scrape-cache');
 const searchLog = require('./search-log');
@@ -41,6 +42,68 @@ const { extractContacts, hasAnyContact } = require('./contact-extractor');
 const { generateCompanyReport } = require('./report-generator');
 const fs = require('fs');
 const path = require('path');
+
+// Auto-associate leads for a qualified company (ICP toggle `autoAssociateLeads`).
+// Cross-references Apollo (search-only — ~1-4 search credits, NO enrichment
+// credits) for people who work at the company:
+//   • people found  → attach them as search-only leads so the Accounts page
+//                      arrives pre-populated with names (no Sales Agent needed).
+//   • clean empty    → auto-reject the company FOR THIS ICP (review decision
+//                      'rejected') so it drops out of the qualified lanes but
+//                      stays in the database (Rejected lane).
+//   • Apollo warned (credits exhausted / API error) → leave PENDING, never
+//                      auto-reject — a real outage must not refuse everything.
+//   • APOLLO_API_KEY unset → skip, leave pending.
+// Only ever invoked for is_match companies from the primary classify path
+// (never fanout); those domains are post-dedup fresh, so re-spend is already
+// prevented by the domain dedup at sweep entry — no extra "checked" stamp needed.
+// Returns true iff the company was auto-rejected for having no contacts.
+async function maybeAutoAssociateLeads(saved, place, domain, icp, companyIdx, totalFresh) {
+    const tag = `[${companyIdx}/${totalFresh}]`;
+    if (!process.env.APOLLO_API_KEY) {
+        console.warn(`[Sweep]   ⚠ ${tag} auto-associate: APOLLO_API_KEY unset — skipping ${domain} (left pending)`);
+        return false;
+    }
+    let people = [];
+    let warnings = [];
+    try {
+        const r = await searchTopPeople(place.title || domain, domain, undefined, { skipEnrich: true });
+        people = (r && r.people) || [];
+        warnings = (r && r.warnings) || [];
+    } catch (err) {
+        console.warn(`[Sweep]   ⚠ ${tag} auto-associate search error for ${domain}: ${err.message} — left pending`);
+        return false;
+    }
+
+    if (people.length > 0) {
+        try {
+            // search-only rows: no email/phone yet (enriched:false). The rep
+            // reveals those from the Accounts page. attachLeads merges + never
+            // downgrades any already-enriched leads.
+            await attachLeads(saved.id, people.map((p) => ({ ...p, enriched: false })));
+            console.log(`[Sweep]   ☎ ${tag} auto-associate: attached ${people.length} Apollo lead(s) to ${domain}`);
+        } catch (err) {
+            console.warn(`[Sweep]   ⚠ ${tag} auto-associate attachLeads failed for ${domain}: ${err.message}`);
+        }
+        return false;
+    }
+
+    // No people came back. Distinguish a clean empty result from an Apollo
+    // outage — only the former is a real "this company has no contacts".
+    if (warnings.length > 0) {
+        console.warn(`[Sweep]   ⚠ ${tag} auto-associate: no people but Apollo warned (${warnings.join('; ')}) — left pending, NOT auto-rejected`);
+        return false;
+    }
+
+    try {
+        await setReviewForIcp(saved.id, icp.id, { decision: 'rejected', reason: 'Auto: no Apollo contacts found' });
+        console.log(`[Sweep]   ⊘ ${tag} auto-associate: no Apollo contacts → auto-rejected ${domain}`);
+        return true;
+    } catch (err) {
+        console.warn(`[Sweep]   ⚠ ${tag} auto-associate auto-reject failed for ${domain}: ${err.message} — left pending`);
+        return false;
+    }
+}
 
 // Read companies.json once per sweep so we can dedupe by domain. The file
 // is tiny (~few KB until much later) so reading it per cell is fine.
@@ -748,7 +811,7 @@ async function sweepCell(icp, cell) {
                             reason: verdict.reason,
                         });
                     }
-                    await upsertCompany({
+                    const saved = await upsertCompany({
                         url,
                         domain,
                         icpId: icp.id,
@@ -779,20 +842,30 @@ async function sweepCell(icp, cell) {
                     if (hasAnyContact(contacts)) {
                         console.log(`[Sweep]   ☎ [${companyIdx}/${totalFresh}] contacts: ${contacts.emails.length} email, ${contacts.phones.length} phone, ${contacts.linkedinPersonUrls.length + contacts.linkedinCompanyUrls.length} LinkedIn`);
                     }
-                    if (verdict.is_match) leadsQualified++;
+                    // Auto-associate leads (per-ICP toggle): for a qualified company,
+                    // pull its people from Apollo and attach them, or auto-reject the
+                    // company if Apollo has nobody. Search-only, so it spends search
+                    // credits but no enrichment credits. autoRejected flips the final
+                    // verdict so the count + sweep event reflect the true outcome.
+                    let autoRejectedNoContacts = false;
+                    if (verdict.is_match && icp.autoAssociateLeads && saved && saved.id) {
+                        autoRejectedNoContacts = await maybeAutoAssociateLeads(saved, place, domain, icp, companyIdx, totalFresh);
+                    }
+                    const finalQualified = verdict.is_match && !autoRejectedNoContacts;
+                    if (finalQualified) leadsQualified++;
                     touchedDomains.push(domain);
-                    console.log(`[Sweep]   ${verdict.is_match ? '✓' : '✗'} [${companyIdx}/${totalFresh}] classify VERDICT: ${domain} → ${verdict.is_match ? 'QUALIFIED' : 'rejected'} - ${verdict.reason}`);
+                    console.log(`[Sweep]   ${finalQualified ? '✓' : '✗'} [${companyIdx}/${totalFresh}] classify VERDICT: ${domain} → ${finalQualified ? 'QUALIFIED' : (autoRejectedNoContacts ? 'auto-rejected (no Apollo contacts)' : 'rejected')} - ${autoRejectedNoContacts ? 'no Apollo contacts found' : verdict.reason}`);
                     pushEvent({
-                        type: verdict.is_match ? 'company_qualified' : 'company_rejected',
+                        type: finalQualified ? 'company_qualified' : 'company_rejected',
                         icpId: icp.id,
                         cellId: cell.id,
                         parentCity: cell.parentCity || null,
                         domain,
                         title: place.title || '',
-                        reason: verdict.reason,
+                        reason: autoRejectedNoContacts ? 'No Apollo contacts found' : verdict.reason,
                         companyIdx,
                         totalCompanies: totalFresh,
-                        message: `${place.title || domain} - ${verdict.is_match ? 'qualified' : 'rejected'}`,
+                        message: `${place.title || domain} - ${finalQualified ? 'qualified' : (autoRejectedNoContacts ? 'rejected (no Apollo contacts)' : 'rejected')}`,
                     });
                 } catch (err) {
                     console.warn(`[Sweep]   ⚠ ${domain} classify/upsert: ${err.message}`);
