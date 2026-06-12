@@ -48,10 +48,15 @@ import {
   clearReview,
   recoverPlaceDetails,
   pushCompanyToHubSpot,
+  pushCompaniesToHubSpot,
+  enrichLeadsBulk,
   type CompanyRecord,
   type Review,
   type Classification,
+  type Lead,
 } from '@/lib/api'
+import { ToastContainer, addToast } from '@/components/ui/toast'
+import { usePhoneReveal } from '@/hooks/use-phone-reveal'
 import { useWorkspace } from '@/context/workspace-context'
 import { useAccountsCount } from '@/context/accounts-count-context'
 import { API_BASE } from '@/lib/api-base'
@@ -149,6 +154,50 @@ export default function AccountsPage() {
   // change.
   const [counts, setCounts] = useState<Record<LaneKey, number>>({ pending: 0, confirmed: 0, rejected: 0, 'needs-check': 0 })
 
+  // Bulk HubSpot export - set of selected company ids + in-flight + last result.
+  // Same pattern as the Database page; reuses pushCompaniesToHubSpot.
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkPushing, setBulkPushing] = useState(false)
+  const [bulkMsg, setBulkMsg] = useState<string | null>(null)
+  // Shared async phone-reveal (initiate + poll for the webhook). One instance
+  // serves every card; keyed by companyId:apolloId internally.
+  const phone = usePhoneReveal()
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  async function bulkPush() {
+    if (bulkPushing || selected.size === 0) return
+    setBulkPushing(true); setBulkMsg(null)
+    try {
+      const res = await pushCompaniesToHubSpot(Array.from(selected))
+      const parts = [`Pushed ${res.pushed.length}`]
+      if (res.skipped.length) parts.push(`${res.skipped.length} skipped`)
+      if (res.errors.length) parts.push(`${res.errors.length} failed`)
+      setBulkMsg(parts.join(' · '))
+      setSelected(new Set())
+      refresh() // refresh so synced badges render
+    } catch (e: any) {
+      setBulkMsg(e?.message || 'Bulk push failed')
+    } finally {
+      setBulkPushing(false)
+    }
+  }
+
+  // Splice an updated lead (from email/phone reveal) back into the in-memory
+  // company so the card re-renders without a full refetch.
+  const patchLead = (companyId: string, updated: Lead) => {
+    setCompanies((prev) => prev.map((c) => {
+      if (c.id !== companyId || !Array.isArray(c.leads)) return c
+      return { ...c, leads: c.leads.map((l) => (l.apolloId && l.apolloId === updated.apolloId ? { ...l, ...updated } : l)) }
+    }))
+  }
+
   // Fetch ICP list. We use the trimmed listing so the chip row stays
   // light; we'll fetch full classification details per company below.
   useEffect(() => {
@@ -230,6 +279,10 @@ export default function AccountsPage() {
 
   useEffect(() => {
     refresh()
+    // Clear any bulk selection when the lane/ICP changes — selected ids from
+    // the previous view aren't visible anymore and shouldn't be pushed.
+    setSelected(new Set())
+    setBulkMsg(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIcp, lane])
 
@@ -393,6 +446,39 @@ export default function AccountsPage() {
             )}
           </div>
 
+          {/* Bulk HubSpot export toolbar. Only on the qualified lanes
+              (pending/confirmed). Companies become selectable once they have at
+              least one enriched/email-bearing contact (the per-card checkbox).
+              Reuses the same bulk endpoint the Database page uses. */}
+          {(lane === 'pending' || lane === 'confirmed') && (selected.size > 0 || bulkMsg) && (
+            <div className={`${GLASS_SUBTLE} px-3 py-2 flex items-center gap-2`}>
+              <span className="text-[11px] text-muted-foreground">
+                {selected.size > 0 ? `${selected.size} selected` : ''}
+              </span>
+              {bulkMsg && <span className="text-[11px] text-muted-foreground italic">{bulkMsg}</span>}
+              <div className="flex-1" />
+              {selected.size > 0 && (
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())} disabled={bulkPushing}>
+                    Clear
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    onClick={bulkPush}
+                    disabled={bulkPushing}
+                    title="Push the selected companies (+ their email contacts) to HubSpot. Dedupes by domain/email; re-push updates in place."
+                  >
+                    {bulkPushing
+                      ? <IconLoader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      : <IconCloudUpload className="h-3.5 w-3.5 mr-1.5" />}
+                    {bulkPushing ? 'Pushing…' : `Push ${selected.size} to HubSpot`}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+
           {/* List */}
           {loading && companies.length === 0 ? (
             <Card className={GLASS}>
@@ -427,12 +513,17 @@ export default function AccountsPage() {
                   onSendToSalesAgent={() => sendToSalesAgent(c, activeIcp)}
                   onStartSequence={() => startSequence(c, activeIcp)}
                   onChanged={refresh}
+                  selectedForPush={selected.has(c.id)}
+                  onTogglePush={() => toggleSelect(c.id)}
+                  phone={phone}
+                  patchLead={patchLead}
                 />
               ))}
             </div>
           )}
         </>
       )}
+      <ToastContainer />
     </div>
   )
 }
@@ -501,6 +592,10 @@ function AccountCard({
   onSendToSalesAgent,
   onStartSequence,
   onChanged,
+  selectedForPush,
+  onTogglePush,
+  phone,
+  patchLead,
 }: {
   company: CompanyRecord
   icpId: string
@@ -511,6 +606,10 @@ function AccountCard({
   onSendToSalesAgent: () => void
   onStartSequence: () => void
   onChanged: () => void
+  selectedForPush: boolean
+  onTogglePush: () => void
+  phone: ReturnType<typeof usePhoneReveal>
+  patchLead: (companyId: string, updated: Lead) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
@@ -521,14 +620,69 @@ function AccountCard({
   // HubSpot push - per-card loading + error so two cards push independently.
   const [pushing, setPushing] = useState(false)
   const [pushErr, setPushErr] = useState<string | null>(null)
+  // Per-person email-reveal selection + in-flight state (this card's leads).
+  const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
+  const [revealingEmails, setRevealingEmails] = useState(false)
+  const [emailMsg, setEmailMsg] = useState<string | null>(null)
   const cls = (company.classifications?.[icpId] || company.classification || {}) as Classification & { city?: string; country?: string; rating?: number; reviews?: number; title?: string; phone?: string; address?: string; signals?: string[]; fleetSizeHint?: string; fleetVehicleTypes?: string[]; bookingPlatformHints?: string[]; tagline?: string }
   const review: Review | undefined = company.reviews?.[icpId]
+
+  const leads = company.leads || []
+  const hasLeads = leads.length > 0
+  // A company is push-eligible once at least one contact has a revealed email
+  // (or is marked enriched). The bulk HubSpot push only sends email-bearing
+  // contacts, so selecting a company with none would push the company shell
+  // with zero contacts — gate it out here (the backend doesn't enforce this).
+  const hasEnrichedLead = leads.some((l) => !!l.email || l.enriched)
+  const pushSelectable = (lane === 'pending' || lane === 'confirmed') && hasEnrichedLead
+
+  const toggleLead = (apolloId: string) => {
+    setSelectedLeadIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(apolloId)) next.delete(apolloId); else next.add(apolloId)
+      return next
+    })
+  }
+
+  // Bulk-reveal email + LinkedIn for the selected people on this company.
+  const handleRevealEmails = async () => {
+    if (revealingEmails || selectedLeadIds.size === 0) return
+    setRevealingEmails(true); setEmailMsg(null)
+    try {
+      const res = await enrichLeadsBulk(company.id, Array.from(selectedLeadIds))
+      for (const r of res.results) {
+        if (r.lead) patchLead(company.id, r.lead)
+      }
+      const parts = [`${res.enriched} revealed`]
+      if (res.skipped) parts.push(`${res.skipped} already done`)
+      if (res.errors) parts.push(`${res.errors} failed`)
+      if (res.warnings.length) parts.push(res.warnings[0])
+      setEmailMsg(parts.join(' · '))
+      setSelectedLeadIds(new Set())
+    } catch (e: any) {
+      setEmailMsg(e?.message || 'Email reveal failed')
+    } finally {
+      setRevealingEmails(false)
+    }
+  }
 
   return (
     <Card className={cn(GLASS, lane === 'rejected' && 'opacity-80')}>
       <CardContent className="p-4 space-y-2.5">
         {/* Top row - name + status + outbound link */}
         <div className="flex items-start gap-2">
+          {/* Bulk-HubSpot selection checkbox. Shown on the qualified lanes once
+              the company has at least one email-bearing contact (otherwise the
+              push would create a contactless company shell). */}
+          {pushSelectable && (
+            <input
+              type="checkbox"
+              checked={selectedForPush}
+              onChange={onTogglePush}
+              className="mt-1 h-3.5 w-3.5 accent-orange-500 shrink-0"
+              title="Select for bulk HubSpot export"
+            />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
               <h3 className="text-sm font-semibold truncate">{cls.title || (cls as any).name || company.domain}</h3>
@@ -689,6 +843,48 @@ function AccountCard({
               {REJECT_REASONS.find((r) => r.value === review.reason)?.label || review.reason || 'Rejected'}
             </div>
             {review.note && <div className="text-muted-foreground mt-0.5">{review.note}</div>}
+          </div>
+        )}
+
+        {/* People (inline) — the decision-makers associated with this company
+            (from the sweep's auto-associate or a prior Sales Agent run). Shown
+            right on the card so the rep doesn't need to expand or open the
+            Sales Agent: tick people and "Reveal email (N)" to bulk-reveal their
+            email + LinkedIn; reveal each person's cell separately (it's the
+            pricier waterfall). */}
+        {hasLeads && (
+          <div className="space-y-1.5">
+            <CompanyLeads
+              leads={leads}
+              selectable
+              selectedApolloIds={selectedLeadIds}
+              onToggleLead={toggleLead}
+              onRevealPhone={(lead) => {
+                if (!lead.apolloId) return
+                phone.reveal(company.id, lead.apolloId, lead.phone, (updated) => patchLead(company.id, updated))
+              }}
+              isRevealingPhone={(apolloId) => phone.isRevealing(company.id, apolloId)}
+              phoneEmpty={(apolloId) => phone.isEmpty(company.id, apolloId)}
+            />
+            {(selectedLeadIds.size > 0 || emailMsg) && (
+              <div className="flex items-center gap-2">
+                {selectedLeadIds.size > 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRevealEmails}
+                    disabled={revealingEmails}
+                    title="Reveal verified email + LinkedIn for the selected people (~1 Apollo credit each; already-revealed contacts are skipped). Phone is a separate per-person reveal."
+                  >
+                    {revealingEmails
+                      ? <IconLoader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      : <IconMail className="h-3.5 w-3.5 mr-1.5" />}
+                    {revealingEmails ? 'Revealing…' : `Reveal email (${selectedLeadIds.size})`}
+                  </Button>
+                )}
+                {emailMsg && <span className="text-[10px] text-muted-foreground italic">{emailMsg}</span>}
+              </div>
+            )}
           </div>
         )}
 
@@ -873,12 +1069,8 @@ function AccountCard({
             <div className="pt-1.5">
               <CompanyReport company={company} icpId={icpId} onChanged={onChanged} />
             </div>
-            {/* Apollo decision-makers found via the Sales Agent - same list
-                the Database drawer shows. Populated once the rep runs lead
-                generation for this account. */}
-            <div className="pt-1.5">
-              <CompanyLeads leads={company.leads} />
-            </div>
+            {/* Leads now render inline above the action row (selectable, with
+                per-person email/phone reveal), so they're not duplicated here. */}
           </div>
         )}
       </CardContent>
